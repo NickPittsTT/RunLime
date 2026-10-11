@@ -1,0 +1,89 @@
+# RunLime — Phase 0: Discovery & Design (rev 2)
+
+Status: **Approved by owner 2026-10-11 with the changes recorded below.** Rev 1 questions and options are superseded by this record.
+
+| Doc | Contents |
+|---|---|
+| `00-OVERVIEW.md` (this file) | Owner answers, hard rules, scope changes, design fixes, open items |
+| `01-ARCHITECTURE.md` | Stack, repo layout, environments, auth & age gate, security design |
+| `02-DATA-MODEL.md` | ERD, tables, RLS matrix |
+| `03-SCREENS.md` | Screen list by surface and phase |
+| `04-BRAND.md` | Chosen direction (A) |
+| `05-COSTS.md` | Running cost estimate |
+| `../legal/` | Legal drafts + store-requirements checklist (Phase 1) |
+
+---
+
+## 1. Owner answers
+
+| # | Topic | Answer |
+|---|---|---|
+| 1 | Repo | Dedicated repo `nickpittstt/runlime` — done |
+| 2 | Legal entity | **OPEN** — the answer arrived as the unfilled template text `[INDIVIDUAL / COMPANY NAME]` |
+| 3 | Bank / VAT | **OPEN** — unfilled template `[BANK, ACCOUNT NAME]`, VAT `[YES / NO]`. Needed by Phase 7 |
+| 4 | Domain | **OPEN** — unfilled template. Treated as "not yet; remind me before Phase 2" |
+| 5 | Legal text | I draft; owner's attorney reviews before launch |
+| 6 | Sign-in | Email (one-time code) + Google + Apple. Phone → BACKLOG |
+| 7 | Premium | Free/Premium split and pricing (US$2.99/mo, US$19.99/yr) accepted as seed values |
+| 8 | Organiser prices | Basic TT$100, Featured TT$400 per event. Free Basic for charities, controlled by the admin setting `listing.charity_free_basic` |
+| 9 | Approval | Always admin approval; settings toggle `events.auto_publish_verified` (default false) |
+| 10 | Social | **Followers (S1) + clubs** |
+| 11 | Areas | Friendly running areas for filters; regional corporation stored for analytics |
+| 12 | Minors on board | Superseded: 18+ only |
+| 13 | Maps | Native maps approved |
+| 14 | Background location | Foreground-service approach approved; fall back to the original design if Phase 5 device tests fail |
+| 15 | Hosting | Vercel Pro |
+| Brand | | **Direction A — Fresh Lime** |
+| D1–D14 | | Approved |
+| A1–A10 | | Accepted, except A9 (group counting, changed below) and A10 (now 18+) |
+| Retention | | Payment records kept 7 years (tax) — confirmed |
+
+## 2. Hard rule: AGE POLICY (18+)
+
+Enforced in the database **and** in code, never an admin setting. Each rule has a pgTAP test.
+
+| Rule | Where enforced |
+|---|---|
+| Minimum account age 18 for every role | Device age gate (first screen) → Auth `before_user_created` hook (email sign-ups) → `profiles` trigger (all sign-ups) → `complete_signup` RPC |
+| Under-18s: store nothing | The gate runs on the device before any sign-in call. Nothing is sent and no auth user is created. The only trace is a local device flag (no PII) |
+| No 13–17 logic | Removed: `is_minor`, minor privacy locks, nickname forcing, `runner.teen` seed. Replaced by a blocked-under-18 test path |
+| Children attend only in an adult's group | RSVP has `group_size` (adults incl. the user) **and** `children_count` (under-18s). Organisers see children only as an aggregate |
+| Minors must be accompanied | Stated in the Terms of Use and on every event page (rendered from the legal setting, not per-event text) |
+
+A9 revised: the public "attending" count = sum of (`group_size` + `children_count`) for Attending. The organiser dashboard shows accounts, adults and children separately.
+
+## 3. Scope changes
+
+- **S1 Followers.** `account_privacy` = `private` (default) | `public`.
+  - Private accounts: follow requests need approval. Public accounts: anyone can follow instantly.
+  - Either side can remove a follower; either side can block (blocking removes the follow both ways).
+  - Followers (or anyone, for public accounts) can see the person's **race passport** (races attended, total km) and **races they're attending**.
+  - Runs, routes, times and history stay private unless the user shares a result to community times.
+  - Built in Phase 3, with RSVP.
+- **S2 QR check-in removed from v1.** No scanner, no QR poster, no QR landing page, no `qr_secret`. Check-in is GPS only. QR → BACKLOG.
+- **S3 Race photo sharing** → BACKLOG.
+- **S4 Parental consent features:** not added.
+
+## 4. Design fixes (all applied in rev 2)
+
+| Fix | Resolution | Detail |
+|---|---|---|
+| **F1** Age gate first | Date of birth is the first screen, before any sign-in method. Under-18 → block screen; no network call | `03-SCREENS.md` M2/M4 reordered |
+| **F2** Server-side 18+ | Postgres `before_user_created` hook rejects email sign-ups without an 18+ DOB. Profile trigger + `complete_signup` RPC enforce 18+ for every account. Accounts without a completed profile have no data access and are purged after 1 hour | `01-ARCHITECTURE.md §4` (incl. one limitation that can't be avoided) |
+| **F3** Audit log without personal data | Pseudonymous actor aliases (deleted with the account) + per-table column allowlists, so personal fields never enter `before`/`after` | `01-ARCHITECTURE.md §10.1` |
+| **F4** Admin MFA + clubs admin | TOTP MFA required for `super_admin` / `platform_admin`. RLS admin checks require `aal2` in the JWT. New screen A14 Clubs | `01-ARCHITECTURE.md §4.4`, `03-SCREENS.md` |
+| **F5** Encryption method | Confirmed: Supabase **does not recommend new use of pgsodium** (pending deprecation) and does not recommend its column encryption. **Decision:** emergency contact is encrypted in the application layer (AES-256-GCM in an Edge Function; key held in Edge Function secrets, never in the database). It's stored in an owner-only table | `01-ARCHITECTURE.md §10.2` |
+
+## 5. Open items (owner)
+
+1. Items 2, 3, 4 above came through as unfilled template text. Legal drafts use the tokens `{{operator_name}}`, `{{operator_address}}`, `{{support_email}}`, `{{website}}`. They are filled from settings at render time, and the web portal shows a visible "DRAFT — operator details missing" banner until they're set.
+2. **Name check reminder.** Confirm "RunLime" is available on the App Store, Google Play, domains, and the TT IPO/USPTO/WIPO trademark registers. Phase 1 uses **development** bundle IDs only (`tt.runlime.app.dev`). Store bundle IDs are fixed in Phase 8 after you confirm.
+3. **Store availability:** I recommend restricting distribution to **Trinidad and Tobago only** at launch in both stores. That keeps us out of US-state and other app-store age-verification laws, which an 18+ social app would otherwise need to assess. Expansion revisits this.
+4. Google Play child safety (CSAE) standards apply because followers make the app "social". **You must name a child-safety point of contact** (a person) in Play Console. See `docs/legal/STORE-REQUIREMENTS.md`.
+
+## 6. Policy findings carried forward (from rev 1)
+- Background location: foreground-service design (approved). Google still requires a foreground-service-type declaration.
+- Google Play 12-tester / 14-day closed test applies to personal accounts (decision depends on item 2).
+- Sign in with Apple is required because Google sign-in is offered.
+- In-app account deletion is required, plus a web deletion URL for Google.
+- Anti-steering: no organiser payment wording anywhere in the mobile app.

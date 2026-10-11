@@ -1,0 +1,60 @@
+# Android development build on Expo's servers (EAS free tier). Run from Actions → "Mobile dev build (Android)".
+# Needs (see docs/phase-2/PLAN.md): secret EXPO_TOKEN; variables SUPABASE_PROJECT_REF, SUPABASE_ANON_KEY;
+# the Expo project ID is fixed in apps/mobile/app.config.ts;
+# optional variables GOOGLE_WEB_CLIENT_ID, STAGING_WEB_URL.
+name: Mobile dev build (Android)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: staging
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      APP_ENV: development
+      EAS: npx --yes eas-cli@24.12.1
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Check required settings are in place (names only, never values)
+        env:
+          SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+        run: |
+          missing=()
+          [ -n "$EXPO_TOKEN" ] || missing+=("secret EXPO_TOKEN")
+          [ -n "$SUPABASE_PROJECT_REF" ] || missing+=("variable SUPABASE_PROJECT_REF (staging environment)")
+          [ -n "$SUPABASE_ANON_KEY" ] || missing+=("variable SUPABASE_ANON_KEY")
+          if [ ${#missing[@]} -gt 0 ]; then printf '::error::Missing: %s\n' "${missing[@]}"; exit 1; fi
+
+      - name: Sync public build settings to EAS "development" environment
+        working-directory: apps/mobile
+        env:
+          SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co
+          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          GOOGLE_WEB_CLIENT_ID: ${{ vars.GOOGLE_WEB_CLIENT_ID }}
+          STAGING_WEB_URL: ${{ vars.STAGING_WEB_URL }}
+        run: |
+          set -euo pipefail
+          put() { [ -n "$2" ] && $EAS env:set development --name "$1" --value "$2" --visibility plaintext --scope project --non-interactive >/dev/null && echo "set $1"; }
+          put EXPO_PUBLIC_SUPABASE_URL "$SUPABASE_URL"
+          put EXPO_PUBLIC_SUPABASE_ANON_KEY "$SUPABASE_ANON_KEY"
+          put EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID "$GOOGLE_WEB_CLIENT_ID" || echo "GOOGLE_WEB_CLIENT_ID not set yet: Google button will be hidden"
+          put EXPO_PUBLIC_WEB_URL "$STAGING_WEB_URL" || echo "STAGING_WEB_URL not set yet: legal links will not open"
+
+      - name: Start the build on EAS (does not wait; the APK link appears on expo.dev)
+        working-directory: apps/mobile
+        run: |
+          set -euo pipefail
+          $EAS build --profile development --platform android --non-interactive --no-wait --json > build.json
+          url=$(node -e "const b=require('./build.json');console.log((Array.isArray(b)?b[0]:b).buildDetailsPageUrl ?? '')" || true)
+          echo "EAS build started: $url"
+          { echo "### Android development build started"; echo; echo "Open on your phone when it finishes (~15–25 min on the free queue): $url"; } >> "$GITHUB_STEP_SUMMARY"

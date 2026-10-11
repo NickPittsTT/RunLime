@@ -1,9 +1,32 @@
 {
-  "cli": { "version": ">= 16.0.0", "appVersionSource": "remote" },
+  "cli": { "version": ">= 24.0.0", "appVersionSource": "remote" },
   "build": {
-    "development": { "developmentClient": true, "distribution": "internal", "env": { "APP_ENV": "development" }, "channel": "development" },
-    "staging": { "distribution": "internal", "env": { "APP_ENV": "staging" }, "channel": "staging" },
-    "production": { "autoIncrement": true, "env": { "APP_ENV": "production" }, "channel": "production" }
+    "base": {
+      "pnpm": "10.28.0",
+      "node": "22.22.0"
+    },
+    "development": {
+      "extends": "base",
+      "developmentClient": true,
+      "distribution": "internal",
+      "environment": "development",
+      "env": { "APP_ENV": "development" },
+      "android": { "buildType": "apk", "withoutCredentials": true },
+      "ios": { "simulator": true }
+    },
+    "staging": {
+      "extends": "base",
+      "distribution": "internal",
+      "environment": "preview",
+      "env": { "APP_ENV": "staging" },
+      "android": { "buildType": "apk" }
+    },
+    "production": {
+      "extends": "base",
+      "autoIncrement": true,
+      "environment": "production",
+      "env": { "APP_ENV": "production" }
+    }
   },
   "submit": { "production": {} }
 }

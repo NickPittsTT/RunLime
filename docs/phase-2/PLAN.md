@@ -76,7 +76,7 @@ Report back: the step number, what you expected, what happened, and a screenshot
 
 | # | What | Secret? | Where you create it | Where you put it |
 |---|---|---|---|---|
-| 1 | **Expo account** (free) and a project named `runlime` | — | expo.dev → Sign up → Create project | Tell me the **project ID** in chat (not secret), or add it as a GitHub *variable* `EAS_PROJECT_ID` |
+| 1 | **Expo account** (free) and a project named `runlime` | — | expo.dev → Sign up → Create project | ✅ Done — project ID `ca1a5ee2-b15a-488d-b123-8fd075db8be1`, linked in `apps/mobile/app.config.ts` |
 | 2 | **Expo access token** | secret | expo.dev → Account settings → Access tokens → Create | GitHub → repo **Settings → Secrets and variables → Actions → New repository secret** `EXPO_TOKEN` |
 | 3 | **GitHub environment `staging`** | — | GitHub → repo **Settings → Environments → New environment** `staging` | (holds items 4–7) |
 | 4 | Supabase **project ref** `fmnmylqxrmxuzmdcvmhs` | public | already known | `staging` environment → *Variables* → `SUPABASE_PROJECT_REF` |

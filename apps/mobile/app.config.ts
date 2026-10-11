@@ -5,6 +5,8 @@ import type { ExpoConfig } from 'expo/config';
  * on both stores, domains and trademark registers (Phase 8 fixes the store IDs).
  */
 const APP_ENV = process.env.APP_ENV ?? 'development';
+/** Existing Expo project (owner-created on expo.dev). Not a secret. */
+const EAS_PROJECT_ID = 'ca1a5ee2-b15a-488d-b123-8fd075db8be1';
 const bundleId = process.env.APP_BUNDLE_ID ?? 'tt.runlime.app.dev';
 const googleIosUrlScheme = process.env.GOOGLE_IOS_URL_SCHEME; // reversed iOS client ID from Google Cloud
 
@@ -25,7 +27,14 @@ const config: ExpoConfig = {
   android: {
     package: bundleId.replace(/-/g, '_'),
     // Phase 1 needs no dangerous permissions. Location/activity recognition are added in Phases 4–5 with disclosures.
-    blockedPermissions: ['android.permission.ACCESS_BACKGROUND_LOCATION', 'android.permission.RECORD_AUDIO'],
+    blockedPermissions: [
+      'android.permission.ACCESS_BACKGROUND_LOCATION',
+      'android.permission.RECORD_AUDIO',
+      'android.permission.READ_EXTERNAL_STORAGE',
+      'android.permission.WRITE_EXTERNAL_STORAGE',
+      // The dev menu overlay needs this in development builds only.
+      ...(APP_ENV === 'development' ? [] : ['android.permission.SYSTEM_ALERT_WINDOW']),
+    ],
   },
   plugins: [
     'expo-router',
@@ -42,7 +51,7 @@ const config: ExpoConfig = {
     webUrl: process.env.EXPO_PUBLIC_WEB_URL ?? 'http://localhost:3000',
     googleWebClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
     googleIosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
-    eas: process.env.EAS_PROJECT_ID ? { projectId: process.env.EAS_PROJECT_ID } : undefined,
+    eas: { projectId: EAS_PROJECT_ID },
   },
 };
 

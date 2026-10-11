@@ -8,14 +8,18 @@
     "build": "next build",
     "start": "next start --port 3000",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "cf:build": "opennextjs-cloudflare build",
+    "cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview --port 3000",
+    "cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
   },
   "dependencies": {
+    "@opennextjs/cloudflare": "1.20.10",
     "@runlime/shared": "workspace:*",
     "@runlime/ui-tokens": "workspace:*",
     "@supabase/ssr": "0.12.7",
     "@supabase/supabase-js": "2.117.3",
-    "next": "16.4.0",
+    "next": "16.3.8",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-markdown": "10.1.0",
@@ -27,8 +31,9 @@
     "@types/react": "~19.2.18",
     "@types/react-dom": "~19.2.7",
     "eslint": "^9.39.5",
-    "eslint-config-next": "16.4.0",
+    "eslint-config-next": "16.3.8",
     "tailwindcss": "4.3.3",
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "wrangler": "4.149.0"
   }
 }

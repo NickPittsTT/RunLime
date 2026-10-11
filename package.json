@@ -13,6 +13,7 @@
     "db:test": "supabase test db",
     "db:types": "supabase gen types typescript --local > packages/shared/src/db.types.ts",
     "seed:dev": "tsx scripts/seed-dev.ts",
+    "legal:sync": "tsx scripts/sync-legal.ts",
     "bootstrap:super-admin": "tsx scripts/bootstrap-super-admin.ts",
     "e2e": "playwright test --config e2e/playwright.config.ts"
   },

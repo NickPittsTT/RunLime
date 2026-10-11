@@ -148,7 +148,7 @@ Trade-off: after deletion we can still see "an admin (alias X) suspended organis
   - `rate_limits` table + `check_rate_limit()` in RPCs
   - Turnstile on public web forms (Phase 2+)
 - Storage buckets: `public-media`, `private-proofs`, `exports` (Phases 2/7).
-- **Account deletion** (Edge Function `delete-account`, mobile + web):
+- **Account deletion** (RPC `delete_my_account()`, `SECURITY DEFINER`, from mobile and web; storage cleanup arrives with Storage in Phase 2):
   - deletes the auth user, which cascades to personal rows
   - the audit alias is removed
   - RSVP aggregates are kept as counts only

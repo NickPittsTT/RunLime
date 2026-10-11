@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, 'phase-*']
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Lint, typecheck, unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm turbo run typecheck lint test
+
+  database:
+    name: Database (pgTAP)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.120.0
+      - run: supabase start -x realtime,imgproxy,postgres-meta,supavisor,vector,logflare,studio,edge-runtime
+      - run: supabase test db
+
+  e2e-web:
+    name: Web end-to-end (Playwright)
+    runs-on: ubuntu-latest
+    needs: [checks]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.120.0
+      - name: Edge function secrets (throwaway key for CI only)
+        run: |
+          printf 'EMERGENCY_CONTACT_KEY_VERSION=1\nEMERGENCY_CONTACT_KEY_V1=%s\nALLOWED_ORIGINS=http://localhost:3000\n' "$(openssl rand -base64 32)" > supabase/functions/.env
+      - run: supabase start -x realtime,imgproxy,postgres-meta,supavisor,vector,logflare,studio
+      - name: Export local Supabase keys
+        run: |
+          supabase status -o env | grep -E '^(ANON_KEY|SERVICE_ROLE_KEY|API_URL)=' | sed 's/"//g' >> "$GITHUB_ENV"
+      - name: Publish legal documents
+        run: SUPABASE_URL=$API_URL SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY pnpm legal:sync --publish
+      - name: Build web
+        run: pnpm --filter @runlime/web build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ env.ANON_KEY }}
+          NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Run Playwright
+        run: pnpm e2e
+        env:
+          SUPABASE_URL: ${{ env.API_URL }}
+          SUPABASE_ANON_KEY: ${{ env.ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ env.SERVICE_ROLE_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ env.ANON_KEY }}
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

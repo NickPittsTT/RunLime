@@ -35,14 +35,30 @@
 - [x] README (setup, env vars, deployment), .env.example, bootstrap-super-admin script
 - [x] Phase 1 review report (`docs/phase-1/REVIEW.md`)
 
-## Waiting on the owner
+## Phase 1 approval items (owner, 2026-10-11)
+- [x] a. CI fully green on GitHub, including web E2E (see the latest run in the Phase 1 review)
+- [x] b. Root cause of the failed mobile test found and fixed at the cause (warm-up render, default timeouts restored; 25/25 randomised runs)
+- [x] c. Moderation Policy: 48-hour review target, child-safety reports first
+- [x] d. Emergency-contact key backup and rotation procedure + verify/rotate tooling (`docs/operations/EMERGENCY-CONTACT-KEY.md`)
+- [x] e. PROGRESS.md and Phase 0 overview updated with the owner's answers
+- [x] Phase 2 plan prepared (`docs/phase-2/PLAN.md`): Android dev build first, phone test script, accounts/keys list. **Not started.**
 
-1. Legal entity (individual or company name) — answer came through as template text.
-2. Bank name / account name and VAT status — needed by Phase 7.
-3. Domain — needed before Phase 2.
-4. Confirm "RunLime" availability (App Store, Google Play, domains, TT IPO/USPTO/WIPO) before store bundle IDs are fixed.
-5. Store distribution: TT only (recommended)?
-6. Name a child-safety (CSAE) contact person for Google Play.
-7. Supabase hosting region (recommended: us-east-1).
-8. Google OAuth client IDs and Apple Sign in credentials (Services ID, key) for staging/production.
-9. Attorney review of `docs/legal/` before launch.
+## Waiting on the owner
+1. **Approve Phase 1.**
+2. Operator details, child-safety contact, support email: your answer used placeholder text (`[MY FULL NAME]`, `[ADDRESS]`, `[NAME]`, `[EMAIL]`). You can enter the real values straight into staging `app_settings` (see `docs/phase-2/PLAN.md`, item 14) without sharing them here.
+3. Accounts and keys for Phase 2 task 1, items 1–9 in `docs/phase-2/PLAN.md` (Expo, GitHub `staging` environment, Supabase secrets, emergency-contact key).
+4. Google Cloud OAuth setup, items 10–13 (for Google sign-in testing).
+5. Free web host choice: Cloudflare Workers (recommended) or Netlify. Vercel Hobby forbids commercial use.
+6. Confirm the Supabase Free plan offers the "Before User Created" and "Custom Access Token" auth hooks and TOTP MFA.
+7. Bank name / account name and VAT status — before Phase 7.
+8. Domain — not yet; **remind the owner before Phase 8**. Nothing in Phases 2–7 depends on it.
+9. Confirm "RunLime" availability (stores, domains, TT IPO/USPTO/WIPO) before store bundle IDs are fixed (Phase 8).
+10. Attorney review of `docs/legal/` before launch.
+11. Apple Developer account (paid) — deferred until budget allows; iOS testing and Sign in with Apple wait for it.
+
+## Decided (owner, 2026-10-11)
+- Operator: "RunLime, operated by <owner>" (individual); may transfer to RunLime Limited, so operator details stay in settings.
+- Availability: Trinidad and Tobago only, both stores. Caribbean expansion later (BACKLOG lists what each country needs).
+- Supabase staging: us-east-1, project `fmnmylqxrmxuzmdcvmhs`. The Privacy Policy states data is stored in the United States.
+- Organiser payments: manual bank transfer only; no card gateway in v1.
+- Budget: free tiers only; Android first; iOS/Apple deferred; no custom domain until Phase 8.

@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import AgeGateScreen from '../app/(auth)/index';
 
 const mockPush = jest.fn();
@@ -22,13 +22,22 @@ jest.mock('react-native-safe-area-context', () => {
 });
 
 async function enterDob(day: string, month: string, year: string) {
-  fireEvent.changeText(await screen.findByLabelText('Day', {}, { timeout: 15000 }), day);
+  fireEvent.changeText(await screen.findByLabelText('Day'), day);
   fireEvent.changeText(screen.getByLabelText('Month'), month);
   fireEvent.changeText(screen.getByLabelText('Year'), year);
   fireEvent.press(screen.getByRole('button', { name: 'Continue' }));
 }
 
 describe('age gate screen (first screen, before any sign-in method)', () => {
+  // React Native requires its built-in components lazily, so the FIRST render in a fresh Jest process also
+  // compiles ScrollView/TextInput/Pressable etc. (~6 s on a cold cache, as on CI). Pay that one-off cost here,
+  // outside the tests, so every test below keeps Jest's default 5 s limit and the default findBy timeouts.
+  beforeAll(async () => {
+    render(<AgeGateScreen />);
+    await screen.findByText('What is your date of birth?', {}, { timeout: 60_000 });
+    cleanup();
+  }, 60_000);
+
   beforeEach(async () => {
     jest.clearAllMocks();
     await AsyncStorage.clear();
@@ -36,7 +45,7 @@ describe('age gate screen (first screen, before any sign-in method)', () => {
 
   it('shows the date of birth question and no sign-in options', async () => {
     render(<AgeGateScreen />);
-    expect(await screen.findByText('What is your date of birth?', {}, { timeout: 15000 })).toBeTruthy();
+    expect(await screen.findByText('What is your date of birth?')).toBeTruthy();
     expect(screen.queryByText(/Google|Apple|Email/)).toBeNull();
   });
 

@@ -27,6 +27,21 @@ describe('legal documents', () => {
     expect(terms).toMatch(/renews automatically/);
   });
 
+  it('moderation: 48-hour review target, child-safety reports first', () => {
+    const mod = docs.find((d) => d.doc.slug === 'moderation')!.doc.body;
+    expect(mod).toMatch(/within 48 hours/);
+    expect(mod).toMatch(/Child-safety reports are always handled first/);
+    expect(mod).not.toMatch(/24 hours/);
+  });
+
+  it('privacy policy states where data is stored and terms name the operator via settings', () => {
+    const privacy = docs.find((d) => d.doc.slug === 'privacy')!.doc.body;
+    expect(privacy).toMatch(/Your data is stored in \{\{hosting_region\}\}/);
+    expect(privacy).toMatch(/United States/);
+    const terms = docs.find((d) => d.doc.slug === 'terms')!.doc.body;
+    expect(terms).toContain('RunLime, operated by {{operator_name}}');
+  });
+
   it('privacy policy never mentions teen/minor accounts', () => {
     const privacy = docs.find((d) => d.doc.slug === 'privacy')!.doc.body;
     expect(privacy).not.toMatch(/13|teen/i);

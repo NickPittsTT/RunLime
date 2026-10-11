@@ -12,7 +12,7 @@ RunLime has **zero tolerance** for child sexual abuse and exploitation (CSAE), i
    - An age gate runs before sign-in, and our servers enforce the rule again.
    - Children don't have accounts. They attend events only with an adult, who records them as a **number** in their group. No child's name, photo or details are collected.
 2. **Prohibited content and conduct.** Any CSAE content or behaviour is forbidden anywhere in RunLime: nicknames, community times, reports, organiser event information, and any other content.
-3. **Reporting in the app.** Every profile, community time and event has a **Report** option, including a "child safety" reason. These reports are prioritised.
+3. **Reporting in the app.** Every profile, community time and event has a **Report** option, including a "child safety" reason. Child-safety reports are handled before any other report, and always within our 48-hour review target.
 4. **Action.** When we become aware of CSAM or CSAE:
    - we remove the content
    - we suspend the account(s) involved

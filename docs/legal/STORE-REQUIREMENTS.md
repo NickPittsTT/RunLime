@@ -44,7 +44,7 @@ Apple's tiers are 4+ / 9+ / 13+ / 16+ / 18+.
 | 11 | Export compliance: the app uses only standard HTTPS/OS encryption → `ITSAppUsesNonExemptEncryption = false` (encryption of emergency contacts happens server-side) | app.config | Built |
 | 12 | Review notes + demo account (participant, no MFA) | Phase 8 | Phase 8 |
 | 13 | Age rating 18+ (section A) | App Store Connect | Owner, Phase 8 |
-| 14 | Availability: Trinidad and Tobago only (recommended) | App Store Connect → Pricing & Availability | Owner decision |
+| 14 | Availability: **Trinidad and Tobago only** (owner decision, 2026-10-11) | App Store Connect → Pricing & Availability | Decided |
 
 ## C. Google Play requirements
 
@@ -65,12 +65,12 @@ Apple's tiers are 4+ / 9+ / 13+ / 16+ / 18+.
 | 13 | App access: reviewer test account (participant) | Phase 8 | Phase 8 |
 | 14 | Closed testing: 12+ testers for 14 continuous days (personal accounts only) | Depends on the legal-entity answer (open item) | Owner |
 | 15 | Financial features / government / news declarations: **none apply** | Play Console | Owner, Phase 8 |
-| 16 | Countries: Trinidad and Tobago only (recommended) | Play Console → Production → Countries | Owner decision |
+| 16 | Countries: **Trinidad and Tobago only** (owner decision, 2026-10-11) | Play Console → Production → Countries | Decided |
 
 ## D. Other things the stores (or the law) will expect for this app
 1. **A real legal operator name and address.** They appear on store listings and in our legal pages. Currently an open item.
-2. **Supabase hosting region** must be stated in the privacy policy (`{{hosting_region}}`). Recommendation: `us-east-1` (closest major region to TT, lowest latency). Owner decision, set when the projects are created.
+2. **Supabase hosting region:** `us-east-1` (United States), as decided by the owner. The Privacy Policy states that data is stored in the United States.
 3. **Attorney review** of every document here, including the Children's Authority hotline numbers in the Child Safety Policy.
 4. **Support mailbox** that is actually monitored. Apple and Google both test it.
-5. **Moderation staffing:** someone must review reports within the 24 hours promised in the Moderation Policy.
+5. **Moderation staffing:** someone must review reports within the 48 hours promised in the Moderation Policy, with child-safety reports first.
 6. **NCMEC reporting:** register as an electronic service provider with the NCMEC CyberTipline before launch, or document the regional reporting route the attorney recommends.

@@ -21,8 +21,7 @@
     ],
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/src/$1"
-    },
-    "testTimeout": 30000
+    }
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",

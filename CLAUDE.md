@@ -3,7 +3,7 @@
 Living record of conventions and decisions. Update at the end of every phase.
 
 ## Product guardrails (from the master prompt + owner decisions; do not drift)
-- Market: Trinidad & Tobago only at launch; tz America/Port_of_Spain; TTD; km. Store distribution: TT only (recommended, pending confirmation).
+- Market: Trinidad & Tobago only at launch (both stores: TT only, owner decision); tz America/Port_of_Spain; TTD; km. Caribbean expansion later, so keep country/currency/timezone per event and organiser.
 - We do NOT handle registration, entry fees, or official timing. No timing-company integrations.
 - Roles: super_admin, platform_admin, organiser, participant. Enforce in Postgres RLS, not only in UI.
 - **AGE POLICY (hard rule, never a setting): every account is 18+.**
@@ -21,6 +21,12 @@ Living record of conventions and decisions. Update at the end of every phase.
 - All limits, prices, radii, windows and legal text live in DB settings, never hardcoded. Exception: the 18+ rule, which is hardcoded by design.
 - New ideas go to BACKLOG.md, not into the build.
 - Work in phases; stop for owner approval after each phase.
+
+## Budget rules (owner, 2026-10-11)
+- **Free tiers only** until the owner says otherwise. Say so BEFORE any step that needs a paid plan or a card on file.
+- **Android first.** Keep the iOS and Sign in with Apple code, but defer anything needing the paid Apple Developer account.
+- **No custom domain** until Phase 8. Use provider-issued URLs; nothing in Phases 2–7 may depend on a custom domain. Remind the owner before Phase 8.
+- Never ask the owner to paste a password, token or service key into chat. Secrets go to GitHub environment secrets, Supabase secrets, or the cloud environment's settings.
 
 ## Process
 - Before reporting a phase complete: run tests, then state exactly what was and was not tested.
@@ -47,10 +53,17 @@ Living record of conventions and decisions. Update at the end of every phase.
 | 2026-10-11 | 18+ only for all accounts (hard rule) | Owner rule |
 | 2026-10-11 | Followers (private/public) + clubs; QR check-in and photo sharing removed from v1 | Owner rule |
 | 2026-10-11 | Brand Direction A, "Fresh Lime" | Approved |
-| 2026-10-11 | Hosting: Vercel Pro | Approved |
+| 2026-10-11 | Hosting: Vercel Pro | **On hold** (budget: free tiers only). Web host to be chosen in Phase 2 |
 | 2026-10-11 | Emergency contact: app-layer encryption, not pgsodium (F5) | Decided — Phase 1 |
 | 2026-10-11 | Audit log pseudonymisation via aliases + allowlists (F3) | Decided — Phase 1 |
 | 2026-10-11 | OAuth sign-ups can't carry DOB to the auth hook; enforced via profile trigger + 1-hour purge of profile-less users | Decided — Phase 1, owner informed |
+| 2026-10-11 | Operator: "RunLime, operated by <owner>" (individual), may move to RunLime Limited; operator details live in settings only | Owner |
+| 2026-10-11 | Store availability: TT only at launch | Owner |
+| 2026-10-11 | Supabase staging: us-east-1, project `fmnmylqxrmxuzmdcvmhs`; Privacy Policy says data is stored in the United States | Owner |
+| 2026-10-11 | Organiser payments: manual bank transfer only; no card gateway in v1 | Owner |
+| 2026-10-11 | Moderation: review within 48 h, child-safety reports first | Owner |
+| 2026-10-11 | Emergency-contact key backup/rotation: docs/operations/EMERGENCY-CONTACT-KEY.md | Decided |
+| 2026-10-11 | Jest: one warm-up render in beforeAll (RN lazy requires) instead of raising timeouts | Decided |
 | 2026-10-11 | Seed prices: Premium US$2.99/mo, US$19.99/yr; Basic TT$100; Featured TT$400; charity free Basic via setting | Owner |
 
 ## Conventions

@@ -37,7 +37,7 @@ jobs:
           version: 2.120.0
       - run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
       - run: supabase db push
-      - run: supabase functions deploy emergency-contact export-user-data --project-ref "$SUPABASE_PROJECT_REF"
+      - run: supabase functions deploy emergency-contact export-user-data emergency-contact-keys --project-ref "$SUPABASE_PROJECT_REF"
       - name: Sync legal documents (published)
         run: pnpm legal:sync --publish
         env:

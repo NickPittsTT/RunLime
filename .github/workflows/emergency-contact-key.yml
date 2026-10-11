@@ -1,0 +1,34 @@
+# Verify or rotate emergency-contact encryption. See docs/operations/EMERGENCY-CONTACT-KEY.md.
+name: Emergency-contact key
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Environment
+        type: choice
+        options: [staging, production]
+      mode:
+        description: verify (read-only counts) or rotate (re-encrypt to the current key version)
+        type: choice
+        options: [verify, rotate]
+        default: verify
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target }}
+    steps:
+      - name: Call emergency-contact-keys
+        env:
+          SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+        run: |
+          set -euo pipefail
+          out=$(curl -sS --fail-with-body -X POST "https://${PROJECT_REF}.supabase.co/functions/v1/emergency-contact-keys" \
+            -H "authorization: Bearer ${SERVICE_ROLE_KEY}" -H "content-type: application/json" \
+            -d '{"mode":"${{ inputs.mode }}"}')
+          echo "$out"
+          echo "### ${{ inputs.mode }} on ${{ inputs.target }}" >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"; echo "$out" >> "$GITHUB_STEP_SUMMARY"; echo '```' >> "$GITHUB_STEP_SUMMARY"
+          if echo "$out" | grep -Eq '"(undecryptable|failed)":[1-9]'; then echo "::error::Some rows could not be processed — see the procedure doc"; exit 1; fi

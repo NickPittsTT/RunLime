@@ -25,7 +25,7 @@ Users can post a display name, a nickname and community times. Users can also re
 - **Remove followers** or switch your account to Private at any time.
 
 ## What we do
-1. Every report goes to a moderation queue that RunLime administrators review. We aim to review reports **within 24 hours** and prioritise any child-safety reports.
+1. Every report goes to a moderation queue that RunLime administrators review. We aim to review every report **within 48 hours**. **Child-safety reports are always handled first**: they go to the top of the queue, ahead of every other report, and the reported content is hidden while we review it.
 2. Possible actions: no action, removal of content, a warning, temporary suspension, or permanent account closure. Serious or repeated breaches lead to closure.
 3. If content may break the law, we preserve the relevant records and report to the authorities where required.
 4. Every moderation action is recorded in our audit log.

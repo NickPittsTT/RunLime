@@ -38,9 +38,21 @@ Date: 2026-10-11 · Branch: `phase-1` · Progress: see `PROGRESS.md`
 - **Real email delivery** (Resend). Locally, emails go to Mailpit.
 - **Screen readers.** Labels, roles and contrast are set and tested, but TalkBack/VoiceOver have not been tried on a device.
 
+## CI failure on run #2: root cause
+- **Symptom:** on GitHub, the first test in `AgeGateScreen.test.tsx` hit Jest's 5 s limit. Every other test passed.
+- **Root cause:** React Native requires its built-in components lazily, so the first `render()` in a fresh Jest process also compiles ScrollView, TextInput, Pressable, SafeArea and so on. CI always starts with an empty transform cache. Reproduced locally with `jest --no-cache`:
+  - whichever test renders first takes 5.6–6.7 s and fails, whatever it asserts
+  - with a warm cache, the same test takes 0.6 s
+  - the work is synchronous (the event loop is blocked), so it isn't a timing race in the app or the test
+- **Fix:** a single warm-up render in `beforeAll` (with its own 60 s limit) pays that one-off cost outside the tests. The temporary 30 s test timeout and 15 s waits are removed, so every test keeps the default 5 s limit and 1 s `findBy` timeout, and a real slowdown would still fail.
+- **Evidence:**
+  - cold-cache run: all 13 pass, each test under 150 ms
+  - 25 consecutive runs in random order (`--randomize`): 25/25 pass
+  - no `act()` warnings
+
 ## Open issues / risks
 1. OAuth sign-ups can't send DOB to the auth hook (Supabase limitation, verified in the Auth source code). Mitigated by the profile trigger, `complete_signup` and the 1-hour purge, but a brief auth row can exist for someone who bypasses the device gate.
-2. Email OTP rate limits in production must be set in the dashboard (`config.toml` applies to local only).
+2. Email OTP rate limits in production must be set in the dashboard (`config.toml` applies to local only). On the Supabase Free plan, the built-in mailer only reaches members of your Supabase organisation and has a very low hourly limit. Fine for your own testing; real users need custom SMTP (free Resend tier requires a domain → Phase 8).
 3. `club_member_counts` is a security-definer view (aggregate counts only). The Supabase linter will flag it. Acceptable, or convert it to a function in Phase 3.
 4. Environment-specific workarounds used only in this cloud session: Edge Functions use direct REST calls instead of supabase-js (lighter anyway), and Expo versions were pinned from SDK 57's `bundledNativeModules.json` because `expo install` couldn't reach Expo's API.
 

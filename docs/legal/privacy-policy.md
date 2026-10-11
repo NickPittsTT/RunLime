@@ -7,7 +7,7 @@ version: 2026-10-11-draft
 
 **Last updated:** 11 October 2026 (draft)
 
-RunLime is a calendar for 5K and similar road races in Trinidad and Tobago, with tools to RSVP, check in on race day, track your own runs and follow other runners. RunLime is operated by {{operator_name}}, {{operator_address}} ("we", "us"). Contact us at {{support_email}}.
+RunLime is a calendar for 5K and similar road races in Trinidad and Tobago, with tools to RSVP, check in on race day, track your own runs and follow other runners. RunLime is operated by {{operator_name}}, {{operator_address}} ("RunLime", "we", "us"). Contact us at {{support_email}}.
 
 We follow the General Privacy Principles of the Trinidad and Tobago Data Protection Act. We collect the minimum we need, keep your account private by default, and ask for your consent before using location, health-related data, or sharing anything publicly.
 
@@ -51,7 +51,7 @@ RunLime accounts are only for adults aged **18 and over**. When you first open t
 
 ## 4. Service providers
 We use trusted providers that process data on our behalf under contract:
-- Supabase (database, authentication, file storage; hosted in {{hosting_region}})
+- Supabase (database, authentication, file storage). **Your data is stored in {{hosting_region}}.**
 - Vercel (website hosting)
 - Expo (push notification delivery)
 - Apple and Google (sign-in, app stores, in-app purchases, maps)
@@ -60,7 +60,7 @@ We use trusted providers that process data on our behalf under contract:
 - Sentry (crash reports)
 - PostHog (privacy-respecting analytics)
 
-Some of these providers process data outside Trinidad and Tobago. Where they do, we rely on their contractual safeguards.
+This means your data is transferred to and stored outside Trinidad and Tobago, mainly in the United States. Where it is, we rely on our providers' contractual safeguards.
 
 ## 5. How long we keep data
 | Data | Kept for |

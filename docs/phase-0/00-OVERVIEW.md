@@ -19,9 +19,9 @@ Status: **Approved by owner 2026-10-11 with the changes recorded below.** Rev 1 
 | # | Topic | Answer |
 |---|---|---|
 | 1 | Repo | Dedicated repo `nickpittstt/runlime` — done |
-| 2 | Legal entity | **OPEN** — the answer arrived as the unfilled template text `[INDIVIDUAL / COMPANY NAME]` |
-| 3 | Bank / VAT | **OPEN** — unfilled template `[BANK, ACCOUNT NAME]`, VAT `[YES / NO]`. Needed by Phase 7 |
-| 4 | Domain | **OPEN** — unfilled template. Treated as "not yet; remind me before Phase 2" |
+| 2 | Legal entity | Individual. Legal pages read "RunLime, operated by <owner's full name>". May transfer to RunLime Limited later, so operator name and address live only in `app_settings` (values still to be entered by the owner) |
+| 3 | Bank / VAT | Owner provides before Phase 7. Payments stay manual bank transfer; no card gateway in v1 |
+| 4 | Domain | None yet. Use provider-issued URLs; nothing in Phases 2–7 depends on a custom domain. Remind the owner before Phase 8 |
 | 5 | Legal text | I draft; owner's attorney reviews before launch |
 | 6 | Sign-in | Email (one-time code) + Google + Apple. Phone → BACKLOG |
 | 7 | Premium | Free/Premium split and pricing (US$2.99/mo, US$19.99/yr) accepted as seed values |
@@ -32,11 +32,16 @@ Status: **Approved by owner 2026-10-11 with the changes recorded below.** Rev 1 
 | 12 | Minors on board | Superseded: 18+ only |
 | 13 | Maps | Native maps approved |
 | 14 | Background location | Foreground-service approach approved; fall back to the original design if Phase 5 device tests fail |
-| 15 | Hosting | Vercel Pro |
+| 15 | Hosting | Vercel Pro — **on hold** (free tiers only). Free host to be chosen in Phase 2 (Cloudflare Workers recommended) |
 | Brand | | **Direction A — Fresh Lime** |
 | D1–D14 | | Approved |
 | A1–A10 | | Accepted, except A9 (group counting, changed below) and A10 (now 18+) |
 | Retention | | Payment records kept 7 years (tax) — confirmed |
+| Availability | | Trinidad and Tobago only, both stores. Caribbean expansion planned (see BACKLOG) |
+| Child-safety contact | | Owner to enter in `legal.child_safety_contact_email` (the answer used placeholder text) |
+| Supabase | | Staging project `fmnmylqxrmxuzmdcvmhs`, us-east-1. Privacy Policy: data stored in the United States |
+| Moderation | | Reports reviewed within 48 hours; child-safety reports first |
+| Budget | | Free tiers only until the owner says otherwise; flag anything paid first. Android first; iOS and Apple sign-in deferred |
 
 ## 2. Hard rule: AGE POLICY (18+)
 
@@ -78,7 +83,7 @@ A9 revised: the public "attending" count = sum of (`group_size` + `children_coun
 
 1. Items 2, 3, 4 above came through as unfilled template text. Legal drafts use the tokens `{{operator_name}}`, `{{operator_address}}`, `{{support_email}}`, `{{website}}`. They are filled from settings at render time, and the web portal shows a visible "DRAFT — operator details missing" banner until they're set.
 2. **Name check reminder.** Confirm "RunLime" is available on the App Store, Google Play, domains, and the TT IPO/USPTO/WIPO trademark registers. Phase 1 uses **development** bundle IDs only (`tt.runlime.app.dev`). Store bundle IDs are fixed in Phase 8 after you confirm.
-3. **Store availability:** I recommend restricting distribution to **Trinidad and Tobago only** at launch in both stores. That keeps us out of US-state and other app-store age-verification laws, which an 18+ social app would otherwise need to assess. Expansion revisits this.
+3. **Store availability:** decided — **Trinidad and Tobago only** at launch in both stores. Expansion steps per country are in BACKLOG.md.
 4. Google Play child safety (CSAE) standards apply because followers make the app "social". **You must name a child-safety point of contact** (a person) in Play Console. See `docs/legal/STORE-REQUIREMENTS.md`.
 
 ## 6. Policy findings carried forward (from rev 1)

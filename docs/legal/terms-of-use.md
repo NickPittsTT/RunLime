@@ -7,7 +7,7 @@ version: 2026-10-11-draft
 
 **Last updated:** 11 October 2026 (draft)
 
-These terms are an agreement between you and {{operator_name}} ("RunLime", "we"). By creating an account you accept them, along with our [Privacy Policy](/legal/privacy), [Moderation Policy](/legal/moderation), [Child Safety Policy](/legal/child-safety) and [Health Disclaimer](/legal/health).
+These terms are an agreement between you and RunLime, operated by {{operator_name}} ("RunLime", "we"). By creating an account you accept them, along with our [Privacy Policy](/legal/privacy), [Moderation Policy](/legal/moderation), [Child Safety Policy](/legal/child-safety) and [Health Disclaimer](/legal/health).
 
 ## 1. Who can use RunLime
 - You must be **18 or older** to create or use a RunLime account. This applies to every account: runners, organisers and administrators. We may close any account we believe belongs to someone under 18.

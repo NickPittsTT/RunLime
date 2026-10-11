@@ -7,7 +7,7 @@
 | Phase | Scope | Status | % |
 |---|---|---|---|
 | 0 | Questions, architecture, data model, screens, brand, costs | Approved by owner (rev 2) | 100% |
-| 1 | Setup, environments, auth + 18+ age gate, roles, RLS, seed, legal drafts | In progress | 95% |
+| 1 | Setup, environments, auth + 18+ age gate, roles, RLS, seed, legal drafts | Complete (awaiting owner approval) | 100% |
 | 2 | Events: organiser portal, admin approval, onboarding, calendar, event page, public web | Not started | 0% |
 | 3 | RSVP, followers & clubs, notifications/broadcasts, attendance dashboard | Not started | 0% |
 | 4 | GPS check-in | Not started | 0% |
@@ -31,7 +31,7 @@
 - [x] Web E2E (Playwright) all green — 10 tests, desktop + phone viewport
 - [x] Mobile app: age gate first, email/Google/Apple sign-in, profile & privacy, emergency contact, export, delete (bundles for Android + iOS)
 - [x] Mobile unit tests (Jest) — 13 tests
-- [x] CI (GitHub Actions): lint, typecheck, unit, pgTAP, web E2E; database deploy workflow (staging auto, production manual)
+- [x] CI (GitHub Actions) green on GitHub (run #3): lint, typecheck, unit, pgTAP, web E2E; database deploy workflow (staging auto, production manual)
 - [x] README (setup, env vars, deployment), .env.example, bootstrap-super-admin script
 - [x] Phase 1 review report (`docs/phase-1/REVIEW.md`)
 

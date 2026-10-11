@@ -7,7 +7,7 @@
 | Phase | Scope | Status | % |
 |---|---|---|---|
 | 0 | Questions, architecture, data model, screens, brand, costs | Approved by owner (rev 2) | 100% |
-| 1 | Setup, environments, auth + 18+ age gate, roles, RLS, seed, legal drafts | In progress | 80% |
+| 1 | Setup, environments, auth + 18+ age gate, roles, RLS, seed, legal drafts | In progress | 90% |
 | 2 | Events: organiser portal, admin approval, onboarding, calendar, event page, public web | Not started | 0% |
 | 3 | RSVP, followers & clubs, notifications/broadcasts, attendance dashboard | Not started | 0% |
 | 4 | GPS check-in | Not started | 0% |
@@ -29,8 +29,8 @@
 - [x] Legal drafts (8 documents) + store requirements checklist + sync script
 - [x] Web portal: sign-in (age gate first), complete profile, account (export/delete), organiser application, admin MFA, organisers queue, users, clubs, legal/support/delete pages
 - [x] Web E2E (Playwright) all green — 10 tests, desktop + phone viewport
-- [ ] Mobile app: age gate first, email/Google/Apple sign-in, profile, emergency contact, export, delete
-- [ ] Mobile unit tests (Jest)
+- [x] Mobile app: age gate first, email/Google/Apple sign-in, profile & privacy, emergency contact, export, delete (bundles for Android + iOS)
+- [x] Mobile unit tests (Jest) — 13 tests
 - [ ] CI (GitHub Actions): lint, typecheck, unit, pgTAP, web E2E
 - [ ] README (setup, env vars, deployment), .env.example
 - [ ] Phase 1 review report

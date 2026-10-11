@@ -27,6 +27,12 @@ describe('legal documents', () => {
     expect(terms).toMatch(/renews automatically/);
   });
 
+  it('terms make a false date of birth a breach and grounds for closure', () => {
+    const terms = docs.find((d) => d.doc.slug === 'terms')!.doc.body;
+    expect(terms).toMatch(/true date of birth/);
+    expect(terms).toMatch(/false date of birth[^.]*breach of these Terms and grounds for closing your account/);
+  });
+
   it('moderation: 48-hour review target, child-safety reports first', () => {
     const mod = docs.find((d) => d.doc.slug === 'moderation')!.doc.body;
     expect(mod).toMatch(/within 48 hours/);

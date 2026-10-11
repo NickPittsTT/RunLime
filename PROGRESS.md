@@ -7,7 +7,7 @@
 | Phase | Scope | Status | % |
 |---|---|---|---|
 | 0 | Questions, architecture, data model, screens, brand, costs | Approved by owner (rev 2) | 100% |
-| 1 | Setup, environments, auth + 18+ age gate, roles, RLS, seed, legal drafts | Complete (awaiting owner approval) | 100% |
+| 1 | Setup, environments, auth + 18+ age gate, roles, RLS, seed, legal drafts | Approved by owner (2026-10-11) | 100% |
 | 2 | Events: organiser portal, admin approval, onboarding, calendar, event page, public web | Not started | 0% |
 | 3 | RSVP, followers & clubs, notifications/broadcasts, attendance dashboard | Not started | 0% |
 | 4 | GPS check-in | Not started | 0% |
@@ -41,10 +41,10 @@
 - [x] c. Moderation Policy: 48-hour review target, child-safety reports first
 - [x] d. Emergency-contact key backup and rotation procedure + verify/rotate tooling (`docs/operations/EMERGENCY-CONTACT-KEY.md`)
 - [x] e. PROGRESS.md and Phase 0 overview updated with the owner's answers
-- [x] Phase 2 plan prepared (`docs/phase-2/PLAN.md`): Android dev build first, phone test script, accounts/keys list. **Not started.**
+- [x] Phase 2 plan prepared (`docs/phase-2/PLAN.md`): Android dev build first, phone test script, accounts/keys list.
+- [x] Final pre-approval checks: corrected PowerShell key command; exactly-18-today / 18-tomorrow tests on every layer + phone script; Terms: false DOB is a breach and grounds for closure; domain + email service recorded as required before closed testing with others.
 
 ## Waiting on the owner
-1. **Approve Phase 1.**
 2. Operator details, child-safety contact, support email: your answer used placeholder text (`[MY FULL NAME]`, `[ADDRESS]`, `[NAME]`, `[EMAIL]`). You can enter the real values straight into staging `app_settings` (see `docs/phase-2/PLAN.md`, item 14) without sharing them here.
 3. Accounts and keys for Phase 2 task 1, items 1–9 in `docs/phase-2/PLAN.md` (Expo, GitHub `staging` environment, Supabase secrets, emergency-contact key).
 4. Google Cloud OAuth setup, items 10–13 (for Google sign-in testing).
@@ -52,6 +52,7 @@
 6. Confirm the Supabase Free plan offers the "Before User Created" and "Custom Access Token" auth hooks and TOTP MFA.
 7. Bank name / account name and VAT status — before Phase 7.
 8. Domain — not yet; **remind the owner before Phase 8**. Nothing in Phases 2–7 depends on it.
+   - **A custom domain AND an email service (custom SMTP) are needed before any closed testing with other people**, including Google Play's closed test with 12+ testers. Supabase's free built-in mailer only sends to members of your Supabase organisation, with a very low hourly limit. Free email services (e.g. Resend's free tier) need a verified domain to send to anyone else. Until then, only you can test email sign-in.
 9. Confirm "RunLime" availability (stores, domains, TT IPO/USPTO/WIPO) before store bundle IDs are fixed (Phase 8).
 10. Attorney review of `docs/legal/` before launch.
 11. Apple Developer account (paid) — deferred until budget allows; iOS testing and Sign in with Apple wait for it.

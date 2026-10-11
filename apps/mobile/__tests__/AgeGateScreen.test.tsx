@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { AGE_REFERENCE_TIME_ZONE, todayIn } from '@runlime/shared/rules';
 import AgeGateScreen from '../app/(auth)/index';
 
 const mockPush = jest.fn();
@@ -71,6 +72,23 @@ describe('age gate screen (first screen, before any sign-in method)', () => {
     render(<AgeGateScreen />);
     expect(await screen.findByText(/can.t create a RunLime account/)).toBeTruthy();
     expect(screen.queryByLabelText('Day')).toBeNull();
+  });
+
+  it('allows someone who turns exactly 18 today (Trinidad and Tobago date)', async () => {
+    const t = todayIn(AGE_REFERENCE_TIME_ZONE);
+    render(<AgeGateScreen />);
+    await enterDob(String(t.day), String(t.month), String(t.year - 18));
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith('/sign-in'));
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
+
+  it('blocks someone who turns 18 tomorrow', async () => {
+    const t = todayIn(AGE_REFERENCE_TIME_ZONE);
+    const tomorrow = new Date(Date.UTC(t.year, t.month - 1, t.day + 1));
+    render(<AgeGateScreen />);
+    await enterDob(String(tomorrow.getUTCDate()), String(tomorrow.getUTCMonth() + 1), String(tomorrow.getUTCFullYear() - 18));
+    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('/blocked'));
+    expect(mockPush).not.toHaveBeenCalled();
   });
 
   it('asks for a complete date', async () => {

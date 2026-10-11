@@ -14,7 +14,7 @@
 ## 1. Creating a key (first time, or for rotation)
 Do this on **your own computer**. Never in a chat, an email, a ticket or a git commit.
 - macOS/Linux/WSL: `openssl rand -base64 32`
-- Windows PowerShell: `$b = New-Object byte[] 32; [Security.Cryptography.RandomNumberGenerator]::Fill($b); [Convert]::ToBase64String($b)`
+- Windows PowerShell (5.1 or 7): `$b = New-Object byte[] 32; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); [Convert]::ToBase64String($b)`
 - The result is 44 characters long and ends with `=`.
 
 ## 2. Backup (do this immediately, before the key is used)

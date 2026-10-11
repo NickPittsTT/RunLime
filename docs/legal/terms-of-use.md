@@ -1,7 +1,7 @@
 ---
 slug: terms
 title: Terms of Use
-version: 2026-10-11-draft
+version: 2026-10-11-draft2
 ---
 # RunLime Terms of Use
 
@@ -11,6 +11,7 @@ These terms are an agreement between you and RunLime, operated by {{operator_nam
 
 ## 1. Who can use RunLime
 - You must be **18 or older** to create or use a RunLime account. This applies to every account: runners, organisers and administrators. We may close any account we believe belongs to someone under 18.
+- You must give your **true date of birth**. Giving a false date of birth, including to get around the 18+ rule, is a **breach of these Terms and grounds for closing your account**.
 - **Minors at events:** {{minors_notice}}
 - You are responsible for keeping your sign-in method secure. Tell us at {{support_email}} if you think your account has been misused.
 
@@ -51,7 +52,7 @@ We may change, suspend or stop features. We aim to give notice of material chang
 To the extent the law allows, RunLime is provided "as is". We aren't liable for events organised by others, for injury or loss arising from taking part in any event or run, or for indirect losses. Nothing in these terms limits liability that cannot be limited by law.
 
 ## 10. Ending your account
-You can delete your account at any time in the app or at {{website}}/delete-account. We may suspend or close accounts that break these terms.
+You can delete your account at any time in the app or at {{website}}/delete-account. We may suspend or close accounts that break these terms, including any account where a false date of birth was given.
 
 ## 11. Law
 These terms are governed by the laws of the Republic of Trinidad and Tobago, and its courts have jurisdiction.

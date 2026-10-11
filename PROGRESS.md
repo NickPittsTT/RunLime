@@ -33,7 +33,7 @@
 - [x] Mobile unit tests (Jest) — 13 tests
 - [x] CI (GitHub Actions): lint, typecheck, unit, pgTAP, web E2E; database deploy workflow (staging auto, production manual)
 - [x] README (setup, env vars, deployment), .env.example, bootstrap-super-admin script
-- [ ] Phase 1 review report
+- [x] Phase 1 review report (`docs/phase-1/REVIEW.md`)
 
 ## Waiting on the owner
 

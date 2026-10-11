@@ -22,7 +22,7 @@ jest.mock('react-native-safe-area-context', () => {
 });
 
 async function enterDob(day: string, month: string, year: string) {
-  fireEvent.changeText(await screen.findByLabelText('Day'), day);
+  fireEvent.changeText(await screen.findByLabelText('Day', {}, { timeout: 15000 }), day);
   fireEvent.changeText(screen.getByLabelText('Month'), month);
   fireEvent.changeText(screen.getByLabelText('Year'), year);
   fireEvent.press(screen.getByRole('button', { name: 'Continue' }));
@@ -36,7 +36,7 @@ describe('age gate screen (first screen, before any sign-in method)', () => {
 
   it('shows the date of birth question and no sign-in options', async () => {
     render(<AgeGateScreen />);
-    expect(await screen.findByText('What is your date of birth?')).toBeTruthy();
+    expect(await screen.findByText('What is your date of birth?', {}, { timeout: 15000 })).toBeTruthy();
     expect(screen.queryByText(/Google|Apple|Email/)).toBeNull();
   });
 

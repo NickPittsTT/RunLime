@@ -17,6 +17,7 @@ const config: ExpoConfig = {
   version: '0.1.0',
   orientation: 'portrait',
   userInterfaceStyle: 'automatic',
+  icon: './assets/icon.png',
   ios: {
     bundleIdentifier: bundleId,
     supportsTablet: false,
@@ -26,6 +27,7 @@ const config: ExpoConfig = {
   },
   android: {
     package: bundleId.replace(/-/g, '_'),
+    adaptiveIcon: { foregroundImage: './assets/adaptive-icon.png', backgroundColor: '#14532D' },
     // Phase 1 needs no dangerous permissions. Location/activity recognition are added in Phases 4–5 with disclosures.
     blockedPermissions: [
       'android.permission.ACCESS_BACKGROUND_LOCATION',
@@ -40,7 +42,8 @@ const config: ExpoConfig = {
     'expo-router',
     'expo-secure-store',
     'expo-apple-authentication',
-    ['expo-splash-screen', { backgroundColor: '#14532D', resizeMode: 'contain' }],
+    // The splash plugin always references a logo drawable, so it must be given an image (EAS build 98d0e228).
+    ['expo-splash-screen', { image: './assets/splash-icon.png', imageWidth: 200, backgroundColor: '#14532D', resizeMode: 'contain' }],
     ...(googleIosUrlScheme ? [['@react-native-google-signin/google-signin', { iosUrlScheme: googleIosUrlScheme }] as [string, unknown]] : []),
   ],
   experiments: { typedRoutes: true },

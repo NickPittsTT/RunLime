@@ -60,7 +60,9 @@
 - [x] Legal pages render Markdown tables; Privacy Policy names Cloudflare as the web host
 - [x] "Deploy web" workflow (Cloudflare Workers Free): skips until configured; free-plan size check; smoke test; points Edge Function CORS (`ALLOWED_ORIGINS`) at the site
 - [x] Worker minified: 2.85 → 2.52 MiB compressed (82% of the free 3 MiB limit); CI fails above the limit. Web E2E 10/10 on the minified build on Cloudflare's runtime (local)
-- [ ] Owner: Cloudflare account, workers.dev subdomain, `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` (PLAN.md items 15–17); then `STAGING_WEB_URL` (item 18) and an app rebuild for the legal links
+- [x] Owner: Cloudflare account (Free), subdomain `runlimett`, `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` (token rolled once after exposure; the new one works)
+- [x] **Staging web live (2026-10-15):** https://runlime-web-staging.runlimett.workers.dev — Deploy web run #3 green: 2.52 MiB, smoke test `/`, `/legal/terms`, `/legal/privacy` → 200, Edge Function `ALLOWED_ORIGINS` set to the site
+- [ ] Owner: `STAGING_WEB_URL` variable (item 18); then one app build with Google sign-in + working legal links
 - [ ] Phase 2 feature work (events, organiser portal, calendar, onboarding, public pages) — after Task 1
 
 ## Phase 1 approval items (owner, 2026-10-11)
@@ -74,8 +76,8 @@
 
 ## Waiting on the owner
 1. Legal details still open: operator name, child-safety contact name and email. (Operator address: optional, non-public, for official records only.) (Support email is set on staging: runlimett@gmail.com, until there's a domain.) You can enter them straight into staging `app_settings` (see `docs/phase-2/PLAN.md`, item 14) without sharing them here.
-1a. Cloudflare setup, items 15–18 in `docs/phase-2/PLAN.md` (free plan, no card).
-2. Google Android OAuth client (item 13 in `docs/phase-2/PLAN.md`): package `tt.runlime.app.dev`, SHA-1 `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25`. Items 10–12 done by the owner on 2026-10-15 (project RunLime, consent screen External/Testing with test users, Web client in Supabase's Google provider, `GOOGLE_WEB_CLIENT_ID` GitHub variable).
+1a. Cloudflare: items 15–17 done (2026-10-15). Item 18 `STAGING_WEB_URL` pending.
+2. Google Android OAuth client (item 13): **done by the owner on 2026-10-15** (`GOOGLE_ANDROID_CLIENT_ID` set). Section D to be tested on the next build.
 3. Bank name / account name and VAT status — before Phase 7.
 4. Custom domain + email service: needed **before any closed testing with other people** (including Google Play's 12-tester closed test), and at the latest Phase 8. Gmail SMTP is for staging/owner testing only. Free email services (e.g. Resend's free tier) need a verified domain to send to anyone else.
 5. Confirm "RunLime" availability (stores, domains, TT IPO/USPTO/WIPO) before store bundle IDs are fixed (Phase 8).

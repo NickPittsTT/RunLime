@@ -63,7 +63,7 @@ erDiagram
 | `profiles` | `id` (= auth.users.id), `display_name`, `nickname`, `date_of_birth date NOT NULL`, `home_region_id`, `runner_level NULL` (`casual`,`club`,`competitive`; self-declared, optional, Phase 3), `verified_runner_at NULL` + `verified_runner_by` (admin-only columns, Phase 6), `weight_kg numeric(5,1) NULL`, `health_consent_at`, `account_privacy` (`private` default / `public`), `show_attendance_to_clubs bool default false`, `country_code`, `timezone`, `created_at` | **Hard rule:** trigger rejects any insert/update where age < 18 (pgTAP-tested). Created only through `complete_signup` |
 | `profile_private` | `user_id`, `emergency_contact_ciphertext text`, `key_version smallint` | Owner-only RLS; no admin policy. Encrypted in the Edge Function (F5) |
 | `user_roles` | `user_id`, `role app_role`, `granted_at` | PK (user_id, role). Only Super Admin at `aal2` can insert/delete `platform_admin`. Who granted it is recorded in the audit log via alias |
-| `consents` | `user_id`, `kind` (`location`, `health_data`, `public_sharing`, `marketing_push`, `terms`, `privacy`), `version`, `granted_at`, `revoked_at` | Evidence for DPA / store forms |
+| `consents` | `user_id`, `kind` (`location`, `health_data`, `public_sharing`, `marketing_push`, `terms`, `privacy`, `leaderboards`, `pilot_terms`), `version`, `granted_at`, `revoked_at` | Evidence for DPA / store forms. `pilot_terms` (owner, 2026-10-15): recorded in `complete_signup` when the pilot notice is shown (setting `pilot.enabled`); the notice text and its version live in settings (`legal.pilot_notice`) |
 
 ### Geography & config
 | Table | Notes |
@@ -108,7 +108,7 @@ erDiagram
 |---|---|
 | `runs` | `id` (client uuid), `user_id`, `started_at`, `ended_at`, `moving_seconds`, `elapsed_seconds`, `distance_m`, `avg_pace_sec_per_km`, `splits jsonb`, `steps NULL`, `calories_est NULL`, `route_polyline NULL`, `source` (`tracked`,`typed_in`), `event_id NULL`, `check_in_id NULL`, `device_meta jsonb`. Private: RLS owner-only |
 | `personal_bests` | materialised per (user, distance bucket 5K/10K/HM/M) — recomputed on run upsert |
-| `community_results` | `event_id`, `run_id`, `user_id`, `display_name_snapshot` (display name or nickname, the user's choice), `time_seconds`, `distance_km`, `source` (`tracked`/`typed_in`), `status` (`visible`,`withdrawn`,`removed`), `shared_at`. CHECK via trigger: user has a check-in for the event, pace ≥ the setting, one per user per event |
+| `community_results` | `event_id`, `run_id`, `user_id`, `display_name_snapshot` (display name or nickname, the user's choice), `time_seconds`, `distance_km`, `source` (`tracked`/`typed_in`), `status` (`visible`,`pending_review`,`withdrawn`,`removed`,`not_counted`), `shared_at`. CHECK via trigger: user has a check-in for the event, one per user per event. **Speed tiers (owner, 2026-10-15): the same three tiers as leaderboards** (see "Speed checks"), applied to the shared time whether tracked or typed in: slower than 3:00 /km → `visible`; 2:35–3:00 → `pending_review` (hidden from the board until approved in the shared review queue A15); faster than 2:35 → `not_counted` (never on the board; the run stays in private history). Verified runners skip the review tier, as on leaderboards |
 | `reports` | polymorphic: `target_type` (`community_result`,`event`,`profile`), `target_id`, `reporter_id`, `reason`, `details`, `status`, `resolved_by`, `resolution` |
 | `blocks` | `blocker_id`, `blocked_id` — removes follows both ways, prevents new follow requests, hides each user's content from the other |
 | `moderation_actions` | `target_user_id`, `action` (`warn`,`suspend`,`remove_content`,`exclude_from_leaderboards`), `reason`, `until`, `actor_id` |
@@ -122,7 +122,7 @@ Two boards: **Kilometres** (tracked runs) and **Races attended** (GPS check-ins)
 | `leaderboard_totals` | `user_id`, `board` (`km`,`races`), `period` (`week`,`month`,`year`), `period_start date`, `value numeric(10,2)`, `updated_at`. PK (user_id, board, period, period_start). Recomputed for one user on run insert/update/delete and on check-in, plus a nightly pg_cron rebuild. **No direct read access (RLS: none)**; read only through the RPC below |
 | RPC `leaderboard(board, period, scope)` | `SECURITY DEFINER`. Returns the top N + the caller's row with rank (competition ranking: 1, 2, 2, 4). Includes only opted-in users who are not suspended, not excluded by moderation, and not blocked by or blocking the viewer. `following` scope = accepted follows of the caller + the caller. Returns name, rank and value only, never routes, run times or areas |
 
-**Speed checks: two tiers (owner decision 2026-10-15).** Applied to every tracked run before it can count on a leaderboard. Thresholds are admin settings:
+**Speed checks: two tiers (owner decision 2026-10-15).** Applied to every tracked run before it can count on a leaderboard, and (same thresholds, same queue) to every time shared to a community board. Thresholds are admin settings:
 
 | Average pace and **every** 1 km split | Result | `runs.leaderboard_status` |
 |---|---|---|
@@ -134,7 +134,7 @@ Two boards: **Kilometres** (tracked runs) and **Races attended** (GPS check-ins)
 - **Verified runner:** when an admin approves a flagged run, they can also mark the runner as verified (`profiles.verified_runner_at`, `verified_runner_by`; audited). A verified runner's runs in the 2:35–3:00 band are counted without review. The 2:35 rejection still applies to everyone.
 - A self-declared `runner_level` never changes any check.
 - **Privacy:** runs are owner-only. The review queue (A15) shows admins only what the decision needs: distance, moving time, average pace and split paces. Never the route or map. The Privacy Policy gets a line about this in Phase 6.
-- Community times keep their own single limit (`community.pace_limit_sec_per_km`, 2:35) unless the owner wants the same review tier there.
+- **Community times use the same tiers and the same review queue** (owner, 2026-10-15). One decision per run: approving a flagged run makes it count on leaderboards **and** shows its community time; excluding it does both. A typed-in time shared to a board goes through the same check (it never counts on leaderboards). Phase 6 migration replaces the Phase 1 setting `community.pace_limit_sec_per_km` with the shared thresholds.
 
 **Verified data only:**
 - **Kilometres:** only `runs.source = 'tracked'` (recorded by the app's GPS tracker) with `leaderboard_status` `counted` or `approved` (see the speed checks above). Typed-in times never count. A run longer than `leaderboard.max_run_km` is excluded too.

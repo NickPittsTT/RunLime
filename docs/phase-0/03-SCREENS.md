@@ -14,6 +14,7 @@ Phase tag = the phase in which the screen is built.
 | M3 | Email code entry | 1 |
 | M6 | Profile basics (display name, nickname, home area) | 1 |
 | M7 | Terms & Privacy acceptance | 1 |
+| M7a | **Pilot notice** (only while `pilot.enabled`): plain-language "this is a test version under draft terms; your data may be wiped when the test ends; you take part on that basis" + "I agree" checkbox, shown with M7 before the account is created; agreement stored as a `pilot_terms` consent. Also on web sign-up | before the pilot (Phase 6) |
 | M8 | Walkthrough (3 cards) | 2 |
 | M9 | Pick areas & distances of interest | 2 |
 | M9a | Onboarding: runner level (Casual / Club runner / Competitive, optional) and your club (pick from the approved list → request to join; or "request a new club") | 3 |
@@ -108,7 +109,7 @@ Phase tag = the phase in which the screen is built.
 | A11 | Announcements | 3 |
 | A12 | Support inbox | 7 |
 | A13 | Audit log (filterable, read-only, before/after diff of allowlisted fields) | 7 |
-| A15 | Speed review queue: flagged runs (2:35–3:00 /km band) showing distance, time, average and split paces only (no route); approve / exclude with note; "mark runner as verified" | 6 |
+| A15 | Speed review queue (one queue for leaderboards **and** community times): flagged runs (2:35–3:00 /km band) showing distance, time, average and split paces only (no route); approve / exclude with note; "mark runner as verified" | 6 |
 | A14 | Clubs: create, edit, archive; view member counts (Phase 1). **Phase 3:** club requests queue (approve / reject with reason), assign or remove club leaders, approve members on a leader's behalf | 1 / 3 |
 
 ## Public web

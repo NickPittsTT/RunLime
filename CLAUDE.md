@@ -16,15 +16,15 @@ Living record of conventions and decisions. Update at the end of every phase.
 - Social: followers, with account privacy Private (default, approval needed) or Public. Followers see the race passport and races attending. Runs, routes, times and history stay private unless shared to community times.
 - Clubs: admin-approved list; users can request a new club (admin approves); per-club leaders approve members; only approved memberships count. Club turnout shows counts only, from opted-in members, hidden below a minimum (setting).
 - Runner level is self-declared and never bypasses speed checks.
-- Speed checks (leaderboards, settings): ≥ 3:00 /km avg and every split → counted; 2:35–3:00 → admin review, excluded until approved; < 2:35 → rejected. Verified runners skip the review tier only. Admin review sees pace/split numbers, never routes.
+- Speed checks (leaderboards **and** community times, one review queue, settings): ≥ 3:00 /km avg and every split → counted; 2:35–3:00 → admin review, excluded until approved; < 2:35 → rejected. Verified runners skip the review tier only. Admin review sees pace/split numbers, never routes.
 - Check-in is GPS only in v1 (no QR).
 - Participant Premium sold ONLY via Apple IAP / Google Play Billing (RevenueCat).
 - Organiser payments ONLY via web portal bank transfer. The mobile app has no payment links or wording for them.
-- Community times: opt-in, check-in required, Tracked/Typed in label, pace limit (setting), withdrawable, report/block, no prizes, disclaimer always shown.
+- Community times: opt-in, check-in required, Tracked/Typed in label, same speed tiers as leaderboards (flagged times hidden until approved), withdrawable, report/block, no prizes, disclaimer always shown.
 - Club leaderboards (Phase 6): km, races attended, avg members per race; total and per member (minimum club size, setting); opted-in approved members only.
 - Activity leaderboards (Phase 6): km from tracked runs + races from GPS check-ins; Weekly/Monthly/Year; Everyone/People I follow; top N (setting) + own rank; opt-in; verified data only (typed-in never counts); impossible speeds excluded (setting); no prizes; read only via RPC.
 - RunLime listings (admin-entered races): facts only + official registration link, "not affiliated, check with the organiser" notice (setting), no organiser flyers or logos without permission.
-- Testing: no outside testers before Phase 6; the first outside test is a real-race pilot after Phase 6.
+- Testing: no outside testers before Phase 6; the first outside test is a real-race pilot after Phase 6, under the draft legal documents with a plain-language pilot notice + recorded `pilot_terms` consent. Attorney review is required before public launch.
 - All limits, prices, radii, windows and legal text live in DB settings, never hardcoded. Exception: the 18+ rule, which is hardcoded by design.
 - New ideas go to BACKLOG.md, not into the build.
 - Work in phases; stop for owner approval after each phase.
@@ -78,6 +78,7 @@ Living record of conventions and decisions. Update at the end of every phase.
 | 2026-10-15 | Two-tier speed checks (3:00 accept / 2:35–3:00 review / 2:35 reject); verified runners skip review; listings include venue + start pin; calendar periods confirmed | Owner |
 | 2026-10-15 | Primary club: leaderboard activity counts for one chosen club; other memberships still show + count in turnout. Club assumptions accepted | Owner |
 | 2026-10-15 | Custom domain needed before public launch, not before the pilot; timeline impact (+9–14 working days, Phases 3 and 6) accepted | Owner |
+| 2026-10-15 | Community times use the same three speed tiers + one review queue; pilot under draft terms with a pilot notice + consent; attorney review before public launch | Owner |
 | 2026-10-11 | Seed prices: Premium US$2.99/mo, US$19.99/yr; Basic TT$100; Featured TT$400; charity free Basic via setting | Owner |
 
 ## Conventions

@@ -49,8 +49,8 @@
 - [x] 6-digit code email template applied on staging (after the owner set up Gmail SMTP, Option A)
 - [x] Staging `legal.support_email` = runlimett@gmail.com (placeholder until there's a domain)
 - [x] Email delivery via Gmail SMTP: **owner-confirmed 2026-10-15** — "Your RunLime sign-in code" with 6 digits arrived in the runlimett@gmail.com inbox (Supabase accepted it with HTTP 200 at 16:24 UTC). Earlier failures were because the new app password hadn't been saved
-- [ ] Android staging APK: build 98d0e228 failed (splash image missing; fixed in 290f8b3 with icons + test); rebuild in progress
-- [ ] First Android staging build (internal APK) → install link sent; owner runs the phone test script
+- [x] First Android staging APK built (EAS build c1e4f42a, commit 290f8b3, 2026-10-15). Earlier failures fixed at the cause: babel-preset-expo not declared; splash image missing; workflow step syntax error
+- [ ] Owner runs the phone test script (sections A, B, C, E on this APK; D after the Google Android client + a rebuild)
 
 **Platform**
 - [x] Workflows moved off Node 20 (checkout@v5, setup-node@v5, pnpm/action-setup@v5, upload-artifact@v6, supabase/setup-cli@v2)

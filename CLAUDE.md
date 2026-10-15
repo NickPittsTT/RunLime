@@ -64,6 +64,7 @@ Living record of conventions and decisions. Update at the end of every phase.
 | 2026-10-11 | Moderation: review within 48 h, child-safety reports first | Owner |
 | 2026-10-11 | Emergency-contact key backup/rotation: docs/operations/EMERGENCY-CONTACT-KEY.md | Decided |
 | 2026-10-11 | Jest: one warm-up render in beforeAll (RN lazy requires) instead of raising timeouts | Decided |
+| 2026-10-15 | Operator address non-public: legal pages and app show operator name + contact email only; address kept for official records (admins only); attorney to confirm; Play developer-address rule checked before Phase 7 | Owner |
 | 2026-10-11 | Seed prices: Premium US$2.99/mo, US$19.99/yr; Basic TT$100; Featured TT$400; charity free Basic via setting | Owner |
 
 ## Conventions

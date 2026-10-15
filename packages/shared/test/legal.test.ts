@@ -48,6 +48,15 @@ describe('legal documents', () => {
     expect(terms).toContain('RunLime, operated by {{operator_name}}');
   });
 
+  it('no document publishes the operator address (owner decision 2026-10-15)', () => {
+    expect(Object.keys(LEGAL_TOKEN_SETTINGS)).not.toContain('operator_address');
+    expect(Object.values(LEGAL_TOKEN_SETTINGS)).not.toContain('legal.operator_address');
+    for (const { doc } of docs) expect(doc.body).not.toMatch(/operator_address/);
+    for (const slug of ['privacy', 'terms']) {
+      expect(docs.find((d) => d.doc.slug === slug)!.doc.body).toMatch(/\{\{operator_name\}\} · \{\{support_email\}\}/);
+    }
+  });
+
   it('privacy policy never mentions teen/minor accounts', () => {
     const privacy = docs.find((d) => d.doc.slug === 'privacy')!.doc.body;
     expect(privacy).not.toMatch(/13|teen/i);

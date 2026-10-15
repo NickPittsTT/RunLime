@@ -66,9 +66,10 @@ Apple's tiers are 4+ / 9+ / 13+ / 16+ / 18+.
 | 14 | Closed testing: 12+ testers for 14 continuous days (personal accounts only) | Depends on the legal-entity answer (open item) | Owner |
 | 15 | Financial features / government / news declarations: **none apply** | Play Console | Owner, Phase 8 |
 | 16 | Countries: **Trinidad and Tobago only** (owner decision, 2026-10-11) | Play Console → Production → Countries | Decided |
+| 17 | **Developer address may be shown publicly.** Google Play may display the developer's address on the store listing for personal developer accounts that offer in-app purchases or subscriptions. RunLime keeps the owner's residential address off its own pages (owner decision, 2026-10-15) | **Check the current Play rule before Phase 7** (Premium). Options then: (a) launch without Premium at first, so no in-app purchases; or (b) incorporate RunLime Limited with an accountant's office as the registered address and publish under an organisation account | **Owner, before Phase 7**
 
 ## D. Other things the stores (or the law) will expect for this app
-1. **A real legal operator name and address.** They appear on store listings and in our legal pages. Currently an open item.
+1. **A real legal operator name.** It appears on store listings and in our legal pages. The operator's address is **not** shown on RunLime's pages or in the app (owner decision, 2026-10-15); it is kept in non-public settings for official records. Once the business is registered, the address is public on the Companies Registry (accepted by the owner). The stores may still require or display an address: see C17. The attorney must confirm no address is legally required on the legal pages.
 2. **Supabase hosting region:** `us-east-1` (United States), as decided by the owner. The Privacy Policy states that data is stored in the United States.
 3. **Attorney review** of every document here, including the Children's Authority hotline numbers in the Child Safety Policy.
 4. **Support mailbox** that is actually monitored. Apple and Google both test it.

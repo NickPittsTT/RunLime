@@ -81,7 +81,7 @@ A9 revised: the public "attending" count = sum of (`group_size` + `children_coun
 
 ## 5. Open items (owner)
 
-1. Items 2, 3, 4 above came through as unfilled template text. Legal drafts use the tokens `{{operator_name}}`, `{{operator_address}}`, `{{support_email}}`, `{{website}}`. They are filled from settings at render time, and the web portal shows a visible "DRAFT — operator details missing" banner until they're set.
+1. Items 2, 3, 4 above came through as unfilled template text. Legal drafts use the tokens `{{operator_name}}`, `{{support_email}}`, `{{website}}`. (The operator address is not a token: owner decision 2026-10-15, kept non-public for official records only.) They are filled from settings at render time, and the web portal shows a visible "DRAFT — operator details missing" banner until they're set.
 2. **Name check reminder.** Confirm "RunLime" is available on the App Store, Google Play, domains, and the TT IPO/USPTO/WIPO trademark registers. Phase 1 uses **development** bundle IDs only (`tt.runlime.app.dev`). Store bundle IDs are fixed in Phase 8 after you confirm.
 3. **Store availability:** decided — **Trinidad and Tobago only** at launch in both stores. Expansion steps per country are in BACKLOG.md.
 4. Google Play child safety (CSAE) standards apply because followers make the app "social". **You must name a child-safety point of contact** (a person) in Play Console. See `docs/legal/STORE-REQUIREMENTS.md`.

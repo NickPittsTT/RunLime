@@ -1,11 +1,11 @@
 ---
 slug: terms
 title: Terms of Use
-version: 2026-10-11-draft2
+version: 2026-10-15-draft
 ---
 # RunLime Terms of Use
 
-**Last updated:** 11 October 2026 (draft)
+**Last updated:** 15 October 2026 (draft)
 
 These terms are an agreement between you and RunLime, operated by {{operator_name}} ("RunLime", "we"). By creating an account you accept them, along with our [Privacy Policy](/legal/privacy), [Moderation Policy](/legal/moderation), [Child Safety Policy](/legal/child-safety) and [Health Disclaimer](/legal/health).
 
@@ -58,4 +58,6 @@ You can delete your account at any time in the app or at {{website}}/delete-acco
 These terms are governed by the laws of the Republic of Trinidad and Tobago, and its courts have jurisdiction.
 
 ## 12. Contact
-{{operator_name}} · {{operator_address}} · {{support_email}}
+{{operator_name}} · {{support_email}}
+
+_Draft note for the attorney: RunLime identifies its operator by name and contact email only; the operator's residential address is deliberately not published here (owner decision, 15 October 2026). Please confirm that no postal address is legally required on this page._

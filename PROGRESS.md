@@ -70,7 +70,7 @@
 - [x] Final pre-approval checks: corrected PowerShell key command; exactly-18-today / 18-tomorrow tests on every layer + phone script; Terms: false DOB is a breach and grounds for closure; domain + email service recorded as required before closed testing with others.
 
 ## Waiting on the owner
-1. Legal details still open: operator name, operator address, child-safety contact name and email. (Support email is set on staging: runlimett@gmail.com, until there's a domain.) You can enter them straight into staging `app_settings` (see `docs/phase-2/PLAN.md`, item 14) without sharing them here.
+1. Legal details still open: operator name, child-safety contact name and email. (Operator address: optional, non-public, for official records only.) (Support email is set on staging: runlimett@gmail.com, until there's a domain.) You can enter them straight into staging `app_settings` (see `docs/phase-2/PLAN.md`, item 14) without sharing them here.
 2. Google Cloud OAuth setup, items 10–13 in `docs/phase-2/PLAN.md` (for Google sign-in testing).
 3. Bank name / account name and VAT status — before Phase 7.
 4. Custom domain + email service: needed **before any closed testing with other people** (including Google Play's 12-tester closed test), and at the latest Phase 8. Gmail SMTP is for staging/owner testing only. Free email services (e.g. Resend's free tier) need a verified domain to send to anyone else.
@@ -83,4 +83,5 @@
 - Availability: Trinidad and Tobago only, both stores. Caribbean expansion later (BACKLOG lists what each country needs).
 - Supabase staging: us-east-1, project `fmnmylqxrmxuzmdcvmhs`. The Privacy Policy states data is stored in the United States.
 - Organiser payments: manual bank transfer only; no card gateway in v1.
+- **Operator address is private (owner, 2026-10-15, Option A):** RunLime's legal pages and app identify the operator by name and contact email only. `legal.operator_address` is non-public (admins with MFA only), kept for official records, and can't be set through a workflow (inputs and logs would expose it). The attorney must confirm no address is legally required on the legal pages (flagged in the Privacy Policy and Terms). Accepted: once the business is registered, the address is public on the Companies Registry. Before Phase 7, check whether Google Play shows a developer address for personal accounts with in-app purchases (STORE-REQUIREMENTS C17); options then are launching without Premium at first, or incorporating RunLime Limited with an accountant's office as the registered address.
 - Budget: free tiers only; Android first; iOS/Apple deferred; no custom domain until needed: before any closed testing with other people, and at the latest Phase 8.

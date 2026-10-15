@@ -105,7 +105,7 @@ All are listed in [.env.example](.env.example). Secrets live only in Supabase se
    - Site URL and redirect URLs: the portal domain plus `runlime://auth/callback`.
 3. **Function secrets:** `supabase secrets set EMERGENCY_CONTACT_KEY_V1=... EMERGENCY_CONTACT_KEY_VERSION=1 ALLOWED_ORIGINS=https://<domain>`
 4. **GitHub environments** `staging` and `production` (the latter with required reviewers), holding the secrets in the table above.
-5. **Settings:** set `legal.operator_name`, `legal.operator_address`, `legal.support_email`, `legal.child_safety_contact_email`, `legal.website` and `legal.hosting_region` in `app_settings`. Until they're set, legal pages show a DRAFT banner.
+5. **Settings:** set `legal.operator_name`, `legal.support_email`, `legal.child_safety_contact_email`, `legal.website` and `legal.hosting_region` in `app_settings`. Until they're set, legal pages show a DRAFT banner. `legal.operator_address` is optional and **non-public** (official records only; never shown on pages or in the app) — enter it in the Supabase Table Editor, not through a workflow.
 6. **Super admin:** the owner signs up normally, then run `pnpm bootstrap:super-admin <owner email>` with production keys. The owner enrols two-factor authentication at `/admin/mfa`.
 
 ### Releasing

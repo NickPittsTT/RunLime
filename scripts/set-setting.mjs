@@ -4,7 +4,11 @@ const [key, raw] = process.argv.slice(2);
 const url = process.env.SUPABASE_URL;
 const keyHeader = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!key || raw === undefined || !url || !keyHeader) throw new Error('usage: set-setting.mjs <key> <json value> (with SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)');
-if (!/^legal\.(operator_name|operator_address|support_email|child_safety_contact_email|website)$/.test(key)) {
+if (key === 'legal.operator_address') {
+  // Workflow inputs and logs would expose a private address. Enter it in the Supabase Table Editor instead.
+  throw new Error('Refusing to set legal.operator_address here: it is private; enter it in Supabase → Table Editor → app_settings');
+}
+if (!/^legal\.(operator_name|support_email|child_safety_contact_email|website)$/.test(key)) {
   throw new Error(`Refusing to set "${key}": only legal operator/contact settings can be set with this tool`);
 }
 const value = JSON.parse(raw);

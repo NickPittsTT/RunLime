@@ -12,7 +12,7 @@ on:
       key:
         description: Setting key
         type: choice
-        options: [legal.support_email, legal.child_safety_contact_email, legal.operator_name, legal.operator_address, legal.website]
+        options: [legal.support_email, legal.child_safety_contact_email, legal.operator_name, legal.website]  # operator_address is private: Table Editor only
       value:
         description: Plain text value (stored as a JSON string)
         required: true

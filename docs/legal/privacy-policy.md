@@ -1,13 +1,13 @@
 ---
 slug: privacy
 title: Privacy Policy
-version: 2026-10-15-draft
+version: 2026-10-15-draft2
 ---
 # RunLime Privacy Policy
 
 **Last updated:** 15 October 2026 (draft)
 
-RunLime is a calendar for 5K and similar road races in Trinidad and Tobago, with tools to RSVP, check in on race day, track your own runs and follow other runners. RunLime is operated by {{operator_name}}, {{operator_address}} ("RunLime", "we", "us"). Contact us at {{support_email}}.
+RunLime is a calendar for 5K and similar road races in Trinidad and Tobago, with tools to RSVP, check in on race day, track your own runs and follow other runners. RunLime is operated by {{operator_name}} ("RunLime", "we", "us"). Contact us at {{support_email}}.
 
 We follow the General Privacy Principles of the Trinidad and Tobago Data Protection Act. We collect the minimum we need, keep your account private by default, and ask for your consent before using location, health-related data, or sharing anything publicly.
 
@@ -88,4 +88,6 @@ Data is encrypted in transit (HTTPS) and at rest. Your emergency contact is also
 If we make material changes, we'll tell you in the app before they take effect. The version and date are shown at the top of this page.
 
 ## 9. Contact
-{{operator_name}} · {{operator_address}} · {{support_email}}
+{{operator_name}} · {{support_email}}
+
+_Draft note for the attorney: RunLime identifies its operator by name and contact email only; the operator's residential address is deliberately not published here (owner decision, 15 October 2026). Please confirm that no postal address is legally required on this page._

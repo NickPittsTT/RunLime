@@ -7,10 +7,12 @@ export interface LegalDocument {
   body: string;
 }
 
-/** Template token -> app_settings key. Text lives in settings, never in code. */
+/**
+ * Template token -> app_settings key. Text lives in settings, never in code.
+ * The operator's address is deliberately NOT a token: it is non-public and never rendered (owner decision 2026-10-15).
+ */
 export const LEGAL_TOKEN_SETTINGS = {
   operator_name: 'legal.operator_name',
-  operator_address: 'legal.operator_address',
   support_email: 'legal.support_email',
   child_safety_contact_email: 'legal.child_safety_contact_email',
   website: 'legal.website',

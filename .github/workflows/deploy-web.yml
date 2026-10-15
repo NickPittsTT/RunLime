@@ -101,6 +101,17 @@ jobs:
             [ "$code" = "200" ] || exit 1
           done
 
+      # Edge Functions only answer browser calls from allowed origins (CORS). Point them at the deployed site.
+      - if: steps.check.outputs.ready == 'true' && env.SUPABASE_ACCESS_TOKEN != ''
+        uses: supabase/setup-cli@v2
+        with:
+          version: 2.120.0
+      - name: Allow the staging site to call Edge Functions (ALLOWED_ORIGINS)
+        if: steps.check.outputs.ready == 'true' && env.SUPABASE_ACCESS_TOKEN != ''
+        env:
+          URL: ${{ steps.deploy.outputs.url }}
+        run: supabase secrets set "ALLOWED_ORIGINS=$URL" --project-ref "$SUPABASE_PROJECT_REF"
+
       - name: Legal settings check (lists any placeholder still "not yet set"; values come from app_settings)
         if: steps.check.outputs.ready == 'true'
         env:
@@ -120,14 +131,3 @@ jobs:
             echo "All legal placeholders are filled."
             { echo; echo "- Legal settings: all placeholders filled"; } >> "$GITHUB_STEP_SUMMARY"
           fi
-
-      # Edge Functions only answer browser calls from allowed origins (CORS). Point them at the deployed site.
-      - if: steps.check.outputs.ready == 'true' && env.SUPABASE_ACCESS_TOKEN != ''
-        uses: supabase/setup-cli@v2
-        with:
-          version: 2.120.0
-      - name: Allow the staging site to call Edge Functions (ALLOWED_ORIGINS)
-        if: steps.check.outputs.ready == 'true' && env.SUPABASE_ACCESS_TOKEN != ''
-        env:
-          URL: ${{ steps.deploy.outputs.url }}
-        run: supabase secrets set "ALLOWED_ORIGINS=$URL" --project-ref "$SUPABASE_PROJECT_REF"

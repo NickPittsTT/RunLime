@@ -47,13 +47,14 @@ Phase tag = the phase in which the screen is built.
 | M35 | Report sheet | 6 |
 | M36 | Race passport (own; others' when allowed by account privacy) | 3 (social view) / 6 |
 | M37 | Finisher card builder + share | 6 |
+| M37a | **Leaderboards**: Kilometres / Races attended; Weekly · Monthly · Year tabs; Everyone / People I follow; top 20 + your rank; disclaimer ("just for fun, no prizes"); opt-in prompt if you're not on the boards; tap a name → their profile (if allowed) or report | 6 |
 | M38 | Premium paywall (store prices, restore, manage subscription, terms links) | 7 |
 
 ### Profile & settings
 | # | Screen | Phase |
 |---|---|---|
 | M39 | Profile view/edit | 1 |
-| M40 | Privacy settings (account Private/Public, show attendance to clubs) | 3 |
+| M40 | Privacy settings (account Private/Public, show attendance to clubs; **Leaderboards on/off + name choice: Phase 6**) | 3 / 6 |
 | M40a | Followers / Following lists (remove follower, unfollow) | 3 |
 | M40b | Follow requests (approve / decline) | 3 |
 | M40c | Other runner's profile (follow / request / block / report; passport + attending races if permitted) | 3 |
@@ -94,13 +95,13 @@ Phase tag = the phase in which the screen is built.
 | A1 | Dashboard (users, actives, events by status, RSVPs, check-ins, runs, revenue, pending queues) | 3 (basic) / 7 (revenue) |
 | A2 | Organiser verification queue (approve / reject with reason / suspend) | 1 |
 | A3 | Event approval queue (+ duplicate warnings; edit, publish, reject, unpublish, feature) | 2 |
-| A4 | Create event on behalf of organiser | 2 |
+| A4 | Create event: on behalf of an organiser, **or as a RunLime listing** (facts only: name, date, start time, distance(s), venue + start pin, official registration link; no flyers/logos; "not affiliated" notice shown) | 2 |
 | A5 | Race suggestions queue (convert to event) | 2 |
 | A6 | Users (search, view, suspend; grant/revoke Platform Admin: Super Admin only) | 1 |
-| A7 | Moderation queue (reports → remove/warn/suspend) | 6 |
+| A7 | Moderation queue (reports → remove/warn/suspend; exclude from leaderboards) | 6 |
 | A8 | Organiser payments (proof viewer, mark Paid/Rejected) | 7 |
 | A9 | Plans & features matrix editor | 7 |
-| A10 | Settings (check-in, pace, limits, regions, disclaimers, legal docs) | 2–7 incrementally |
+| A10 | Settings (check-in, pace, limits, regions, disclaimers, legal docs, "not affiliated" notice; leaderboard size/pace/max-run/disclaimer in Phase 6) | 2–7 incrementally |
 | A11 | Announcements | 3 |
 | A12 | Support inbox | 7 |
 | A13 | Audit log (filterable, read-only, before/after diff of allowlisted fields) | 7 |
@@ -110,7 +111,7 @@ Phase tag = the phase in which the screen is built.
 | # | Page | Phase |
 |---|---|---|
 | W1 | Landing (store badges, upcoming featured races) | 2 |
-| W2 | Public event page `/e/[slug]` (OG image, open-in-app) | 2 |
+| W2 | Public event page `/e/[slug]` (OG image, open-in-app; RunLime listings show the "not affiliated, check with the organiser" notice and the official registration link) | 2 |
 | W3 | Public calendar `/races` (read-only, SEO) | 2 |
 | W4 | Privacy Policy, Terms of Use (incl. subscriptions, 18+), Moderation Policy, Child Safety Policy, Health Disclaimer, Community Times notice | 1 (draft) / 8 (final) |
 | W5 | Support & contact (FAQ grows in Phase 7) | 1 |

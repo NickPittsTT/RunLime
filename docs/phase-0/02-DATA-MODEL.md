@@ -81,6 +81,7 @@ erDiagram
 | `organisation_members` | `organisation_id`, `user_id`, `role` (`owner`,`manager`) |
 | `organiser_applications` | applicant details, ID/document upload refs, 18+ check result, review fields |
 | `events` | `organisation_id`, `slug`, `name`, `description`, `starts_at timestamptz`, `timezone`, `country_code`, `region_id`, `venue_name`, `start_location geography(Point)`, `route_polyline NULL`, `registration_url NULL`, `registration_instructions`, `package_collection`, `parking`, `contact_*`, `cause`, `charity_name`, `walk_friendly bool`, `fee_min`, `fee_max`, `currency`, `status` (`draft`,`pending_approval`,`published`,`postponed`,`cancelled`,`unpublished`,`rejected`), `featured_until`, `checkin_radius_m NULL`, `checkin_opens_at`/`closes_at NULL` (overrides), `duplicated_from_id`, `published_at`, `approved_by` |
+| *RunLime listings (owner decision 2026-10-15)* | Events the admin enters from public facts before organisers join. **Phase 2 migration:** `organisation_id` becomes nullable and a new column `listing_source` (`organiser` default / `runlime`) is added. CHECK: `organiser` ⇒ `organisation_id NOT NULL`; `runlime` ⇒ `organisation_id IS NULL` **and** `registration_url NOT NULL` (the official link). A trigger rejects `event_media` and `event_sponsors` rows for `runlime` listings (no flyers or logos without permission). Public pages show the notice from setting `events.unaffiliated_notice`. An organiser who later joins can claim the listing (admin moves it to their organisation; `listing_source` → `organiser`) |
 | `event_distances` | `event_id`, `distance_km numeric(5,2)`, `label` ("5K", "10K", "2K fun walk") |
 | `event_members` | per-event co-organisers: `event_id`, `user_id`, `role` (`co_organiser`), `invited_by`, `accepted_at` |
 | `event_media` | `kind` (`flyer`,`route_map`,`gallery`), `storage_path`, `alt_text` (required — accessibility) |
@@ -109,7 +110,23 @@ erDiagram
 | `community_results` | `event_id`, `run_id`, `user_id`, `display_name_snapshot` (display name or nickname, the user's choice), `time_seconds`, `distance_km`, `source` (`tracked`/`typed_in`), `status` (`visible`,`withdrawn`,`removed`), `shared_at`. CHECK via trigger: user has a check-in for the event, pace ≥ the setting, one per user per event |
 | `reports` | polymorphic: `target_type` (`community_result`,`event`,`profile`), `target_id`, `reporter_id`, `reason`, `details`, `status`, `resolved_by`, `resolution` |
 | `blocks` | `blocker_id`, `blocked_id` — removes follows both ways, prevents new follow requests, hides each user's content from the other |
-| `moderation_actions` | `target_user_id`, `action` (`warn`,`suspend`,`remove_content`), `reason`, `until`, `actor_id` |
+| `moderation_actions` | `target_user_id`, `action` (`warn`,`suspend`,`remove_content`,`exclude_from_leaderboards`), `reason`, `until`, `actor_id` |
+
+### Activity leaderboards (Phase 6, owner decision 2026-10-15)
+Two boards: **Kilometres** (tracked runs) and **Races attended** (GPS check-ins). Periods: **Weekly** (Mon–Sun), **Monthly**, **Year** (calendar periods in the user's country time zone, America/Port_of_Spain for TT). Scopes: **Everyone** and **People I follow**. Shows the top N (setting, 20) plus the viewer's own rank. Opt-in only; no prizes.
+
+| Table / column | Notes |
+|---|---|
+| `profiles.leaderboard_opt_in boolean default false`, `leaderboard_name` (`display_name`/`nickname`) | Off by default for everyone. Turning it on records a `consents` row (kind `leaderboards`). Turning it off removes the user from every board at once |
+| `leaderboard_totals` | `user_id`, `board` (`km`,`races`), `period` (`week`,`month`,`year`), `period_start date`, `value numeric(10,2)`, `updated_at`. PK (user_id, board, period, period_start). Recomputed for one user on run insert/update/delete and on check-in, plus a nightly pg_cron rebuild. **No direct read access (RLS: none)**; read only through the RPC below |
+| RPC `leaderboard(board, period, scope)` | `SECURITY DEFINER`. Returns the top N + the caller's row with rank (competition ranking: 1, 2, 2, 4). Includes only opted-in users who are not suspended, not excluded by moderation, and not blocked by or blocking the viewer. `following` scope = accepted follows of the caller + the caller. Returns name, rank and value only, never routes, run times or areas |
+
+**Verified data only:**
+- **Kilometres:** only `runs.source = 'tracked'` (recorded by the app's GPS tracker). Typed-in times never count. A run is excluded if its average pace is faster than `leaderboard.min_pace_sec_per_km`, or any 1 km split is faster than that limit (impossible speed: car, bike, GPS jump). A run longer than `leaderboard.max_run_km` is excluded too.
+- **Races attended:** count of the user's GPS `check_ins` in the period (one per event, by design).
+- Limit (stated in the in-app disclaimer): tracked runs come from the user's phone, so a determined user could fake GPS. The server checks above remove impossible values; reports and the admin `exclude_from_leaderboards` action handle the rest.
+
+**Settings (admin-editable, never hardcoded):** `leaderboard.enabled` (bool), `leaderboard.size` (20), `leaderboard.min_pace_sec_per_km` (155 = 2:35 /km), `leaderboard.max_run_km` (100), `leaderboard.disclaimer` ("Just for fun. Based on runs tracked in RunLime and GPS race check-ins. No prizes.").
 
 ### Notifications
 | Table | Notes |
@@ -156,6 +173,7 @@ Resolving entitlements: SQL function `has_feature(subject, feature_key)` / `feat
 | `rsvps` | own row CRUD | **aggregates only** via `event_counters` / views (+ nicknames of attendees who opted in) | aggregates | aggregates + support lookup | public count only |
 | `runs` | own only | — | — (no access to private runs) | — | — |
 | `community_results` | read visible (minus blocked users); write own via RPC | read for own events | moderate | moderate | read visible |
+| `leaderboard_totals` | via `leaderboard()` RPC only (opted-in users, minus blocked) | same as participant | via RPC + moderation view | same | — |
 | `check_ins` | own; insert via RPC | count for own events | read | read | — |
 | `profiles` | own; others: display name/nickname/area only; passport + attending races if the owner is public or the viewer is an accepted follower, and neither has blocked the other | nickname of opted-in attendees only | read (no DOB in UI except age-verified flag) | read | — |
 | `profile_private` | own only | — | — | — | — |

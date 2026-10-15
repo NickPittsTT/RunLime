@@ -12,7 +12,7 @@
 | 3 | RSVP, followers & clubs, notifications/broadcasts, attendance dashboard | Not started | 0% |
 | 4 | GPS check-in | Not started | 0% |
 | 5 | Run tracker, history, totals | Not started | 0% |
-| 6 | Community times, sharing, reporting/blocking, finisher card | Not started | 0% |
+| 6 | Community times, activity leaderboards, sharing, reporting/blocking, finisher card → then the real-race pilot | Not started | 0% |
 | 7 | Plans/entitlements, store subscriptions, organiser payments, settings, support inbox, audit UI | Not started | 0% |
 | 8 | Hardening, store readiness, TestFlight + Play closed test | Not started | 0% |
 
@@ -64,6 +64,7 @@
 - [x] **Staging web live (2026-10-15):** https://runlime-web-staging.runlimett.workers.dev — Deploy web run #3 green: 2.52 MiB, smoke test `/`, `/legal/terms`, `/legal/privacy` → 200, Edge Function `ALLOWED_ORIGINS` set to the site
 - [ ] Owner: `STAGING_WEB_URL` variable (item 18); then one app build with Google sign-in + working legal links
 - [ ] Phase 2 feature work (events, organiser portal, calendar, onboarding, public pages) — after Task 1
+- [ ] RunLime listings (owner's pilot plan): events without an organiser (`listing_source = runlime`, official link required, no media/sponsors), admin create-event A4, `events.unaffiliated_notice` setting shown on app + web event pages; pgTAP for the constraints
 
 ## Phase 1 approval items (owner, 2026-10-11)
 - [x] a. CI fully green on GitHub, including web E2E (see the latest run in the Phase 1 review)
@@ -91,4 +92,6 @@
 - Supabase staging: us-east-1, project `fmnmylqxrmxuzmdcvmhs`. The Privacy Policy states data is stored in the United States.
 - Organiser payments: manual bank transfer only; no card gateway in v1.
 - **Operator address is private (owner, 2026-10-15, Option A):** RunLime's legal pages and app identify the operator by name and contact email only. `legal.operator_address` is non-public (admins with MFA only), kept for official records, and can't be set through a workflow (inputs and logs would expose it). The attorney must confirm no address is legally required on the legal pages (flagged in the Privacy Policy and Terms). Accepted: once the business is registered, the address is public on the Companies Registry. Before Phase 7, check whether Google Play shows a developer address for personal accounts with in-app purchases (STORE-REQUIREMENTS C17); options then are launching without Premium at first, or incorporating RunLime Limited with an accountant's office as the registered address.
+- **Activity leaderboards (owner, 2026-10-15) — Phase 6, with community times.** Kilometres (tracked runs) and Races attended (GPS check-ins); Weekly / Monthly / Year; Everyone / People I follow; top 20 + your own rank; opt-in; verified data only; impossible speeds excluded (admin setting); no prizes. Design added to `02-DATA-MODEL.md`, `03-SCREENS.md` (M37a), `00-OVERVIEW.md` §4a, CLAUDE.md.
+- **Testing plan (owner, 2026-10-15) — replaces the earlier "share with 5 to 15 testers in Phase 2" plan.** No early tester link. The first outside test is a **real-race pilot after Phase 6** with friends who run 5Ks. Until then the owner acts as admin and enters real upcoming races with the admin "create event" screen as **RunLime listings**: facts only (name, date, start, distance, official registration link; venue + start pin for GPS check-in), a visible "not affiliated, check with the organiser" notice, no organiser flyers or logos without permission. Needs in Phase 2: events without an organiser (`listing_source = runlime`), admin create-event (A4), notice setting.
 - Budget: free tiers only; Android first; iOS/Apple deferred; no custom domain until needed: before any closed testing with other people, and at the latest Phase 8.

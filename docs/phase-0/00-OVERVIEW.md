@@ -79,6 +79,15 @@ A9 revised: the public "attending" count = sum of (`group_size` + `children_coun
 | **F4** Admin MFA + clubs admin | TOTP MFA required for `super_admin` / `platform_admin`. RLS admin checks require `aal2` in the JWT. New screen A14 Clubs | `01-ARCHITECTURE.md §4.4`, `03-SCREENS.md` |
 | **F5** Encryption method | Confirmed: Supabase **does not recommend new use of pgsodium** (pending deprecation) and does not recommend its column encryption. **Decision:** emergency contact is encrypted in the application layer (AES-256-GCM in an Edge Function; key held in Edge Function secrets, never in the database). It's stored in an owner-only table | `01-ARCHITECTURE.md §10.2` |
 
+## 4a. Owner decisions, 2026-10-15
+
+**S5 Activity leaderboards (Phase 6, with community times).** Two boards: kilometres from tracked runs, and races attended from GPS check-ins. Weekly / Monthly / Year tabs; Everyone / People I follow. Top 20 + the viewer's own rank. Opt-in, verified data only (tracked runs, GPS check-ins; typed-in times never count), impossible speeds excluded by an admin setting, no prizes. Design: `02-DATA-MODEL.md` → "Activity leaderboards"; screens M37a, M40, A7, A10.
+
+**Testing plan: real-race pilot, no early tester link.**
+- No outside testers before Phase 6. The first outside test is a **real-race pilot after Phase 6** with friends who run 5Ks.
+- Until then the owner is the admin and enters real upcoming races with the admin "create event" screen (A4) as **RunLime listings**: facts only (name, date, start time, distance, official registration link, plus venue and start pin, which GPS check-in needs), a visible "not affiliated, check with the organiser" notice, and **no organiser flyers or logos without permission**.
+- Before the pilot: custom domain + email service (closed testing with other people), and Google Play's closed-test rules if the pilot uses the Play Store (STORE-REQUIREMENTS C14).
+
 ## 5. Open items (owner)
 
 1. Items 2, 3, 4 above came through as unfilled template text. Legal drafts use the tokens `{{operator_name}}`, `{{support_email}}`, `{{website}}`. (The operator address is not a token: owner decision 2026-10-15, kept non-public for official records only.) They are filled from settings at render time, and the web portal shows a visible "DRAFT — operator details missing" banner until they're set.

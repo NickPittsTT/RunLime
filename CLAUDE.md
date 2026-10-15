@@ -18,6 +18,9 @@ Living record of conventions and decisions. Update at the end of every phase.
 - Participant Premium sold ONLY via Apple IAP / Google Play Billing (RevenueCat).
 - Organiser payments ONLY via web portal bank transfer. The mobile app has no payment links or wording for them.
 - Community times: opt-in, check-in required, Tracked/Typed in label, pace limit (setting), withdrawable, report/block, no prizes, disclaimer always shown.
+- Activity leaderboards (Phase 6): km from tracked runs + races from GPS check-ins; Weekly/Monthly/Year; Everyone/People I follow; top N (setting) + own rank; opt-in; verified data only (typed-in never counts); impossible speeds excluded (setting); no prizes; read only via RPC.
+- RunLime listings (admin-entered races): facts only + official registration link, "not affiliated, check with the organiser" notice (setting), no organiser flyers or logos without permission.
+- Testing: no outside testers before Phase 6; the first outside test is a real-race pilot after Phase 6.
 - All limits, prices, radii, windows and legal text live in DB settings, never hardcoded. Exception: the 18+ rule, which is hardcoded by design.
 - New ideas go to BACKLOG.md, not into the build.
 - Work in phases; stop for owner approval after each phase.
@@ -65,6 +68,8 @@ Living record of conventions and decisions. Update at the end of every phase.
 | 2026-10-11 | Emergency-contact key backup/rotation: docs/operations/EMERGENCY-CONTACT-KEY.md | Decided |
 | 2026-10-11 | Jest: one warm-up render in beforeAll (RN lazy requires) instead of raising timeouts | Decided |
 | 2026-10-15 | Operator address non-public: legal pages and app show operator name + contact email only; address kept for official records (admins only); attorney to confirm; Play developer-address rule checked before Phase 7 | Owner |
+| 2026-10-15 | Activity leaderboards (km + races; weekly/monthly/year; everyone/following; top 20 + own rank; opt-in; verified only; no prizes) in Phase 6 | Owner |
+| 2026-10-15 | Testing: no early tester link; real-race pilot after Phase 6; owner enters real races as fact-only RunLime listings | Owner |
 | 2026-10-11 | Seed prices: Premium US$2.99/mo, US$19.99/yr; Basic TT$100; Featured TT$400; charity free Basic via setting | Owner |
 
 ## Conventions

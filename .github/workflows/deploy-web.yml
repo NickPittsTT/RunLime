@@ -89,9 +89,14 @@ jobs:
         if: steps.check.outputs.ready == 'true'
         env:
           URL: ${{ steps.deploy.outputs.url }}
+        # A new workers.dev subdomain/route can take a minute or two to go live, so retry for up to ~3 minutes.
         run: |
           for path in / /legal/terms /legal/privacy; do
-            code=$(curl -s -o /dev/null -w '%{http_code}' "$URL$path")
+            for i in $(seq 1 18); do
+              code=$(curl -s -o /dev/null -w '%{http_code}' "$URL$path")
+              [ "$code" = "200" ] && break
+              sleep 10
+            done
             echo "$path → HTTP $code"
             [ "$code" = "200" ] || exit 1
           done

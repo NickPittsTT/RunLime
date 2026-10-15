@@ -45,7 +45,10 @@
 - [x] Staging deployed: 7 migrations, 3 Edge Functions, 8 legal drafts (no seed data, no test accounts)
 - [x] Auth configured on the Free plan: Before User Created hook (probe: no DOB → 403, 17-year-old → 403), Custom Access Token hook, TOTP MFA on, 6-digit OTP valid 10 min, app redirect URL
 - [x] Emergency-contact key verify on staging: `currentKey: ok`, 0 undecryptable
-- [ ] **Blocked (Free plan):** email templates can't be changed on the default mailer, so the sign-in email contains a link, not the 6-digit code → owner decision (custom SMTP, or app change to link sign-in)
+- [x] 6-digit code email template applied on staging (after the owner set up Gmail SMTP, Option A)
+- [x] Staging `legal.support_email` = runlimett@gmail.com (placeholder until there's a domain)
+- [ ] **Email delivery fails:** Supabase gets an error from Gmail (HTTP 500 "Error sending confirmation email"). Host/port/username/sender check out, so the likely cause is the Gmail app password or 2-Step Verification → owner to check, then re-run Configure auth with a test email
+- [ ] Android staging APK: EAS build run #2 in progress
 - [ ] First Android staging build (internal APK) → install link sent; owner runs the phone test script
 
 **Platform**

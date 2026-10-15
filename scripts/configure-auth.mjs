@@ -140,4 +140,20 @@ if (testEmail && anonKey) {
   if (!res.ok) failed = true;
 }
 
+// Optional: last mail-related Auth log errors (Management API logs endpoint), email addresses redacted.
+if (process.argv.includes('--mail-log')) {
+  const end = new Date();
+  const start = new Date(end.getTime() - 6 * 3600 * 1000);
+  const sql = "select timestamp, event_message from auth_logs where regexp_contains(lower(event_message), 'smtp|mail|535|534|auth') and regexp_contains(lower(event_message), 'error|fail') order by timestamp desc limit 8";
+  const url = `https://api.supabase.com/v1/projects/${ref}/analytics/endpoints/logs.all?sql=${encodeURIComponent(sql)}&iso_timestamp_start=${start.toISOString()}&iso_timestamp_end=${end.toISOString()}`;
+  const res = await fetch(url, { headers });
+  const text = await res.text();
+  console.log(`\n== Auth mail errors, last 6 h: HTTP ${res.status}`);
+  let rows = [];
+  try { rows = JSON.parse(text).result ?? []; } catch { console.log(text.slice(0, 300)); }
+  const redact = (s) => String(s).replace(/[\w.+-]+@[\w-]+(\.[\w-]+)+/g, '<email>').replace(/"(password|pass|token)"\s*:\s*"[^"]*"/gi, '"$1":"<hidden>"');
+  for (const r of rows) console.log(`${new Date(Number(r.timestamp) / 1000).toISOString()} ${redact(r.event_message).slice(0, 600)}`);
+  if (!rows.length) console.log('(no matching rows)');
+}
+
 process.exit(failed ? 1 : 0);

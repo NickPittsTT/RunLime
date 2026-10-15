@@ -18,6 +18,10 @@ on:
         description: Optional — send a real sign-in code to this address to prove email delivery
         required: false
         default: ''
+      mail_log:
+        description: Show recent mail-sending errors from the Auth logs (addresses redacted)
+        type: boolean
+        default: false
 
 jobs:
   configure:
@@ -34,7 +38,7 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
           SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
-        run: set -o pipefail; node scripts/configure-auth.mjs ${{ inputs.apply && '--apply' || '' }} ${{ inputs.test_email && format('--test-email={0}', inputs.test_email) || '' }} | tee auth-report.txt
+        run: set -o pipefail; node scripts/configure-auth.mjs ${{ inputs.apply && '--apply' || '' }} ${{ inputs.test_email && format('--test-email={0}', inputs.test_email) || '' }} ${{ inputs.mail_log && '--mail-log' || '' }} | tee auth-report.txt
       - name: Summary
         if: always()
         run: |

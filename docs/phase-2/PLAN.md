@@ -96,6 +96,18 @@ Report back: the step number, what you expected, what happened, and a screenshot
 | 13 | Google **Android client ID** | public | Credentials → OAuth client → *Android*; package `tt.runlime.app.dev`; SHA-1 `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25` (the staging APK is signed with the Expo template's debug key; the build workflow prints the APK's real SHA-1 to confirm). Production gets its own upload key and SHA-1 in Phase 8 | GitHub *variable* `GOOGLE_ANDROID_CLIENT_ID` |
 | 14 | **Your legal details** (full name, address, support email, child-safety contact name + email) | personal | — | Optional to share with me. You can type them straight into Supabase → Table Editor → `app_settings` (staging): keys `legal.operator_name`, `legal.support_email`, `legal.child_safety_contact_email`. Optionally `legal.operator_address`: non-public, kept for official records only, never shown on RunLime pages or in the app (owner decision 2026-10-15). Values are JSON strings, e.g. `"Jane Doe"` including the quotes |
 
+### Cloudflare (staging web portal + legal pages) — free plan, no card
+| # | What | Secret? | Where you create it | Where you put it |
+|---|---|---|---|---|
+| 15 | **Cloudflare account** (Free plan) and a **workers.dev subdomain** | — | dash.cloudflare.com/sign-up with runlimett@gmail.com → verify the email. Skip every "add a site/domain" prompt. Then **Workers & Pages** (may be listed under **Compute (Workers)**) → on the overview, set **your subdomain** (e.g. `runlime`; it's public, so not your personal name) | — |
+| 16 | **Account ID** | public | Workers & Pages overview → right-hand panel → **Account ID** → copy | GitHub → **Settings → Environments → `staging` → Variables** → `CLOUDFLARE_ACCOUNT_ID` |
+| 17 | **API token** for deploys | **secret** | Profile icon (top right) → **My Profile → API Tokens → Create Token** → template **"Edit Cloudflare Workers"** → *Use template*. **Account Resources:** Include → your account. **Zone Resources:** Include → All zones from an account → your account (you have no zones; that's fine). Leave IP filtering empty; TTL optional. **Continue to summary → Create Token** → copy it once | GitHub → **Settings → Environments → `staging` → Secrets** → `CLOUDFLARE_API_TOKEN`. **Not chat** |
+| 18 | **Staging web URL** | public | Printed by the "Deploy web" run (e.g. `https://runlime-web-staging.<subdomain>.workers.dev`) | GitHub → `staging` environment → Variables → `STAGING_WEB_URL` (the next app build then opens the legal links) |
+
+- Free plan only: Workers Free (100,000 requests/day). **If Cloudflare asks for a card or a paid plan at any point, stop and tell me.** We don't use R2, KV or a custom domain.
+- The free plan caps the site's code at 3 MiB (compressed). Ours is 2.52 MiB (82%, with minify). CI checks this on every change and fails before we would ever need a paid plan.
+- The "Edit Cloudflare Workers" template grants a bit more than the deploy needs (e.g. KV/R2/Pages edit), limited to this one account. A narrower custom token is possible later.
+
 Notes:
 - Items 1–9 are needed for task 1. Items 10–13 are needed for Google sign-in (test steps 14–15). Item 14 removes the DRAFT "operator details missing" banner.
 - Item 7 must be the **legacy** `service_role` JWT, not the new `sb_secret_…` key. The current Edge Functions and the key-rotation workflow compare against the legacy key. Migrating to the new key format is noted for Phase 8.

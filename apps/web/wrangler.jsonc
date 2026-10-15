@@ -5,6 +5,8 @@
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  // Keeps the bundle well under the free plan's 3 MiB (compressed) limit: 2.85 → 2.52 MiB on 2026-10-15.
+  "minify": true,
   "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
   "observability": { "enabled": true }
 }

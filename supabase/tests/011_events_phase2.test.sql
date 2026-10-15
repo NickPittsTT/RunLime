@@ -1,6 +1,6 @@
 begin;
 \ir _helpers.psql
-select plan(32);
+select plan(33);
 
 select tests.create_user('owner@runlime.test') as owner \gset
 select tests.create_user('runner@runlime.test') as runner \gset
@@ -33,8 +33,9 @@ select throws_ok(format($$select public.save_event(null, %L::jsonb || jsonb_buil
   :'ev', tests.area_id('Port of Spain & North-West'), :'dist'), '22023', null, 'start pin must be inside Trinidad and Tobago');
 select throws_ok(format($$select public.save_event(null, %L::jsonb || jsonb_build_object('listing_source','runlime','region_id',%L), '[]')$$,
   :'ev', tests.area_id('Port of Spain & North-West')), '22023', null, 'at least one distance is required');
-select public.save_event(null, :'ev'::jsonb || jsonb_build_object('listing_source', 'runlime', 'region_id', tests.area_id('Port of Spain & North-West')), :'dist') as listing \gset
+select public.save_event(null, :'ev'::jsonb || jsonb_build_object('listing_source', 'runlime', 'region_id', tests.area_id('Port of Spain & North-West'), 'route', null), :'dist') as listing \gset
 select is((select organisation_id from public.events where id = :'listing'), null, 'listing has no organiser');
+select is((select route from public.events where id = :'listing'), null, 'a JSON null route is stored as no route');
 select is((select listing_source::text from public.events where id = :'listing'), 'runlime', 'listing source recorded');
 select is((select count(*)::int from public.event_distances where event_id = :'listing'), 1, 'distances saved');
 select throws_ok(format($$insert into public.event_media (event_id, kind, storage_path, alt_text) values (%L, 'flyer', %L, 'Race flyer')$$,

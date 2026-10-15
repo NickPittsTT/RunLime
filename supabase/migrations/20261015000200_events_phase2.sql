@@ -451,7 +451,7 @@ begin
       nullif(btrim(p_event ->> 'parking'), ''), nullif(btrim(p_event ->> 'contact_email'), ''), nullif(btrim(p_event ->> 'contact_phone'), ''),
       nullif(btrim(p_event ->> 'cause'), ''), nullif(btrim(p_event ->> 'charity_name'), ''),
       coalesce((p_event ->> 'walk_friendly')::boolean, false), coalesce((p_event ->> 'fee_min')::numeric, 0), (p_event ->> 'fee_max')::numeric,
-      (select c.currency from public.countries c where c.code = v_country), p_event -> 'route', 'draft', v_uid)
+      (select c.currency from public.countries c where c.code = v_country), nullif(p_event -> 'route', 'null'::jsonb), 'draft', v_uid)
     returning id into v_id;
   else
     update public.events set
@@ -465,7 +465,7 @@ begin
       cause = nullif(btrim(p_event ->> 'cause'), ''), charity_name = nullif(btrim(p_event ->> 'charity_name'), ''),
       walk_friendly = coalesce((p_event ->> 'walk_friendly')::boolean, false),
       fee_min = coalesce((p_event ->> 'fee_min')::numeric, 0), fee_max = (p_event ->> 'fee_max')::numeric,
-      route = p_event -> 'route'
+      route = nullif(p_event -> 'route', 'null'::jsonb)
     where id = p_id;
     v_id := p_id;
     delete from public.event_distances where event_id = v_id;

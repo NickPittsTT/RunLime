@@ -1,7 +1,7 @@
 import 'server-only';
-import { isoToZonedLocal } from '@runlime/shared/schemas';
+import { isoToZonedLocal } from '@runlime/shared/events';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { EventFormValues } from '@/components/events/EventForm';
+import type { EventFormValues } from '@/components/events/eventValues';
 
 export const EVENT_COLUMNS =
   'id, slug, name, description, starts_at, timezone, status, status_reason, listing_source, organisation_id, region_id, venue_name, start_lat, start_lng, registration_url, registration_instructions, package_collection, parking, contact_email, contact_phone, cause, charity_name, walk_friendly, fee_min, fee_max, currency, route, published_at, duplicated_from_id, event_distances(distance_km, label)';

@@ -40,7 +40,7 @@ test('organiser applies; admin enrols MFA and approves; organiser becomes verifi
 
   // 3. Organiser sees verified status
   await organiser.reload();
-  await expect(organiser.getByText('You are a verified organiser')).toBeVisible();
+  await expect(organiser.getByText('Verified organiser.', { exact: false })).toBeVisible();
 
   // 4. Admin creates a club (F4)
   await admin.getByRole('navigation', { name: 'Admin' }).getByRole('link', { name: 'Clubs' }).click();

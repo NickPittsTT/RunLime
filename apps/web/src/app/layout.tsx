@@ -17,9 +17,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip to content
         </a>
         <header className="bg-forest text-white">
-          <nav aria-label="Main" className="mx-auto max-w-4xl px-4 py-3 flex flex-wrap items-center gap-x-6 gap-y-2">
+          <nav aria-label="Main" className="mx-auto max-w-5xl px-4 py-3 flex flex-wrap items-center gap-x-6 gap-y-2">
             <Link href="/" className="text-white no-underline text-xl font-bold">
               run<span className="text-lime">lime</span>
+            </Link>
+            <Link href="/races" className="text-white">
+              Races
             </Link>
             <Link href="/organiser" prefetch={false} className="text-white">
               Organisers
@@ -32,11 +35,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </Link>
           </nav>
         </header>
-        <main id="main" className="mx-auto w-full max-w-4xl px-4 py-8 flex-1">
+        <main id="main" className="mx-auto w-full max-w-5xl px-4 py-8 flex-1">
           {children}
         </main>
         <footer className="border-t border-line bg-surface">
-          <nav aria-label="Legal" className="mx-auto max-w-4xl px-4 py-6 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+          <nav aria-label="Legal" className="mx-auto max-w-5xl px-4 py-6 flex flex-wrap gap-x-5 gap-y-2 text-sm">
             <Link href="/legal/privacy">Privacy</Link>
             <Link href="/legal/terms">Terms</Link>
             <Link href="/legal/moderation">Moderation</Link>

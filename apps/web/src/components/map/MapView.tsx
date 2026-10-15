@@ -5,6 +5,9 @@ import * as maplibregl from 'maplibre-gl';
 import type { GeoJSONSource, Map as MlMap, MapMouseEvent, Marker } from 'maplibre-gl';
 import { useEffect, useRef } from 'react';
 
+// The worker is served from public/maplibre (copied at build time; see scripts/copy-maplibre-worker.mjs).
+if (typeof window !== 'undefined') maplibregl.setWorkerUrl('/maplibre/maplibre-gl-worker.mjs');
+
 export interface MapPin {
   id: string;
   lat: number;
@@ -44,6 +47,8 @@ export default function MapView({ pins = [], route, onMapClick, fit = true, heig
       attributionControl: { compact: true },
     });
     m.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+    // Tile/style errors (offline, blocked network) must never break the page: the map just stays blank.
+    m.on('error', () => undefined);
     m.on('click', (e: MapMouseEvent) => clickRef.current?.(e.lngLat.lng, e.lngLat.lat));
     m.on('load', () => {
       m.addSource('route', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });

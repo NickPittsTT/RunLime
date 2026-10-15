@@ -15,11 +15,14 @@
   --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
-html { font-size: 100%; }
-body { @apply bg-white text-ink antialiased; font-size: 1rem; line-height: 1.6; }
-a { @apply text-leaf underline underline-offset-2; }
-a:hover { @apply text-forest; }
-:focus-visible { outline: 3px solid var(--color-forest); outline-offset: 2px; }
+/* Base rules live in the base layer so utility classes (e.g. text-white on header links) can override them. */
+@layer base {
+  html { font-size: 100%; }
+  body { @apply bg-white text-ink antialiased; font-size: 1rem; line-height: 1.6; }
+  a { @apply text-leaf underline underline-offset-2; }
+  a:hover { @apply text-forest; }
+  :focus-visible { outline: 3px solid var(--color-forest); outline-offset: 2px; }
+}
 
 .prose-legal h1 { @apply text-3xl font-bold mt-2 mb-4; }
 .prose-legal h2 { @apply text-xl font-bold mt-8 mb-2; }

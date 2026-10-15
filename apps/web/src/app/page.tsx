@@ -1,6 +1,18 @@
 import Link from 'next/link';
+import { RaceList } from '@/components/calendar/RaceList';
+import { fetchPublicEvents, upcomingWindow } from '@/lib/events/public';
+import { createClient } from '@/lib/supabase/server';
 
-export default function Home() {
+export const dynamic = 'force-dynamic';
+
+export default async function Home() {
+  const { from, to } = upcomingWindow(120);
+  const supabase = await createClient();
+  const [events, { data: areas }] = await Promise.all([
+    fetchPublicEvents(from, to),
+    supabase.from('regions').select('id, name').eq('kind', 'area'),
+  ]);
+  const areaName = (id: string) => areas?.find((a) => a.id === id)?.name ?? '';
   return (
     <>
       <section className="rounded-2xl bg-forest text-white p-8 mb-8">
@@ -11,6 +23,13 @@ export default function Home() {
           RunLime is the 5K race calendar and run tracker for Trinidad and Tobago. Discover races, get reminders, check in on race day
           and keep your own running history.
         </p>
+      </section>
+      <section className="mb-10">
+        <div className="flex items-baseline justify-between mb-2">
+          <h2 className="text-2xl font-bold">Upcoming races</h2>
+          <Link href="/races">Full calendar →</Link>
+        </div>
+        <RaceList events={events.slice(0, 6)} areaName={areaName} />
       </section>
       <section className="grid gap-6 sm:grid-cols-2">
         <div className="rounded-xl border border-line p-6">

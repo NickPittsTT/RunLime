@@ -3,6 +3,8 @@
  * All calendar dates are computed in the event's IANA time zone (America/Port_of_Spain for TT).
  */
 
+export { isoToZonedLocal, parseGpx, zonedLocalToIso } from './time';
+
 export interface CalendarEvent {
   id: string;
   slug: string;

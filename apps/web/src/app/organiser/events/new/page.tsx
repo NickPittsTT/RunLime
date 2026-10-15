@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
-import { EventForm, emptyEvent } from '@/components/events/EventForm';
+import { EventForm } from '@/components/events/EventForm';
+import { emptyEvent } from '@/components/events/eventValues';
 import { PageTitle } from '@/components/ui';
 import { requireProfile } from '@/lib/auth';
 import { loadAreas } from '@/lib/events/load';

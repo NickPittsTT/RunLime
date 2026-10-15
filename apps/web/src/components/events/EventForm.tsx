@@ -1,66 +1,16 @@
 'use client';
-import { parseGpx } from '@runlime/shared/schemas';
+import { parseGpx } from '@runlime/shared/events';
 import dynamic from 'next/dynamic';
 import { useActionState, useState } from 'react';
 import { Button, Field, Input, Notice, Select, Textarea } from '@/components/ui';
 import { saveEventAction } from '@/lib/events/actions';
+import type { EventFormValues } from './eventValues';
+
+export type { EventFormValues } from './eventValues';
 
 const MapView = dynamic(() => import('@/components/map/MapView'), {
   ssr: false,
   loading: () => <div className="h-80 rounded-lg border border-line bg-surface grid place-items-center text-ink-muted">Loading map…</div>,
-});
-
-export interface EventFormValues {
-  id?: string;
-  listingSource: 'organiser' | 'runlime';
-  organisationId?: string;
-  name: string;
-  description: string;
-  startsLocal: string;
-  timezone: string;
-  regionId: string;
-  venueName: string;
-  startLat: number | null;
-  startLng: number | null;
-  registrationUrl: string;
-  registrationInstructions: string;
-  packageCollection: string;
-  parking: string;
-  contactEmail: string;
-  contactPhone: string;
-  cause: string;
-  charityName: string;
-  walkFriendly: boolean;
-  feeMin: number;
-  feeMax: number | null;
-  route: [number, number][] | null;
-  distances: { km: number; label: string }[];
-}
-
-export const emptyEvent = (listingSource: 'organiser' | 'runlime', organisationId?: string): EventFormValues => ({
-  listingSource,
-  organisationId,
-  name: '',
-  description: '',
-  startsLocal: '',
-  timezone: 'America/Port_of_Spain',
-  regionId: '',
-  venueName: '',
-  startLat: null,
-  startLng: null,
-  registrationUrl: '',
-  registrationInstructions: '',
-  packageCollection: '',
-  parking: '',
-  contactEmail: '',
-  contactPhone: '',
-  cause: '',
-  charityName: '',
-  walkFriendly: false,
-  feeMin: 0,
-  feeMax: null,
-  route: null,
-  distances: [{ km: 5, label: '5K' }],
 });
 
 const PRESETS = [
@@ -236,8 +186,30 @@ export function EventForm({ initial, areas, organisations, back, suggestionId }:
         fit={false}
         height={360}
       />
+      <div className="grid grid-cols-2 gap-4 mt-3">
+        <Field label="Start latitude" htmlFor="ev-lat" hint="Filled in when you tap the map, or type it.">
+          <Input
+            id="ev-lat"
+            type="number"
+            step="any"
+            inputMode="decimal"
+            value={v.startLat ?? ''}
+            onChange={(e) => set('startLat', e.target.value === '' ? null : Number(e.target.value))}
+          />
+        </Field>
+        <Field label="Start longitude" htmlFor="ev-lng" hint="Trinidad and Tobago longitudes are negative (about −60.5 to −62).">
+          <Input
+            id="ev-lng"
+            type="number"
+            step="any"
+            inputMode="decimal"
+            value={v.startLng ?? ''}
+            onChange={(e) => set('startLng', e.target.value === '' ? null : Number(e.target.value))}
+          />
+        </Field>
+      </div>
       <p className="text-sm mt-2 mb-3" aria-live="polite">
-        {v.startLat !== null ? `Start pin: ${v.startLat.toFixed(5)}, ${v.startLng!.toFixed(5)}` : 'No start pin yet.'}
+        {v.startLat !== null && v.startLng !== null ? `Start pin: ${v.startLat.toFixed(5)}, ${v.startLng.toFixed(5)}` : 'No start pin yet.'}
         {v.route && v.route.length > 1 ? ` · Route: ${v.route.length} points` : ''}
       </p>
       <Field label="Route from a GPX file (optional)" htmlFor="ev-gpx" hint={gpxNote ?? undefined}>

@@ -15,17 +15,19 @@ jobs:
       EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
     steps:
       - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v5
       - uses: actions/setup-node@v5
         with:
           node-version-file: .nvmrc
-          package-manager-cache: false
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - name: Build status, error and failing-phase log tail
         working-directory: apps/mobile
         env:
           BUILD_ID: ${{ inputs.build_id }}
         run: |
           set -uo pipefail
-          npx --yes eas-cli@24.12.1 build:view "$BUILD_ID" --json > /tmp/build.json 2>/tmp/err.txt || { cat /tmp/err.txt; exit 1; }
+          npx --yes eas-cli@24.12.1 build:view "$BUILD_ID" --json > /tmp/build.json 2>/tmp/err.txt || { cat /tmp/err.txt; npx --yes eas-cli@24.12.1 build:view "$BUILD_ID" 2>&1 | tail -40; exit 1; }
           node - <<'JS'
           const b = require('/tmp/build.json');
           console.log('status:', b.status, '| platform:', b.platform, '| profile:', b.buildProfile);

@@ -71,7 +71,7 @@
 
 ## Waiting on the owner
 1. Legal details still open: operator name, child-safety contact name and email. (Operator address: optional, non-public, for official records only.) (Support email is set on staging: runlimett@gmail.com, until there's a domain.) You can enter them straight into staging `app_settings` (see `docs/phase-2/PLAN.md`, item 14) without sharing them here.
-2. Google Cloud OAuth setup, items 10–13 in `docs/phase-2/PLAN.md` (for Google sign-in testing).
+2. Google Android OAuth client (item 13 in `docs/phase-2/PLAN.md`): package `tt.runlime.app.dev`, SHA-1 `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25`. Items 10–12 done by the owner on 2026-10-15 (project RunLime, consent screen External/Testing with test users, Web client in Supabase's Google provider, `GOOGLE_WEB_CLIENT_ID` GitHub variable).
 3. Bank name / account name and VAT status — before Phase 7.
 4. Custom domain + email service: needed **before any closed testing with other people** (including Google Play's 12-tester closed test), and at the latest Phase 8. Gmail SMTP is for staging/owner testing only. Free email services (e.g. Resend's free tier) need a verified domain to send to anyone else.
 5. Confirm "RunLime" availability (stores, domains, TT IPO/USPTO/WIPO) before store bundle IDs are fixed (Phase 8).

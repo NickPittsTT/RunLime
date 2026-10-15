@@ -60,7 +60,7 @@ jobs:
 
       - name: Build on EAS and wait for the result (free queue ~15–30 min)
         working-directory: apps/mobile
-        timeout-minutes: 60
+        timeout-minutes: 150  # free queue has taken 35–60+ min
         run: |
           set -uo pipefail
           $EAS build --profile "${{ inputs.profile }}" --platform android --non-interactive --wait --json > build.json; code=$?
@@ -70,4 +70,22 @@ jobs:
             console.log(lines.join('\n'));
             require('fs').appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join('\n')+'\n');
           " || cat build.json
-          exit $code"
+          exit $code
+
+      - name: Signing certificate of the APK (SHA-1 for the Google Android OAuth client)
+        if: success()
+        working-directory: apps/mobile
+        run: |
+          url=$(node -e "const b=[].concat(require('./build.json'))[0]||{};process.stdout.write((b.artifacts&&b.artifacts.buildUrl)||'')")
+          if [ -z "$url" ]; then echo "No APK URL"; exit 0; fi
+          curl -fsSL "$url" -o app.apk
+          signer=$(ls -d "$ANDROID_HOME"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -1)
+          if [ -n "$signer" ]; then
+            # apksigner prints lowercase hex without colons; Google Cloud wants AA:BB:… form.
+            raw=$("$signer" verify --print-certs app.apk | grep -m1 'certificate SHA-1 digest' | sed 's/.*digest: *//')
+            sha1=$(echo "$raw" | tr 'a-f' 'A-F' | sed 's/../&:/g; s/:$//')
+          else
+            sha1=$(keytool -printcert -jarfile app.apk | grep -m1 'SHA1:' | sed 's/.*SHA1: *//')
+          fi
+          echo "APK signing SHA-1: $sha1"
+          { echo; echo "- APK signing SHA-1 (Google Android OAuth client): \`$sha1\`"; } >> "$GITHUB_STEP_SUMMARY"

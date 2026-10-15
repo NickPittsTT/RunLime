@@ -51,7 +51,8 @@
 - [x] Email delivery via Gmail SMTP: **owner-confirmed 2026-10-15** — "Your RunLime sign-in code" with 6 digits arrived in the runlimett@gmail.com inbox (Supabase accepted it with HTTP 200 at 16:24 UTC). Earlier failures were because the new app password hadn't been saved
 - [x] First Android staging APK built (EAS build c1e4f42a, commit 290f8b3, 2026-10-15). Earlier failures fixed at the cause: babel-preset-expo not declared; splash image missing; workflow step syntax error
 - [x] **Phone test PASSED (owner, 2026-10-15)** on the staging APK: every step in sections A, B, C and E. Confirmed: 18-tomorrow blocked (step 3) and still blocked after force-close (step 4); code email → "Hi" + Private (7–9); emergency contact reloads (11); data export contains the profile (12); both test accounts deleted, staging clean (16–18). Only the legal links failed, as expected until the staging website is deployed
-- [ ] Section D (Google sign-in) + legal links: build started 2026-10-15 with Google sign-in and `STAGING_WEB_URL`; owner tests when the APK is ready
+- [x] Second staging APK built (2026-10-15, 18 min): Google sign-in + `STAGING_WEB_URL`. APK signing SHA-1 printed from the real APK = `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25` (matches the Google Android client)
+- [ ] Owner tests Section D (Google sign-in) + legal links on the new APK
 
 **Platform**
 - [x] Workflows moved off Node 20 (checkout@v5, setup-node@v5, pnpm/action-setup@v5, upload-artifact@v6, supabase/setup-cli@v2)

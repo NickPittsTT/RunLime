@@ -1,6 +1,6 @@
 # Phase 2 plan — prepared, NOT started (waiting for Phase 1 approval)
 
-## Task 1 (first): Android development build on your phone
+## Task 1 (first): Android build on your phone (internal staging APK)
 Free-tier only, Android only (iOS and Apple sign-in are deferred until there's a paid Apple Developer account).
 
 What I'll do once Phase 1 is approved and the accounts below exist:
@@ -42,7 +42,7 @@ Phase 2's first task doesn't need the web host. The phone build only opens the l
 **Limits of this first build (expected, not bugs):**
 - **"Read the Terms" / "Help & legal" links won't open yet.** The staging web portal isn't deployed (it needs the free Cloudflare account, the next step). Skip the link check in step 9 and the legal links.
 - **No "Continue with Google" button yet.** It appears once the Google Cloud setup (items 10–13) is done. Section D waits for that.
-- **Install:** open the APK link on your Android phone and allow "Install unknown apps" for your browser when asked. The app is called **RunLime (development)**. Because it's a development build, it may first show a developer menu or a "development servers" screen. If so, tell me and I'll switch to a standalone build. Expected: it opens straight to the date-of-birth screen.
+- **Install:** open the APK link on your Android phone and allow "Install unknown apps" for your browser when asked. The app is called **RunLime (staging)**. It's a standalone internal build: it opens straight to the date-of-birth screen, with no computer or dev server needed.
 Use **your own email**, the one on your Supabase account, so the free built-in mailer can reach you. Each line has an expected result; tick or note what happened.
 
 **A. Age gate (first screen, before any sign-in)**

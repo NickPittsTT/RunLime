@@ -1,11 +1,18 @@
-# Android development build on Expo's servers (EAS free tier). Run from Actions → "Mobile dev build (Android)".
+# Android build on Expo's servers (EAS free tier). Run from Actions → "Mobile build (Android)".
+# profile=staging: standalone internal APK (code inside; install from a link). profile=development: needs a dev server.
 # Needs (see docs/phase-2/PLAN.md): secret EXPO_TOKEN; variables SUPABASE_PROJECT_REF, SUPABASE_ANON_KEY;
 # the Expo project ID is fixed in apps/mobile/app.config.ts;
 # optional variables GOOGLE_WEB_CLIENT_ID, STAGING_WEB_URL.
-name: Mobile dev build (Android)
+name: Mobile build (Android)
 
 on:
   workflow_dispatch:
+    inputs:
+      profile:
+        description: Build profile
+        type: choice
+        options: [staging, development]
+        default: staging
 
 jobs:
   build:
@@ -13,7 +20,8 @@ jobs:
     environment: staging
     env:
       EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-      APP_ENV: development
+      APP_ENV: ${{ inputs.profile }}
+      EAS_ENVIRONMENT: ${{ inputs.profile == 'staging' && 'preview' || 'development' }}
       EAS: npx --yes eas-cli@24.12.1
     steps:
       - uses: actions/checkout@v5
@@ -35,7 +43,7 @@ jobs:
           [ -n "$SUPABASE_ANON_KEY" ] || missing+=("variable SUPABASE_ANON_KEY")
           if [ ${#missing[@]} -gt 0 ]; then printf '::error::Missing: %s\n' "${missing[@]}"; exit 1; fi
 
-      - name: Sync public build settings to EAS "development" environment
+      - name: Sync public build settings to the EAS environment for this profile
         working-directory: apps/mobile
         env:
           SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co
@@ -44,7 +52,7 @@ jobs:
           STAGING_WEB_URL: ${{ vars.STAGING_WEB_URL }}
         run: |
           set -euo pipefail
-          put() { [ -n "$2" ] && $EAS env:set development --name "$1" --value "$2" --visibility plaintext --scope project --non-interactive >/dev/null && echo "set $1"; }
+          put() { [ -n "$2" ] && $EAS env:set "$EAS_ENVIRONMENT" --name "$1" --value "$2" --visibility plaintext --scope project --non-interactive >/dev/null && echo "set $1"; }
           put EXPO_PUBLIC_SUPABASE_URL "$SUPABASE_URL"
           put EXPO_PUBLIC_SUPABASE_ANON_KEY "$SUPABASE_ANON_KEY"
           put EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID "$GOOGLE_WEB_CLIENT_ID" || echo "GOOGLE_WEB_CLIENT_ID not set yet: Google button will be hidden"
@@ -55,10 +63,10 @@ jobs:
         timeout-minutes: 60
         run: |
           set -uo pipefail
-          $EAS build --profile development --platform android --non-interactive --wait --json > build.json; code=$?
+          $EAS build --profile "${{ inputs.profile }}" --platform android --non-interactive --wait --json > build.json; code=$?
           node -e "
             const b=[].concat(require('./build.json'))[0]||{};
-            const lines=['### Android development build: '+(b.status||'unknown'),'','- Build page: '+(b.buildDetailsPageUrl||'n/a'),'- APK (open on your phone): '+((b.artifacts&&b.artifacts.buildUrl)||'not available'),'- Error: '+((b.error&&b.error.message)||'none')];
+            const lines=['### Android ${{ inputs.profile }} build: '+(b.status||'unknown'),'','- Build page: '+(b.buildDetailsPageUrl||'n/a'),'- APK (open on your phone): '+((b.artifacts&&b.artifacts.buildUrl)||'not available'),'- Error: '+((b.error&&b.error.message)||'none')];
             console.log(lines.join('\n'));
             require('fs').appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join('\n')+'\n');
           " || cat build.json

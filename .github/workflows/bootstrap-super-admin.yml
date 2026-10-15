@@ -1,0 +1,34 @@
+# One-time: make an existing, fully signed-up account the super admin (scripts/bootstrap-super-admin.ts).
+# The only way super_admin is ever granted (CLAUDE.md). Refuses if a super admin already exists.
+name: Bootstrap super admin
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Environment
+        type: choice
+        options: [staging, production]
+        default: staging
+      email:
+        description: Email of the account (must already have finished sign-up)
+        required: true
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Grant super admin
+        env:
+          SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          EMAIL: ${{ inputs.email }}
+        run: pnpm bootstrap:super-admin "$EMAIL"

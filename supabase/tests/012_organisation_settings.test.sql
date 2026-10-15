@@ -1,6 +1,6 @@
 begin;
 \ir _helpers.psql
-select plan(8);
+select plan(10);
 
 select tests.create_user('owner@runlime.test') as owner \gset
 select tests.create_user('mate@runlime.test') as mate \gset
@@ -20,6 +20,12 @@ select lives_ok(format($$select public.update_organisation(%L, 'hello@arima.tt',
   'members edit organisation details');
 select lives_ok(format($$select public.add_organisation_member(%L, %L)$$, :'org', :'mate_email'), 'owner adds a manager by email');
 select ok(public.has_role('organiser', :'mate'), 'a manager of a verified organisation becomes an organiser');
+
+select is((select count(*)::int from public.organisation_team(:'org')), 2, 'members see the team with display names');
+select tests.clear_authentication();
+select tests.create_user('stranger@runlime.test') as stranger \gset
+select tests.authenticate_as(:'stranger');
+select is((select count(*)::int from public.organisation_team(:'org')), 0, 'outsiders see no team members');
 
 select tests.authenticate_as(:'mate');
 select throws_ok(format($$select public.add_organisation_member(%L, %L)$$, :'org', :'mate_email'), '42501', null, 'managers cannot add members');

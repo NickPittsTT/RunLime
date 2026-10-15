@@ -745,3 +745,27 @@ end;
 $$;
 revoke execute on function public.update_organisation, public.is_org_owner, public.add_organisation_member, public.remove_organisation_member from public, anon;
 grant execute on function public.update_organisation, public.is_org_owner, public.add_organisation_member, public.remove_organisation_member to authenticated;
+
+-- Team lists show display names to teammates only (profiles are otherwise owner-only).
+create function public.organisation_team(p_org uuid)
+returns table (user_id uuid, display_name text, role public.organisation_member_role)
+language sql stable security definer
+set search_path = ''
+as $$
+  select m.user_id, p.display_name, m.role
+    from public.organisation_members m join public.profiles p on p.id = m.user_id
+   where m.organisation_id = p_org and (public.is_org_member(p_org) or public.is_admin())
+   order by m.role, p.display_name
+$$;
+create function public.event_team(p_event uuid)
+returns table (user_id uuid, display_name text, accepted boolean)
+language sql stable security definer
+set search_path = ''
+as $$
+  select em.user_id, p.display_name, em.accepted_at is not null
+    from public.event_members em join public.profiles p on p.id = em.user_id
+   where em.event_id = p_event and public.can_edit_event(p_event)
+   order by p.display_name
+$$;
+revoke execute on function public.organisation_team, public.event_team from public, anon;
+grant execute on function public.organisation_team, public.event_team to authenticated;

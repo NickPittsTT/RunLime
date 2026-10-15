@@ -65,7 +65,7 @@ Phase tag = the phase in which the screen is built.
 | M42 | Health data (weight, consent, revoke) | 5 |
 | M43 | Emergency contact | 1 |
 | M44 | Blocked users | 3 |
-| M45 | Clubs: browse the approved list, request to join (pending until a leader approves), leave; "Request a new club" form; runner level edit in M39 | 3 |
+| M45 | Clubs: browse the approved list, request to join (pending until a leader approves), leave; choose your **primary club** (counts for club leaderboards); "Request a new club" form; runner level edit in M39 | 3 |
 | M45a | Club leader: pending join requests (approve / decline), member list, remove member | 3 |
 | M46 | Data export request | 1 (Edge Function) / 8 (polish) |
 | M47 | Delete account (two-step confirm) | 1 |

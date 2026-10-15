@@ -21,7 +21,7 @@ Status: **Approved by owner 2026-10-11 with the changes recorded below.** Rev 1 
 | 1 | Repo | Dedicated repo `nickpittstt/runlime` — done |
 | 2 | Legal entity | Individual. Legal pages read "RunLime, operated by <owner's full name>". May transfer to RunLime Limited later, so operator name and address live only in `app_settings` (values still to be entered by the owner) |
 | 3 | Bank / VAT | Owner provides before Phase 7. Payments stay manual bank transfer; no card gateway in v1 |
-| 4 | Domain | None yet. Use provider-issued URLs; nothing in Phases 2–7 depends on a custom domain. Remind the owner before Phase 8 |
+| 4 | Domain | None yet. Use provider-issued URLs. **Needed before public launch, not before the pilot** (owner, 2026-10-15). Remind the owner before Phase 8 |
 | 5 | Legal text | I draft; owner's attorney reviews before launch |
 | 6 | Sign-in | Email (one-time code) + Google + Apple. Phone → BACKLOG |
 | 7 | Premium | Free/Premium split and pricing (US$2.99/mo, US$19.99/yr) accepted as seed values |
@@ -86,13 +86,13 @@ A9 revised: the public "attending" count = sum of (`group_size` + `children_coun
 **Testing plan: real-race pilot, no early tester link.**
 - No outside testers before Phase 6. The first outside test is a **real-race pilot after Phase 6** with friends who run 5Ks.
 - Until then the owner is the admin and enters real upcoming races with the admin "create event" screen (A4) as **RunLime listings**: facts only (name, date, start time, distance, official registration link, plus venue and start pin, which GPS check-in needs), a visible "not affiliated, check with the organiser" notice, and **no organiser flyers or logos without permission**.
-- Before the pilot: custom domain + email service (closed testing with other people), and Google Play's closed-test rules if the pilot uses the Play Store (STORE-REQUIREMENTS C14).
+- Before the pilot: no custom domain needed (Gmail SMTP + Google basic sign-in cover ~10 testers; APK shared by link). Google Play's closed-test rules apply only if the pilot uses the Play Store (STORE-REQUIREMENTS C14). The domain is needed before public launch.
 
 **S6 Runner level, clubs with leaders, club turnout, club leaderboards.**
 - *Runner level* (Phase 3): optional Casual / Club runner / Competitive, asked in onboarding, editable. Self-declared; it never bypasses speed checks. Only admin "verified runner" status changes the limit (Phase 6).
 - *Clubs* (Phase 3): pick from the admin-approved list in onboarding or later; joining needs a club leader's approval; users can request a new club, which the admin approves. New per-club **leader** role. Only approved memberships count.
 - *Club turnout* (Phase 3): "Club X: 25 attending" on race pages and organiser dashboards, from approved members who opted in; small counts hidden.
-- *Club leaderboards* (Phase 6): km, races attended, average members per race; each as a total and per member; opted-in approved members only.
+- *Club leaderboards* (Phase 6): km, races attended, average members per race; each as a total and per member; opted-in approved members only. Each person picks one **primary club**; their leaderboard activity counts only there (other memberships still show and count in turnout). Club assumptions accepted by the owner, 2026-10-15.
 
 **Speed checks (owner, 2026-10-15), Phase 6.** Two tiers, thresholds as admin settings: runs with average pace and every 1 km split slower than 3:00 /km count automatically; 2:35–3:00 /km is flagged for admin review and excluded from leaderboards until approved; faster than 2:35 /km is rejected for leaderboards. Admins can mark a reviewed runner as verified so their 2:35–3:00 runs aren't flagged again. RunLime listings include the venue and start pin (confirmed). Leaderboard periods are calendar periods (confirmed).
 

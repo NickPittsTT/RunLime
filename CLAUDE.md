@@ -32,7 +32,7 @@ Living record of conventions and decisions. Update at the end of every phase.
 ## Budget rules (owner, 2026-10-11)
 - **Free tiers only** until the owner says otherwise. Say so BEFORE any step that needs a paid plan or a card on file.
 - **Android first.** Keep the iOS and Sign in with Apple code, but defer anything needing the paid Apple Developer account.
-- **No custom domain until needed:** before any closed testing with other people, and at the latest Phase 8. Use provider-issued URLs until then; owner-only testing must not depend on a custom domain. Remind the owner before closed testing or Phase 8, whichever comes first.
+- **No custom domain until public launch** (owner, 2026-10-15): not needed for the friends pilot (Gmail SMTP + Google basic sign-in + APK link). Use provider-issued URLs until then. Remind the owner before Phase 8.
 - Never ask the owner to paste a password, token or service key into chat. Secrets go to GitHub environment secrets, Supabase secrets, or the cloud environment's settings.
 
 ## Process
@@ -76,6 +76,8 @@ Living record of conventions and decisions. Update at the end of every phase.
 | 2026-10-15 | Testing: no early tester link; real-race pilot after Phase 6; owner enters real races as fact-only RunLime listings | Owner |
 | 2026-10-15 | Runner level (Phase 3), clubs with leader approval + club requests + turnout (Phase 3), club leaderboards (Phase 6) | Owner |
 | 2026-10-15 | Two-tier speed checks (3:00 accept / 2:35–3:00 review / 2:35 reject); verified runners skip review; listings include venue + start pin; calendar periods confirmed | Owner |
+| 2026-10-15 | Primary club: leaderboard activity counts for one chosen club; other memberships still show + count in turnout. Club assumptions accepted | Owner |
+| 2026-10-15 | Custom domain needed before public launch, not before the pilot; timeline impact (+9–14 working days, Phases 3 and 6) accepted | Owner |
 | 2026-10-11 | Seed prices: Premium US$2.99/mo, US$19.99/yr; Basic TT$100; Featured TT$400; charity free Basic via setting | Owner |
 
 ## Conventions

@@ -150,10 +150,10 @@ Ranks clubs on three measures, each shown as a **total** and **per member** (so 
 | Races attended | GPS check-ins by counted members | total ÷ counted members |
 | Average members per race | for each race in the period with ≥ 1 counted member checked in: number of counted members checked in; averaged over those races | that average ÷ counted members (a "turnout %") |
 
-- **Counted member** = `approved` membership **and** leaderboard opt-in, not suspended or excluded. Activity counts only from the date the membership was approved.
+- **Counted member** = the club is the user's **primary club**, membership `approved`, leaderboard opt-in on, not suspended or excluded. Activity counts only from the date the membership was approved.
 - `club_leaderboard_totals`: `club_id`, `measure`, `period`, `period_start`, `total`, `counted_members`, `per_member`, `updated_at`. Built from `leaderboard_totals` + `check_ins` (nightly + on change). Read via RPC `club_leaderboard(measure, period, basis)` (`basis` = `total`/`per_member`), top N + the viewer's own clubs.
 - Per-member rankings only include clubs with at least `clubs.leaderboard_min_members` counted members (setting, default 3), so a one-person club can't top the per-member board.
-- Assumption to confirm: a user may belong to several clubs; their activity counts for **each** approved club.
+- **Primary club (owner, 2026-10-15):** a user may belong to several clubs, but picks **one primary club** (`profiles.primary_club_id`, must be an `approved` membership; cleared automatically if they leave it). **Leaderboard activity counts only for the primary club.** Other memberships still show on the profile and still count in club turnout on race pages.
 
 ### Club turnout on race pages (Phase 3, owner decision 2026-10-15)
 Race pages (app + web) and organiser dashboards show "Club X: 25 attending". The count includes only members with an `approved` membership who turned on **show my attendance in club turnout** (`profiles.show_attendance_to_clubs`, existing, opt-in, off by default; its wording now says the count is public). Counts below `clubs.turnout_min_count` (setting, default 3) are hidden, so nobody is singled out by a "1 attending". Read via a view/RPC returning counts only, never names.

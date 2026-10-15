@@ -25,20 +25,48 @@ jobs:
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
       SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
     steps:
+      # Guard: until the owner has added the staging secrets, skip cleanly instead of failing.
+      - name: Check deploy settings (names only, never values)
+        id: check
+        env:
+          SERVICE_ROLE: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          missing=()
+          [ -n "$SUPABASE_ACCESS_TOKEN" ] || missing+=("secret SUPABASE_ACCESS_TOKEN")
+          [ -n "$SUPABASE_DB_PASSWORD" ] || missing+=("secret SUPABASE_DB_PASSWORD")
+          [ -n "$SERVICE_ROLE" ] || missing+=("secret SUPABASE_SERVICE_ROLE_KEY")
+          [ -n "$SUPABASE_PROJECT_REF" ] || missing+=("variable SUPABASE_PROJECT_REF")
+          if [ ${#missing[@]} -gt 0 ]; then
+            printf '::notice::Deploy skipped: not configured yet (%s)\n' "$(IFS=', '; echo "${missing[*]}")"
+            echo "### Deploy skipped" >> "$GITHUB_STEP_SUMMARY"
+            printf -- '- missing %s\n' "${missing[@]}" >> "$GITHUB_STEP_SUMMARY"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
       - uses: actions/checkout@v5
+        if: steps.check.outputs.ready == 'true'
       - uses: pnpm/action-setup@v5
+        if: steps.check.outputs.ready == 'true'
       - uses: actions/setup-node@v5
+        if: steps.check.outputs.ready == 'true'
         with:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+        if: steps.check.outputs.ready == 'true'
       - uses: supabase/setup-cli@v2
+        if: steps.check.outputs.ready == 'true'
         with:
           version: 2.120.0
       - run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
+        if: steps.check.outputs.ready == 'true'
       - run: supabase db push
+        if: steps.check.outputs.ready == 'true'
       - run: supabase functions deploy emergency-contact export-user-data emergency-contact-keys --project-ref "$SUPABASE_PROJECT_REF"
+        if: steps.check.outputs.ready == 'true'
       - name: Sync legal documents (published)
+        if: steps.check.outputs.ready == 'true'
         run: pnpm legal:sync --publish
         env:
           SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co

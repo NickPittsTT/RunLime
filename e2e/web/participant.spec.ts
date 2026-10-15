@@ -40,6 +40,12 @@ test('legal pages are public and marked as drafts', async ({ page }) => {
     await expect(page.getByRole('heading', { level: 1, name: heading })).toBeVisible();
     await expect(page.getByText('DRAFT', { exact: true })).toBeVisible();
   }
+  // Markdown tables render as real tables (not raw pipe text).
+  await page.goto('/legal/privacy');
+  await expect(page.getByRole('table').first()).toBeVisible();
+  await expect(page.getByRole('cell', { name: 'Account and profile' })).toBeVisible();
+  await expect(page.getByText('| Data |')).toHaveCount(0);
+  await expect(page.getByText('Cloudflare (website hosting)')).toBeVisible();
   await page.goto('/legal/terms');
   await expect(page.getByText(/must be accompanied by a parent or guardian/)).toBeVisible();
   const res = await page.goto('/legal/not-a-page');

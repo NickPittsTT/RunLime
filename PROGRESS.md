@@ -1,6 +1,6 @@
 # RunLime — Progress
 
-**Last updated:** 2026-10-11
+**Last updated:** 2026-10-15
 
 ## Phases
 
@@ -8,7 +8,7 @@
 |---|---|---|---|
 | 0 | Questions, architecture, data model, screens, brand, costs | Approved by owner (rev 2) | 100% |
 | 1 | Setup, environments, auth + 18+ age gate, roles, RLS, seed, legal drafts | Approved by owner (2026-10-11) | 100% |
-| 2 | Events: organiser portal, admin approval, onboarding, calendar, event page, public web | Not started | 0% |
+| 2 | Events: organiser portal, admin approval, onboarding, calendar, event page, public web | In progress | 10% |
 | 3 | RSVP, followers & clubs, notifications/broadcasts, attendance dashboard | Not started | 0% |
 | 4 | GPS check-in | Not started | 0% |
 | 5 | Run tracker, history, totals | Not started | 0% |
@@ -34,6 +34,24 @@
 - [x] CI (GitHub Actions) green on GitHub (run #3): lint, typecheck, unit, pgTAP, web E2E; database deploy workflow (staging auto, production manual)
 - [x] README (setup, env vars, deployment), .env.example, bootstrap-super-admin script
 - [x] Phase 1 review report (`docs/phase-1/REVIEW.md`)
+
+## Phase 2 checklist (current)
+
+**Task 1: Android development build on the owner's phone**
+- [x] Expo project linked (`ca1a5ee2-b15a-488d-b123-8fd075db8be1`), `expo-dev-client`, EAS development profile (APK, debug key)
+- [x] "Mobile dev build (Android)" workflow (EAS free tier; uses `EXPO_TOKEN` from GitHub secrets)
+- [x] Owner: `EXPO_TOKEN` secret added
+- [ ] Owner: `SUPABASE_PROJECT_REF` (staging environment variable) and `SUPABASE_ANON_KEY` (repository variable)
+- [ ] Staging database deployed (needs the Supabase secrets, items 5–7 in `docs/phase-2/PLAN.md`)
+- [ ] First build started; APK link sent; owner runs the phone test script
+
+**Platform**
+- [x] Workflows moved off Node 20 (checkout@v5, setup-node@v5, pnpm/action-setup@v5, upload-artifact@v6, supabase/setup-cli@v2)
+- [x] Web host: Cloudflare Workers via OpenNext. Next.js pinned to 16.3.8 (adapter limit; 16.4 in BACKLOG). The full web E2E suite passes on Cloudflare's runtime locally; CI now runs E2E on that runtime
+- [x] "Deploy database" skips cleanly until the staging secrets exist
+- [x] Legal pages render Markdown tables; Privacy Policy names Cloudflare as the web host
+- [ ] Cloudflare account + API token (free) for the staging web deploy — added to the setup table when we reach that step
+- [ ] Phase 2 feature work (events, organiser portal, calendar, onboarding, public pages) — after Task 1
 
 ## Phase 1 approval items (owner, 2026-10-11)
 - [x] a. CI fully green on GitHub, including web E2E (see the latest run in the Phase 1 review)

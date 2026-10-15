@@ -19,3 +19,4 @@ Not to be built without explicit owner approval.
 - Wear OS / Apple Watch companion.
 - Audio cues during runs.
 - Self-hosted PostHog for full data residency.
+- **Move the web app from Next.js 16.3.8 to 16.4.x** once `@opennextjs/cloudflare` supports it. 16.4.0 (released 6 Oct 2026) loads a new `preview-props.json` manifest that adapter 1.20.10 doesn't inline, so every page fails on Workers. Check: the adapter's release notes list Next 16.4, then `pnpm cf:build` + the Playwright suite on the Cloudflare runtime pass (CI runs it).

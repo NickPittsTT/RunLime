@@ -32,3 +32,4 @@ jobs:
           echo "### ${{ inputs.mode }} on ${{ inputs.target }}" >> "$GITHUB_STEP_SUMMARY"
           echo '```json' >> "$GITHUB_STEP_SUMMARY"; echo "$out" >> "$GITHUB_STEP_SUMMARY"; echo '```' >> "$GITHUB_STEP_SUMMARY"
           if echo "$out" | grep -Eq '"(undecryptable|failed)":[1-9]'; then echo "::error::Some rows could not be processed — see the procedure doc"; exit 1; fi
+          if echo "$out" | grep -q '"currentKey"' && ! echo "$out" | grep -q '"currentKey":"ok"'; then echo "::error::The current key is missing or invalid — see the procedure doc"; exit 1; fi

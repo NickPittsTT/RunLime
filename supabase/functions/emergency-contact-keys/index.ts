@@ -57,6 +57,13 @@ Deno.serve(async (req) => {
 
   try {
     if (mode === 'verify') {
+      // The current key must exist and be a valid 32-byte AES key, even before any contact is stored.
+      let currentKey = 'ok';
+      try {
+        await keyFor(current);
+      } catch (e) {
+        currentKey = e instanceof Error ? e.message : 'invalid';
+      }
       const byVersion: Record<string, number> = {};
       let undecryptable = 0;
       for await (const batch of rows()) {
@@ -70,7 +77,7 @@ Deno.serve(async (req) => {
           }
         }
       }
-      return reply({ currentVersion: current, byVersion, undecryptable });
+      return reply({ currentVersion: current, currentKey, byVersion, undecryptable }, currentKey === 'ok' ? 200 : 500);
     }
 
     if (mode === 'rotate') {

@@ -1,0 +1,36 @@
+# Apply and verify hosted Supabase Auth settings (hooks, MFA, OTP email) for an environment.
+# Prints setting names and non-secret values only. Never seeds data or creates accounts.
+name: Configure auth
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Environment
+        type: choice
+        options: [staging, production]
+        default: staging
+      apply:
+        description: Apply changes (false = show current settings only)
+        type: boolean
+        default: true
+
+jobs:
+  configure:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+      - name: Configure and verify auth
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+        run: set -o pipefail; node scripts/configure-auth.mjs ${{ inputs.apply && '--apply' || '' }} | tee auth-report.txt
+      - name: Summary
+        if: always()
+        run: |
+          { echo '### Auth configuration (${{ inputs.target }})'; echo '```'; cat auth-report.txt 2>/dev/null; echo '```'; } >> "$GITHUB_STEP_SUMMARY"

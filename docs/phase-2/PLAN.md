@@ -43,7 +43,7 @@ Phase 2's first task doesn't need the web host. The phone build only opens the l
 - **"Read the Terms" / "Help & legal" links won't open yet.** The staging web portal isn't deployed (it needs the free Cloudflare account, the next step). Skip the link check in step 9 and the legal links.
 - **No "Continue with Google" button yet.** It appears once the Google Cloud setup (items 10–13) is done. Section D waits for that.
 - **Install:** open the APK link on your Android phone and allow "Install unknown apps" for your browser when asked. The app is called **RunLime (staging)**. It's a standalone internal build: it opens straight to the date-of-birth screen, with no computer or dev server needed.
-Use **your own email**, the one on your Supabase account, so the free built-in mailer can reach you. Each line has an expected result; tick or note what happened.
+Use **runlimett@gmail.com** or another inbox you control (sign-in codes are sent through the Gmail SMTP you set up). Each line has an expected result; tick or note what happened.
 
 **A. Age gate (first screen, before any sign-in)**
 1. Open RunLime. Expect: the first screen asks only for your date of birth, with no Google or email buttons.
@@ -51,13 +51,13 @@ Use **your own email**, the one on your Supabase account, so the free built-in m
 2. **Exactly 18 today:** enter today's day and month, 18 years ago → Continue. Expect: the sign-in screen (allowed). **Don't sign in.** Tap back.
 3. **18 tomorrow:** enter tomorrow's day and month, 18 years ago → Continue. Expect: "Sorry, you can't create a RunLime account", and no sign-in options.
 4. Close the app completely, reopen it. Expect: still the "Sorry" screen. This lasts 24 hours on this phone, with nothing sent to the server.
-5. Android Settings → Apps → RunLime (dev) → Storage → **Clear storage**. Reopen. Expect: the date of birth question again.
+5. Android Settings → Apps → RunLime (staging) → Storage → **Clear storage**. Reopen. Expect: the date of birth question again.
 
 **B. Email sign-in**
-6. Enter your real adult date of birth → Continue. Expect: the sign-in screen with "Continue with Google" and an email box.
-7. Enter your email → "Email me a code". Expect: an email "Your RunLime sign-in code" within ~1 minute. If nothing arrives after 5 minutes, tell me; it's probably the free mailer's hourly limit.
+6. Enter your real adult date of birth → Continue. Expect: the sign-in screen with an email box (the Google button appears in a later build, see Section D).
+7. Enter your email → "Email me a code". Expect: an email "Your RunLime sign-in code" within ~1 minute. If nothing arrives after 5 minutes, check spam, then tell me.
 8. Enter the 6 digits → Sign in. Expect: "Finish setting up".
-9. Fill in Display name, Nickname (optional), Home area, tick the terms box (open "Read the Terms" to check the link works) → Create my account. Expect: the Profile screen "Hi, <name>" showing your area and **Private**.
+9. Fill in Display name, Nickname (optional), Home area, tick the terms box (the "Read the Terms" link won't open yet; see the limits above) → Create my account. Expect: the Profile screen "Hi, <name>" showing your area and **Private**.
 
 **C. Profile**
 10. Edit profile & privacy → change the nickname and the area → switch to **Public** → Save. Expect: the Profile screen shows the new values.

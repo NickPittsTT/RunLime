@@ -25,7 +25,7 @@ Living record of conventions and decisions. Update at the end of every phase.
 ## Budget rules (owner, 2026-10-11)
 - **Free tiers only** until the owner says otherwise. Say so BEFORE any step that needs a paid plan or a card on file.
 - **Android first.** Keep the iOS and Sign in with Apple code, but defer anything needing the paid Apple Developer account.
-- **No custom domain** until Phase 8. Use provider-issued URLs; nothing in Phases 2–7 may depend on a custom domain. Remind the owner before Phase 8.
+- **No custom domain until needed:** before any closed testing with other people, and at the latest Phase 8. Use provider-issued URLs until then; owner-only testing must not depend on a custom domain. Remind the owner before closed testing or Phase 8, whichever comes first.
 - Never ask the owner to paste a password, token or service key into chat. Secrets go to GitHub environment secrets, Supabase secrets, or the cloud environment's settings.
 
 ## Process

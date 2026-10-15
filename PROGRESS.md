@@ -31,7 +31,8 @@
 - [x] Web E2E (Playwright) all green — 10 tests, desktop + phone viewport
 - [x] Mobile app: age gate first, email/Google/Apple sign-in, profile & privacy, emergency contact, export, delete (bundles for Android + iOS)
 - [x] Mobile unit tests (Jest) — 13 tests
-- [x] CI (GitHub Actions) green on GitHub (run #3): lint, typecheck, unit, pgTAP, web E2E; database deploy workflow (staging auto, production manual)
+- [x] CI (GitHub Actions) green on GitHub: lint, typecheck, unit, pgTAP, web E2E; database deploy workflow (staging auto, production manual)
+- [x] **Approval run:** CI run #6 on commit `0d61553` (all jobs green): https://github.com/NickPittsTT/RunLime/actions/runs/38162201374
 - [x] README (setup, env vars, deployment), .env.example, bootstrap-super-admin script
 - [x] Phase 1 review report (`docs/phase-1/REVIEW.md`)
 
@@ -47,7 +48,7 @@
 - [x] Emergency-contact key verify on staging: `currentKey: ok`, 0 undecryptable
 - [x] 6-digit code email template applied on staging (after the owner set up Gmail SMTP, Option A)
 - [x] Staging `legal.support_email` = runlimett@gmail.com (placeholder until there's a domain)
-- [x] Email delivery via Gmail SMTP works: test code sent to runlimett@gmail.com, HTTP 200 (2026-10-15 16:24 UTC). Earlier failures: the new app password hadn't been saved
+- [x] Email delivery via Gmail SMTP: **owner-confirmed 2026-10-15** — "Your RunLime sign-in code" with 6 digits arrived in the runlimett@gmail.com inbox (Supabase accepted it with HTTP 200 at 16:24 UTC). Earlier failures were because the new app password hadn't been saved
 - [ ] Android staging APK: build 98d0e228 failed (splash image missing; fixed in 290f8b3 with icons + test); rebuild in progress
 - [ ] First Android staging build (internal APK) → install link sent; owner runs the phone test script
 
@@ -69,21 +70,17 @@
 - [x] Final pre-approval checks: corrected PowerShell key command; exactly-18-today / 18-tomorrow tests on every layer + phone script; Terms: false DOB is a breach and grounds for closure; domain + email service recorded as required before closed testing with others.
 
 ## Waiting on the owner
-2. Operator details, child-safety contact, support email: your answer used placeholder text (`[MY FULL NAME]`, `[ADDRESS]`, `[NAME]`, `[EMAIL]`). You can enter the real values straight into staging `app_settings` (see `docs/phase-2/PLAN.md`, item 14) without sharing them here.
-3. Accounts and keys for Phase 2 task 1, items 1–9 in `docs/phase-2/PLAN.md` (Expo, GitHub `staging` environment, Supabase secrets, emergency-contact key).
-4. Google Cloud OAuth setup, items 10–13 (for Google sign-in testing).
-5. Free web host choice: Cloudflare Workers (recommended) or Netlify. Vercel Hobby forbids commercial use.
-6. Confirm the Supabase Free plan offers the "Before User Created" and "Custom Access Token" auth hooks and TOTP MFA.
-7. Bank name / account name and VAT status — before Phase 7.
-8. Domain — not yet; **remind the owner before Phase 8**. Nothing in Phases 2–7 depends on it.
-   - **A custom domain AND an email service (custom SMTP) are needed before any closed testing with other people**, including Google Play's closed test with 12+ testers. Supabase's free built-in mailer only sends to members of your Supabase organisation, with a very low hourly limit. Free email services (e.g. Resend's free tier) need a verified domain to send to anyone else. Until then, only you can test email sign-in.
-9. Confirm "RunLime" availability (stores, domains, TT IPO/USPTO/WIPO) before store bundle IDs are fixed (Phase 8).
-10. Attorney review of `docs/legal/` before launch.
-11. Apple Developer account (paid) — deferred until budget allows; iOS testing and Sign in with Apple wait for it.
+1. Legal details still open: operator name, operator address, child-safety contact name and email. (Support email is set on staging: runlimett@gmail.com, until there's a domain.) You can enter them straight into staging `app_settings` (see `docs/phase-2/PLAN.md`, item 14) without sharing them here.
+2. Google Cloud OAuth setup, items 10–13 in `docs/phase-2/PLAN.md` (for Google sign-in testing).
+3. Bank name / account name and VAT status — before Phase 7.
+4. Custom domain + email service: needed **before any closed testing with other people** (including Google Play's 12-tester closed test), and at the latest Phase 8. Gmail SMTP is for staging/owner testing only. Free email services (e.g. Resend's free tier) need a verified domain to send to anyone else.
+5. Confirm "RunLime" availability (stores, domains, TT IPO/USPTO/WIPO) before store bundle IDs are fixed (Phase 8).
+6. Attorney review of `docs/legal/` before launch.
+7. Apple Developer account (paid) — deferred until budget allows; iOS testing and Sign in with Apple wait for it.
 
 ## Decided (owner, 2026-10-11)
 - Operator: "RunLime, operated by <owner>" (individual); may transfer to RunLime Limited, so operator details stay in settings.
 - Availability: Trinidad and Tobago only, both stores. Caribbean expansion later (BACKLOG lists what each country needs).
 - Supabase staging: us-east-1, project `fmnmylqxrmxuzmdcvmhs`. The Privacy Policy states data is stored in the United States.
 - Organiser payments: manual bank transfer only; no card gateway in v1.
-- Budget: free tiers only; Android first; iOS/Apple deferred; no custom domain until Phase 8.
+- Budget: free tiers only; Android first; iOS/Apple deferred; no custom domain until needed: before any closed testing with other people, and at the latest Phase 8.

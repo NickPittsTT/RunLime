@@ -53,8 +53,24 @@ function report(title, cfg) {
   }
 }
 
+// Custom SMTP diagnostics: host/port/sender only; the username and password are never printed, only checked.
+function smtpReport(cfg) {
+  const mask = (e) => (typeof e === 'string' && e.includes('@') ? e.replace(/^(.).*(@.*)$/, '$1…$2') : JSON.stringify(e ?? null));
+  const pass = cfg.smtp_pass;
+  console.log('\n== Custom SMTP (non-secret view)');
+  console.log(`smtp_host = ${JSON.stringify(cfg.smtp_host ?? null)}`);
+  console.log(`smtp_port = ${JSON.stringify(cfg.smtp_port ?? null)}`);
+  console.log(`smtp_sender_name = ${JSON.stringify(cfg.smtp_sender_name ?? null)}`);
+  console.log(`smtp_admin_email (From) = ${mask(cfg.smtp_admin_email)}`);
+  console.log(`smtp_user set = ${Boolean(cfg.smtp_user)}; same as From = ${cfg.smtp_user ? String(cfg.smtp_user).trim().toLowerCase() === String(cfg.smtp_admin_email ?? '').trim().toLowerCase() : 'n/a'}`);
+  console.log(`smtp_user has spaces = ${cfg.smtp_user ? /\s/.test(String(cfg.smtp_user)) : 'n/a'}`);
+  console.log(`smtp_pass returned by API = ${pass ? 'yes' : 'no (write-only)'}${pass ? `; contains spaces = ${/\s/.test(String(pass))}` : ''}`);
+  console.log(`smtp_max_frequency = ${JSON.stringify(cfg.smtp_max_frequency ?? null)}; rate_limit_email_sent = ${JSON.stringify(cfg.rate_limit_email_sent ?? null)}`);
+}
+
 const before = await getConfig();
 report('Current staging auth config', before);
+smtpReport(before);
 const unsupported = Object.keys(desired).filter((k) => !(k in before));
 const body = Object.fromEntries(Object.entries(desired).filter(([k]) => k in before));
 

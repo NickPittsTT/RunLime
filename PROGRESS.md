@@ -47,8 +47,8 @@
 - [x] Emergency-contact key verify on staging: `currentKey: ok`, 0 undecryptable
 - [x] 6-digit code email template applied on staging (after the owner set up Gmail SMTP, Option A)
 - [x] Staging `legal.support_email` = runlimett@gmail.com (placeholder until there's a domain)
-- [ ] **Email delivery fails:** Supabase gets an error from Gmail (HTTP 500 "Error sending confirmation email"). Host/port/username/sender check out, so the likely cause is the Gmail app password or 2-Step Verification → owner to check, then re-run Configure auth with a test email
-- [ ] Android staging APK: EAS build run #2 in progress
+- [x] Email delivery via Gmail SMTP works: test code sent to runlimett@gmail.com, HTTP 200 (2026-10-15 16:24 UTC). Earlier failures: the new app password hadn't been saved
+- [ ] Android staging APK: build 98d0e228 failed (splash image missing; fixed in 290f8b3 with icons + test); rebuild in progress
 - [ ] First Android staging build (internal APK) → install link sent; owner runs the phone test script
 
 **Platform**

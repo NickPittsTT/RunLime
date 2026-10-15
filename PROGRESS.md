@@ -1,6 +1,6 @@
 # RunLime — Progress
 
-**Last updated:** 2026-10-15
+**Last updated:** 2026-10-15 (Phase 2 built, waiting for review)
 
 ## Phases
 
@@ -8,7 +8,7 @@
 |---|---|---|---|
 | 0 | Questions, architecture, data model, screens, brand, costs | Approved by owner (rev 2) | 100% |
 | 1 | Setup, environments, auth + 18+ age gate, roles, RLS, seed, legal drafts | Approved by owner (2026-10-11) | 100% |
-| 2 | Events: organiser portal, admin approval, onboarding, calendar, event page, public web | In progress | 20% |
+| 2 | Events: organiser portal, admin approval, onboarding, calendar, event page, public web | **Built; waiting for owner review** (`docs/phase-2/REVIEW.md`) | 95% |
 | 3 | RSVP, followers, clubs (leaders, approvals, requests, turnout), runner level, notifications/broadcasts, attendance dashboard | Not started | 0% |
 | 4 | GPS check-in | Not started | 0% |
 | 5 | Run tracker, history, totals | Not started | 0% |
@@ -66,8 +66,17 @@
 - [x] Owner: Cloudflare account (Free), subdomain `runlimett`, `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` (token rolled once after exposure; the new one works)
 - [x] **Staging web live (2026-10-15):** https://runlime-web-staging.runlimett.workers.dev — Deploy web run #3 green: 2.52 MiB, smoke test `/`, `/legal/terms`, `/legal/privacy` → 200, Edge Function `ALLOWED_ORIGINS` set to the site
 - [x] Owner: `STAGING_WEB_URL` saved (2026-10-15); owner confirmed the site works on their phone and Terms shows the operator name + support email, no address
-- [ ] Phase 2 feature work (events, organiser portal, calendar, onboarding, public pages) — after Task 1
-- [ ] RunLime listings (owner's pilot plan): events without an organiser (`listing_source = runlime`, official link required, no media/sponsors), admin create-event A4, `events.unaffiliated_notice` setting shown on app + web event pages; pgTAP for the constraints
+
+**Phase 2 feature work**
+- [x] Database: RunLime listings, distances, co-organisers, media + sponsors, change history, duplicates, race suggestions, write RPCs, Phase 2 settings; pgTAP 136 passing. Deployed to staging (Deploy database green on `19c6642`)
+- [x] Admin (web): events queue, create event (RunLime listing or organisation), review, postpone/cancel, duplicate, history, suggestions, settings editor
+- [x] Organiser portal (web): dashboard, editor with map pin + route (tap or GPX), submit, postpone/cancel, duplicate, flyers/photos, sponsors, co-organisers, organisation settings + team
+- [x] Public web: landing, `/races` month calendar + filters, `/e/[slug]` with not-affiliated + minors notices, `.ics`, share. Deployed (Deploy web green on `19c6642`; Worker 1.78 MiB after switching to webpack)
+- [x] App: ride-share navigation (top bar, side menu, Start run, no tabs), age gate auto-advance, month view + list, search, filters, near me, map, race page + full-screen map, onboarding, suggest a race, offline copy. Jest 42 passing
+- [x] Web E2E 12/12 on Cloudflare's runtime (local)
+- [x] Phase 2 review + owner test script: `docs/phase-2/REVIEW.md`
+- [ ] Staging APK with the Phase 2 app (EAS build started 2026-10-15)
+- [ ] **Owner review of Phase 2** (test script sections A–C)
 
 ## Phase 1 approval items (owner, 2026-10-11)
 - [x] a. CI fully green on GitHub, including web E2E (see the latest run in the Phase 1 review)

@@ -1,6 +1,6 @@
 # Phase 2 plan
 
-**Status (2026-10-15):** Task 1 (Android build on the owner's phone) is **complete**: phone test sections A–E passed, Google sign-in and legal links work. Phase 2 feature work started.
+**Status (2026-10-15):** Task 1 (Android build on the owner's phone) is **complete**: phone test sections A–E passed, Google sign-in and legal links work. Phase 2 feature work **built**; review report and test script in `REVIEW.md`, waiting for owner review.
 
 ## Phase 2 feature work (in build order)
 1. **Database:** RunLime listings (`listing_source`, organiser optional, official link required, no flyers/logos), event distances, media + sponsors (organiser events only), co-organisers, change history, race suggestions, duplicate detection, Phase 2 settings (incl. `events.unaffiliated_notice`), public calendar queries. pgTAP for every table/rule.

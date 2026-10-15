@@ -60,7 +60,7 @@ erDiagram
 ### Identity & roles
 | Table | Key columns | Notes |
 |---|---|---|
-| `profiles` | `id` (= auth.users.id), `display_name`, `nickname`, `date_of_birth date NOT NULL`, `home_region_id`, `weight_kg numeric(5,1) NULL`, `health_consent_at`, `account_privacy` (`private` default / `public`), `show_attendance_to_clubs bool default false`, `country_code`, `timezone`, `created_at` | **Hard rule:** trigger rejects any insert/update where age < 18 (pgTAP-tested). Created only through `complete_signup` |
+| `profiles` | `id` (= auth.users.id), `display_name`, `nickname`, `date_of_birth date NOT NULL`, `home_region_id`, `runner_level NULL` (`casual`,`club`,`competitive`; self-declared, optional, Phase 3), `verified_runner_at NULL` + `verified_runner_by` (admin-only columns, Phase 6), `weight_kg numeric(5,1) NULL`, `health_consent_at`, `account_privacy` (`private` default / `public`), `show_attendance_to_clubs bool default false`, `country_code`, `timezone`, `created_at` | **Hard rule:** trigger rejects any insert/update where age < 18 (pgTAP-tested). Created only through `complete_signup` |
 | `profile_private` | `user_id`, `emergency_contact_ciphertext text`, `key_version smallint` | Owner-only RLS; no admin policy. Encrypted in the Edge Function (F5) |
 | `user_roles` | `user_id`, `role app_role`, `granted_at` | PK (user_id, role). Only Super Admin at `aal2` can insert/delete `platform_admin`. Who granted it is recorded in the audit log via alias |
 | `consents` | `user_id`, `kind` (`location`, `health_data`, `public_sharing`, `marketing_push`, `terms`, `privacy`), `version`, `granted_at`, `revoked_at` | Evidence for DPA / store forms |
@@ -97,7 +97,8 @@ erDiagram
 | `rsvp_history` | append-only, for the organiser trend chart (aggregated nightly to `event_stats_daily`) |
 | `event_follows` | implicit when RSVP is attending/maybe; explicit "follow" too |
 | `check_ins` | `user_id`, `event_id`, `method` (`gps` only in v1), `lat/lng rounded to 3 dp`, `accuracy_m`, `checked_in_at`. UNIQUE (user_id, event_id). Insert only via RPC |
-| `clubs`, `club_members` | Admin-created clubs (screen A14); users join/leave; `show_attendance_to_clubs` opt-in |
+| `clubs`, `club_members` | Admin-approved clubs (screen A14). **Phase 3 change (owner, 2026-10-15):** `club_members` gains `status` (`pending`,`approved`,`declined`), `role` (`member`,`leader`), `requested_at`, `decided_at`, `decided_by`. A join creates a `pending` row; a club **leader** (or an admin) approves or declines. **Only `approved` memberships count anywhere** (member counts, turnout, club leaderboards). Leaders are assigned by an admin (A14); `leader` is a per-club role on the membership row, not a new app role. The Phase 1 "join immediately" policy and its pgTAP test change accordingly |
+| `club_requests` | `name`, `region_id`, `description`, `requested_by`, `status` (`pending`,`approved`,`rejected`), `reviewed_by`, `review_note`, `created_club_id`. A user asks for a club missing from the list; an admin approves (creates the club; the requester becomes its first leader by default) or rejects with a reason. Rate-limited |
 | `follows` | `follower_id`, `followee_id`, `status` (`pending`,`accepted`), `created_at`, `accepted_at`. PK (follower, followee). Insert = `accepted` if the followee is public, else `pending`. Either side can delete. Blocking deletes both directions |
 | `event_stats_daily` | `event_id`, `date`, `attending`, `maybe`, `not_attending`, `group_total`, `children_total`, `views`, `shares`, `calendar_adds`, `checkins`, `by_region jsonb` |
 | `event_counters` | live counters updated by triggers (fast public "N attending") |
@@ -121,12 +122,31 @@ Two boards: **Kilometres** (tracked runs) and **Races attended** (GPS check-ins)
 | `leaderboard_totals` | `user_id`, `board` (`km`,`races`), `period` (`week`,`month`,`year`), `period_start date`, `value numeric(10,2)`, `updated_at`. PK (user_id, board, period, period_start). Recomputed for one user on run insert/update/delete and on check-in, plus a nightly pg_cron rebuild. **No direct read access (RLS: none)**; read only through the RPC below |
 | RPC `leaderboard(board, period, scope)` | `SECURITY DEFINER`. Returns the top N + the caller's row with rank (competition ranking: 1, 2, 2, 4). Includes only opted-in users who are not suspended, not excluded by moderation, and not blocked by or blocking the viewer. `following` scope = accepted follows of the caller + the caller. Returns name, rank and value only, never routes, run times or areas |
 
+**Runner level vs speed checks:** a self-declared `runner_level` never changes any check. Only admin **verified runner** status (`profiles.verified_runner_at`, set in A6, audited) applies the faster limit `leaderboard.verified_min_pace_sec_per_km` instead of `leaderboard.min_pace_sec_per_km` (assumption: verified runners still have a limit, so a car or bike trip can never count; both values are settings).
+
 **Verified data only:**
 - **Kilometres:** only `runs.source = 'tracked'` (recorded by the app's GPS tracker). Typed-in times never count. A run is excluded if its average pace is faster than `leaderboard.min_pace_sec_per_km`, or any 1 km split is faster than that limit (impossible speed: car, bike, GPS jump). A run longer than `leaderboard.max_run_km` is excluded too.
 - **Races attended:** count of the user's GPS `check_ins` in the period (one per event, by design).
 - Limit (stated in the in-app disclaimer): tracked runs come from the user's phone, so a determined user could fake GPS. The server checks above remove impossible values; reports and the admin `exclude_from_leaderboards` action handle the rest.
 
-**Settings (admin-editable, never hardcoded):** `leaderboard.enabled` (bool), `leaderboard.size` (20), `leaderboard.min_pace_sec_per_km` (155 = 2:35 /km), `leaderboard.max_run_km` (100), `leaderboard.disclaimer` ("Just for fun. Based on runs tracked in RunLime and GPS race check-ins. No prizes.").
+### Club leaderboards (Phase 6, owner decision 2026-10-15)
+Ranks clubs on three measures, each shown as a **total** and **per member** (so small clubs can compete). Same periods as the individual boards (Weekly / Monthly / Year).
+
+| Measure | Total | Per member |
+|---|---|---|
+| Kilometres | sum of counted km (same verified-data rules as above) by counted members | total ÷ counted members |
+| Races attended | GPS check-ins by counted members | total ÷ counted members |
+| Average members per race | for each race in the period with ≥ 1 counted member checked in: number of counted members checked in; averaged over those races | that average ÷ counted members (a "turnout %") |
+
+- **Counted member** = `approved` membership **and** leaderboard opt-in, not suspended or excluded. Activity counts only from the date the membership was approved.
+- `club_leaderboard_totals`: `club_id`, `measure`, `period`, `period_start`, `total`, `counted_members`, `per_member`, `updated_at`. Built from `leaderboard_totals` + `check_ins` (nightly + on change). Read via RPC `club_leaderboard(measure, period, basis)` (`basis` = `total`/`per_member`), top N + the viewer's own clubs.
+- Per-member rankings only include clubs with at least `clubs.leaderboard_min_members` counted members (setting, default 3), so a one-person club can't top the per-member board.
+- Assumption to confirm: a user may belong to several clubs; their activity counts for **each** approved club.
+
+### Club turnout on race pages (Phase 3, owner decision 2026-10-15)
+Race pages (app + web) and organiser dashboards show "Club X: 25 attending". The count includes only members with an `approved` membership who turned on **show my attendance in club turnout** (`profiles.show_attendance_to_clubs`, existing, opt-in, off by default; its wording now says the count is public). Counts below `clubs.turnout_min_count` (setting, default 3) are hidden, so nobody is singled out by a "1 attending". Read via a view/RPC returning counts only, never names.
+
+**Settings (admin-editable, never hardcoded):** `clubs.turnout_min_count` (3), `clubs.leaderboard_min_members` (3), `leaderboard.verified_min_pace_sec_per_km` (e.g. 140 = 2:20 /km), `leaderboard.enabled` (bool), `leaderboard.size` (20), `leaderboard.min_pace_sec_per_km` (155 = 2:35 /km), `leaderboard.max_run_km` (100), `leaderboard.disclaimer` ("Just for fun. Based on runs tracked in RunLime and GPS race check-ins. No prizes.").
 
 ### Notifications
 | Table | Notes |

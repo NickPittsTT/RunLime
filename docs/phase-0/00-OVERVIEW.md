@@ -88,6 +88,12 @@ A9 revised: the public "attending" count = sum of (`group_size` + `children_coun
 - Until then the owner is the admin and enters real upcoming races with the admin "create event" screen (A4) as **RunLime listings**: facts only (name, date, start time, distance, official registration link, plus venue and start pin, which GPS check-in needs), a visible "not affiliated, check with the organiser" notice, and **no organiser flyers or logos without permission**.
 - Before the pilot: custom domain + email service (closed testing with other people), and Google Play's closed-test rules if the pilot uses the Play Store (STORE-REQUIREMENTS C14).
 
+**S6 Runner level, clubs with leaders, club turnout, club leaderboards.**
+- *Runner level* (Phase 3): optional Casual / Club runner / Competitive, asked in onboarding, editable. Self-declared; it never bypasses speed checks. Only admin "verified runner" status changes the limit (Phase 6).
+- *Clubs* (Phase 3): pick from the admin-approved list in onboarding or later; joining needs a club leader's approval; users can request a new club, which the admin approves. New per-club **leader** role. Only approved memberships count.
+- *Club turnout* (Phase 3): "Club X: 25 attending" on race pages and organiser dashboards, from approved members who opted in; small counts hidden.
+- *Club leaderboards* (Phase 6): km, races attended, average members per race; each as a total and per member; opted-in approved members only.
+
 ## 5. Open items (owner)
 
 1. Items 2, 3, 4 above came through as unfilled template text. Legal drafts use the tokens `{{operator_name}}`, `{{support_email}}`, `{{website}}`. (The operator address is not a token: owner decision 2026-10-15, kept non-public for official records only.) They are filled from settings at render time, and the web portal shows a visible "DRAFT — operator details missing" banner until they're set.

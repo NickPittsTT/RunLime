@@ -8,7 +8,7 @@
 |---|---|---|---|
 | 0 | Questions, architecture, data model, screens, brand, costs | Approved by owner (rev 2) | 100% |
 | 1 | Setup, environments, auth + 18+ age gate, roles, RLS, seed, legal drafts | Approved by owner (2026-10-11) | 100% |
-| 2 | Events: organiser portal, admin approval, onboarding, calendar, event page, public web | In progress | 10% |
+| 2 | Events: organiser portal, admin approval, onboarding, calendar, event page, public web | In progress | 15% |
 | 3 | RSVP, followers & clubs, notifications/broadcasts, attendance dashboard | Not started | 0% |
 | 4 | GPS check-in | Not started | 0% |
 | 5 | Run tracker, history, totals | Not started | 0% |
@@ -41,9 +41,12 @@
 - [x] Expo project linked (`ca1a5ee2-b15a-488d-b123-8fd075db8be1`), `expo-dev-client`, EAS development profile (APK, debug key)
 - [x] "Mobile dev build (Android)" workflow (EAS free tier; uses `EXPO_TOKEN` from GitHub secrets)
 - [x] Owner: `EXPO_TOKEN` secret added
-- [ ] Owner: `SUPABASE_PROJECT_REF` (staging environment variable) and `SUPABASE_ANON_KEY` (repository variable)
-- [ ] Staging database deployed (needs the Supabase secrets, items 5–7 in `docs/phase-2/PLAN.md`)
-- [ ] First build started; APK link sent; owner runs the phone test script
+- [x] Owner: staging variables and secrets, plus emergency-contact key v1 in Supabase secrets
+- [x] Staging deployed: 7 migrations, 3 Edge Functions, 8 legal drafts (no seed data, no test accounts)
+- [x] Auth configured on the Free plan: Before User Created hook (probe: no DOB → 403, 17-year-old → 403), Custom Access Token hook, TOTP MFA on, 6-digit OTP valid 10 min, app redirect URL
+- [x] Emergency-contact key verify on staging: `currentKey: ok`, 0 undecryptable
+- [ ] **Blocked (Free plan):** email templates can't be changed on the default mailer, so the sign-in email contains a link, not the 6-digit code → owner decision (custom SMTP, or app change to link sign-in)
+- [ ] First Android staging build (internal APK) → install link sent; owner runs the phone test script
 
 **Platform**
 - [x] Workflows moved off Node 20 (checkout@v5, setup-node@v5, pnpm/action-setup@v5, upload-artifact@v6, supabase/setup-cli@v2)

@@ -144,15 +144,18 @@ if (testEmail && anonKey) {
 if (process.argv.includes('--mail-log')) {
   const end = new Date();
   const start = new Date(end.getTime() - 6 * 3600 * 1000);
-  const sql = "select timestamp, event_message from auth_logs where regexp_contains(lower(event_message), 'smtp|mail|535|534|auth') and regexp_contains(lower(event_message), 'error|fail') order by timestamp desc limit 8";
-  const url = `https://api.supabase.com/v1/projects/${ref}/analytics/endpoints/logs.all?sql=${encodeURIComponent(sql)}&iso_timestamp_start=${start.toISOString()}&iso_timestamp_end=${end.toISOString()}`;
+  // logs.all was retired (HTTP 410); the replacement 'logs' endpoint takes ClickHouse SQL over one unified table.
+  const sql = "select timestamp, event_message from logs where source_name = 'auth_logs' and (event_message ilike '%smtp%' or event_message ilike '%mail%' or event_message ilike '%535%' or event_message ilike '%534%') order by timestamp desc limit 8";
+  const url = `https://api.supabase.com/v1/projects/${ref}/analytics/endpoints/logs?sql=${encodeURIComponent(sql)}&iso_timestamp_start=${start.toISOString()}&iso_timestamp_end=${end.toISOString()}`;
+  const redactText = (s) => String(s).replace(/[\w.+-]+@[\w-]+(\.[\w-]+)+/g, '<email>');
   const res = await fetch(url, { headers });
   const text = await res.text();
   console.log(`\n== Auth mail errors, last 6 h: HTTP ${res.status}`);
   let rows = [];
-  try { rows = JSON.parse(text).result ?? []; } catch { console.log(text.slice(0, 300)); }
+  try { rows = JSON.parse(text).result ?? []; } catch { /* not JSON */ }
+  if (!res.ok || !rows.length) console.log(redactText(text).slice(0, 500));
   const redact = (s) => String(s).replace(/[\w.+-]+@[\w-]+(\.[\w-]+)+/g, '<email>').replace(/"(password|pass|token)"\s*:\s*"[^"]*"/gi, '"$1":"<hidden>"');
-  for (const r of rows) console.log(`${new Date(Number(r.timestamp) / 1000).toISOString()} ${redact(r.event_message).slice(0, 600)}`);
+  for (const r of rows) console.log(`${/^\d+$/.test(String(r.timestamp)) ? new Date(Number(r.timestamp) / 1000).toISOString() : r.timestamp} ${redact(r.event_message).slice(0, 600)}`);
   if (!res.ok) console.log('(logs API unavailable: read Dashboard → Logs → Auth instead)');
   else if (!rows.length) console.log('(no matching rows)');
 }

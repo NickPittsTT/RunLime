@@ -145,7 +145,7 @@ if (process.argv.includes('--mail-log')) {
   const end = new Date();
   const start = new Date(end.getTime() - 6 * 3600 * 1000);
   // logs.all was retired (HTTP 410); the replacement 'logs' endpoint takes ClickHouse SQL over one unified table.
-  const sql = "select timestamp, event_message from logs where source_name = 'auth_logs' and (event_message ilike '%smtp%' or event_message ilike '%mail%' or event_message ilike '%535%' or event_message ilike '%534%') order by timestamp desc limit 8";
+  const sql = process.env.MAIL_LOG_SQL || "select timestamp, event_message from logs where event_message ilike '%mail%' order by timestamp desc limit 8";
   const url = `https://api.supabase.com/v1/projects/${ref}/analytics/endpoints/logs?sql=${encodeURIComponent(sql)}&iso_timestamp_start=${start.toISOString()}&iso_timestamp_end=${end.toISOString()}`;
   const redactText = (s) => String(s).replace(/[\w.+-]+@[\w-]+(\.[\w-]+)+/g, '<email>');
   const res = await fetch(url, { headers });

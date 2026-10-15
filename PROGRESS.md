@@ -76,7 +76,7 @@
 - [x] Final pre-approval checks: corrected PowerShell key command; exactly-18-today / 18-tomorrow tests on every layer + phone script; Terms: false DOB is a breach and grounds for closure; domain + email service recorded as required before closed testing with others.
 
 ## Waiting on the owner
-1. Legal details still open: operator name, child-safety contact name and email. (Operator address: optional, non-public, for official records only.) (Support email is set on staging: runlimett@gmail.com, until there's a domain.) You can enter them straight into staging `app_settings` (see `docs/phase-2/PLAN.md`, item 14) without sharing them here.
+1. Legal details on staging: **done (2026-10-15).** Operator name and child-safety contact email entered by the owner; support email = runlimett@gmail.com; `legal.website` = the staging site URL (set by Claude). Deploy web now checks the live legal pages for any "not yet set" placeholder. Still to do: the child-safety contact person's **name** goes in Play Console at store submission (Phase 8); the operator address stays optional and non-public.
 1a. Cloudflare: items 15–18 done (2026-10-15).
 2. Google Android OAuth client (item 13): **done by the owner on 2026-10-15** (`GOOGLE_ANDROID_CLIENT_ID` set). Section D to be tested on the next build.
 3. Bank name / account name and VAT status — before Phase 7.

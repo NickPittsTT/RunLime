@@ -1,0 +1,36 @@
+# Set a legal operator/contact setting (e.g. legal.support_email) in an environment. Audited in the database.
+name: Set legal setting
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Environment
+        type: choice
+        options: [staging, production]
+        default: staging
+      key:
+        description: Setting key
+        type: choice
+        options: [legal.support_email, legal.child_safety_contact_email, legal.operator_name, legal.operator_address, legal.website]
+      value:
+        description: Plain text value (stored as a JSON string)
+        required: true
+
+jobs:
+  set:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Update setting
+        env:
+          SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          KEY: ${{ inputs.key }}
+          VALUE: ${{ inputs.value }}
+        run: node scripts/set-setting.mjs "$KEY" "$(node -e 'console.log(JSON.stringify(process.env.VALUE))')"

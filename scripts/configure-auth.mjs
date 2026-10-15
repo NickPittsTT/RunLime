@@ -110,4 +110,18 @@ if (anonKey && after.hook_before_user_created_enabled !== true) {
   await probe('17-year-old', { date_of_birth: `${new Date().getUTCFullYear() - 17}-01-01` });
 }
 
+// Optional delivery test: send a real sign-in code to an owner-chosen address (--test-email=…).
+// Creates a profile-less auth user that the 1-hour purge removes; it can do nothing without completing the age gate.
+const testEmail = process.argv.find((a) => a.startsWith('--test-email='))?.split('=')[1];
+if (testEmail && anonKey) {
+  const res = await fetch(`https://${ref}.supabase.co/auth/v1/otp`, {
+    method: 'POST',
+    headers: { apikey: anonKey, 'content-type': 'application/json' },
+    body: JSON.stringify({ email: testEmail, create_user: true, data: { date_of_birth: '1990-01-01' } }),
+  });
+  const t = await res.text();
+  console.log(`\n== Delivery test to ${testEmail.replace(/^(.).*(@.*)$/, '$1…$2')}: HTTP ${res.status} ${res.ok ? '(accepted by the SMTP server — check the inbox for a 6-digit code)' : t.slice(0, 200)}`);
+  if (!res.ok) failed = true;
+}
+
 process.exit(failed ? 1 : 0);

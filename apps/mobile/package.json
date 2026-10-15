@@ -14,7 +14,7 @@
   "jest": {
     "preset": "jest-expo",
     "transformIgnorePatterns": [
-      "node_modules/(?!(?:.pnpm/)?((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@supabase/.*|@runlime/.*))"
+      "node_modules/(?!(?:.pnpm/)?((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@supabase/.*|@runlime/.*|@expo\\+vector-icons))"
     ],
     "setupFiles": [
       "./jest.setup.js"
@@ -24,6 +24,8 @@
     }
   },
   "dependencies": {
+    "@expo/vector-icons": "^15.1.1",
+    "@maplibre/maplibre-react-native": "11.4.0",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-google-signin/google-signin": "16.1.5",
     "@runlime/shared": "workspace:*",
@@ -37,6 +39,7 @@
     "expo-file-system": "~57.0.7",
     "expo-font": "~57.0.4",
     "expo-linking": "~57.0.12",
+    "expo-location": "~57.0.21",
     "expo-router": "~57.0.25",
     "expo-secure-store": "~57.0.4",
     "expo-sharing": "~57.0.22",
@@ -54,6 +57,7 @@
   },
   "devDependencies": {
     "@testing-library/react-native": "^13.3.3",
+    "@types/geojson": "7946.0.16",
     "@types/jest": "^29.5.14",
     "@types/react": "~19.2.18",
     "babel-preset-expo": "~57.0.14",

@@ -28,7 +28,8 @@ const config: ExpoConfig = {
   android: {
     package: bundleId.replace(/-/g, '_'),
     adaptiveIcon: { foregroundImage: './assets/adaptive-icon.png', backgroundColor: '#14532D' },
-    // Phase 1 needs no dangerous permissions. Location/activity recognition are added in Phases 4–5 with disclosures.
+    // Phase 2: foreground location for "Near me" only (asked when the user taps it; never sent or stored).
+    // Background location and activity recognition arrive in Phase 5 with their own disclosures.
     blockedPermissions: [
       'android.permission.ACCESS_BACKGROUND_LOCATION',
       'android.permission.RECORD_AUDIO',
@@ -44,6 +45,19 @@ const config: ExpoConfig = {
     'expo-apple-authentication',
     // The splash plugin always references a logo drawable, so it must be given an image (EAS build 98d0e228).
     ['expo-splash-screen', { image: './assets/splash-icon.png', imageWidth: 200, backgroundColor: '#14532D', resizeMode: 'contain' }],
+    [
+      'expo-location',
+      {
+        locationWhenInUsePermission: 'RunLime uses your location to show races near you. It stays on your phone.',
+        locationAlwaysAndWhenInUsePermission: false,
+        locationAlwaysPermission: false,
+        motionUsagePermission: false,
+        isIosBackgroundLocationEnabled: false,
+        isAndroidBackgroundLocationEnabled: false,
+        isAndroidForegroundServiceEnabled: false,
+      },
+    ],
+    '@maplibre/maplibre-react-native',
     ...(googleIosUrlScheme ? [['@react-native-google-signin/google-signin', { iosUrlScheme: googleIosUrlScheme }] as [string, unknown]] : []),
   ],
   experiments: { typedRoutes: true },

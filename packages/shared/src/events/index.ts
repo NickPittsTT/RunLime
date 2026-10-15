@@ -3,6 +3,8 @@
  * All calendar dates are computed in the event's IANA time zone (America/Port_of_Spain for TT).
  */
 
+import { z } from 'zod';
+
 export { isoToZonedLocal, parseGpx, zonedLocalToIso } from './time';
 
 export interface CalendarEvent {
@@ -23,6 +25,40 @@ export interface CalendarEvent {
   currency: string;
   cause: string | null;
   distances: { distance_km: number; label: string }[];
+}
+
+/** Columns for calendar rows (web + mobile select the same shape). */
+export const CALENDAR_COLUMNS =
+  'id, slug, name, starts_at, timezone, status, listing_source, region_id, venue_name, start_lat, start_lng, walk_friendly, fee_min, fee_max, currency, cause, distances:event_distances(distance_km, label)';
+
+/** Validates calendar rows from the API (numeric columns may arrive as strings). */
+export const calendarEventSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  name: z.string(),
+  starts_at: z.string(),
+  timezone: z.string(),
+  status: z.string(),
+  listing_source: z.enum(['organiser', 'runlime']),
+  region_id: z.string(),
+  venue_name: z.string(),
+  start_lat: z.coerce.number(),
+  start_lng: z.coerce.number(),
+  walk_friendly: z.boolean(),
+  fee_min: z.coerce.number(),
+  fee_max: z.coerce.number().nullable(),
+  currency: z.string(),
+  cause: z.string().nullable(),
+  distances: z.array(z.object({ distance_km: z.coerce.number(), label: z.string() })),
+});
+
+/** Parse rows, dropping (not throwing on) any that do not match. */
+export function parseCalendarEvents(rows: unknown): CalendarEvent[] {
+  if (!Array.isArray(rows)) return [];
+  return rows.flatMap((r) => {
+    const p = calendarEventSchema.safeParse(r);
+    return p.success ? [p.data] : [];
+  });
 }
 
 /** "YYYY-MM-DD" of an instant in a zone. */

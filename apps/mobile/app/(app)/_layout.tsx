@@ -1,10 +1,16 @@
 import { Stack } from 'expo-router';
 import { colors } from '@runlime/ui-tokens';
 
+/** N1–N4: no tab bar. Home (race calendar) has its own top bar + side menu; other screens push on top. */
 export default function AppLayout() {
   return (
     <Stack screenOptions={{ headerTintColor: colors.forest, headerTitleStyle: { fontWeight: '700' } }}>
-      <Stack.Screen name="index" options={{ title: 'Profile' }} />
+      <Stack.Screen name="index" options={{ headerShown: false, title: 'Races' }} />
+      <Stack.Screen name="onboarding" options={{ title: 'Welcome' }} />
+      <Stack.Screen name="race/[id]" options={{ title: 'Race details' }} />
+      <Stack.Screen name="race/map" options={{ title: 'Map' }} />
+      <Stack.Screen name="suggest-race" options={{ title: 'Suggest a race' }} />
+      <Stack.Screen name="profile" options={{ title: 'Profile' }} />
       <Stack.Screen name="edit-profile" options={{ title: 'Edit profile' }} />
       <Stack.Screen name="emergency-contact" options={{ title: 'Emergency contact' }} />
       <Stack.Screen name="your-data" options={{ title: 'Your data' }} />

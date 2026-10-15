@@ -7,7 +7,14 @@ const url = z
   .string()
   .trim()
   .regex(/^https?:\/\/\S+$/i, 'Enter a full link starting with https://');
-const optionalText = (max: number) => z.string().trim().max(max).optional().or(z.literal('').transform(() => undefined));
+/** Optional free text: blank (or whitespace-only) becomes undefined. */
+const optionalText = (max: number) =>
+  z
+    .string()
+    .trim()
+    .max(max)
+    .optional()
+    .transform((v) => (v ? v : undefined));
 
 export const eventDistanceSchema = z.object({
   km: z.coerce.number().positive('Distance must be more than 0').max(100),

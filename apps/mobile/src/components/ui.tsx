@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ReactNode, Ref } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -84,13 +84,14 @@ export function Button({
   );
 }
 
-export function TextField({ label, hint, error, ...props }: TextInputProps & { label: string; hint?: string; error?: string }) {
+export function TextField({ label, hint, error, inputRef, ...props }: TextInputProps & { label: string; hint?: string; error?: string; inputRef?: Ref<TextInput> }) {
   const { c, radius, minTouchTarget, fontSize } = useTheme();
   return (
     <View style={{ gap: 6 }}>
       <T style={{ fontWeight: '700' }}>{label}</T>
       {hint ? <T variant="caption">{hint}</T> : null}
       <TextInput
+        ref={inputRef}
         accessibilityLabel={label}
         accessibilityHint={hint}
         placeholderTextColor={c.inkMuted}
@@ -144,3 +145,27 @@ export function LinkRow({ label, onPress, danger }: { label: string; onPress: ()
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, gap: 12 },
 });
+
+export function Chip({ label, selected, onPress, accessibilityHint }: { label: string; selected: boolean; onPress: () => void; accessibilityHint?: string }) {
+  const { c, radius } = useTheme();
+  return (
+    <Pressable
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked: selected }}
+      accessibilityLabel={label}
+      accessibilityHint={accessibilityHint}
+      onPress={onPress}
+      style={{
+        minHeight: 40,
+        paddingHorizontal: 14,
+        borderRadius: radius.pill,
+        borderWidth: 1,
+        borderColor: selected ? c.leaf : c.border,
+        backgroundColor: selected ? c.surface : c.background,
+        justifyContent: 'center',
+      }}
+    >
+      <Text style={{ color: selected ? c.leaf : c.ink, fontWeight: selected ? '800' : '500' }}>{selected ? `✓ ${label}` : label}</Text>
+    </Pressable>
+  );
+}

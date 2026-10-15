@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { addMonths, eventsByDay, feeLabel, filterEvents, haversineKm, localDateKey, monthGrid, sortEvents, type CalendarEvent } from '../src/events';
-import { eventInputSchema, isoToZonedLocal, parseGpx, toSaveEventPayload, zonedLocalToIso } from '../src/schemas/event';
+import { addMonths, eventsByDay, feeLabel, filterEvents, haversineKm, localDateKey, monthGrid, parseCalendarEvents, sortEvents, type CalendarEvent } from '../src/events';
+import { eventInputSchema, raceSuggestionSchema, isoToZonedLocal, parseGpx, toSaveEventPayload, zonedLocalToIso } from '../src/schemas/event';
 
 const TT = 'America/Port_of_Spain';
 const ev = (over: Partial<CalendarEvent>): CalendarEvent => ({
@@ -104,5 +104,30 @@ describe('event input', () => {
     const gpx = '<gpx><trk><trkseg><trkpt lat="10.1" lon="-61.1"/><trkpt lon="-61.2" lat="10.2"></trkpt><rtept lat="10.3" lon="-61.3"/></trkseg></trk></gpx>';
     expect(parseGpx(gpx)).toEqual([[-61.1, 10.1], [-61.2, 10.2], [-61.3, 10.3]]);
     expect(parseGpx(gpx, 2)).toEqual([[-61.1, 10.1], [-61.3, 10.3]]);
+  });
+});
+
+describe('parseCalendarEvents', () => {
+  const row = {
+    id: 'a', slug: 's', name: 'N', starts_at: '2031-03-01T10:00:00+00:00', timezone: 'America/Port_of_Spain', status: 'published',
+    listing_source: 'runlime', region_id: 'r', venue_name: 'V', start_lat: '10.6', start_lng: -61.5, walk_friendly: false,
+    fee_min: '100.00', fee_max: null, currency: 'TTD', cause: null, distances: [{ distance_km: '5.0', label: '5K' }],
+  };
+  it('coerces numeric strings and drops malformed rows', () => {
+    const out = parseCalendarEvents([row, { id: 'bad' }]);
+    expect(out).toHaveLength(1);
+    expect(out[0]!.start_lat).toBe(10.6);
+    expect(out[0]!.fee_min).toBe(100);
+    expect(out[0]!.distances[0]!.distance_km).toBe(5);
+  });
+  it('returns [] for non-arrays', () => {
+    expect(parseCalendarEvents(null)).toEqual([]);
+  });
+});
+
+describe('raceSuggestionSchema', () => {
+  it('turns blank optional text into undefined', () => {
+    const v = raceSuggestionSchema.parse({ name: 'Mayaro 5K', eventDate: '', location: '  ', url: '', notes: '' });
+    expect(v).toEqual({ name: 'Mayaro 5K', eventDate: undefined, location: undefined, url: undefined, notes: undefined });
   });
 });

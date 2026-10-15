@@ -670,3 +670,78 @@ insert into public.app_settings (key, value, is_public, description) values
   ('ratelimit.race_suggestions_per_day', '5', false, 'Race suggestions one person can send per day.'),
   ('calendar.near_me_radius_km', '25', true, 'Default radius for "Near me" in the app.')
 on conflict (key) do nothing;
+
+-- ---------------------------------------------------------------------------
+-- Organisation settings (O15): edit details; owners add/remove members
+-- ---------------------------------------------------------------------------
+create function public.update_organisation(p_org uuid, p_contact_email text, p_contact_phone text, p_website text, p_about text)
+returns void
+language plpgsql security definer
+set search_path = ''
+as $$
+begin
+  if not public.is_org_member(p_org) and not public.is_admin() then
+    raise exception 'You cannot edit this organisation' using errcode = '42501';
+  end if;
+  if char_length(btrim(coalesce(p_about, ''))) < 20 then
+    raise exception 'Tell us a little more about the organisation' using errcode = '22023';
+  end if;
+  if coalesce(btrim(p_contact_email), '') !~ '^[^@\s]+@[^@\s]+\.[^@\s]+$' then
+    raise exception 'Enter a valid contact email' using errcode = '22023';
+  end if;
+  update public.organisations
+     set contact_email = btrim(p_contact_email), contact_phone = btrim(p_contact_phone),
+         website = nullif(btrim(p_website), ''), about = btrim(p_about)
+   where id = p_org;
+end;
+$$;
+
+create function public.is_org_owner(p_org uuid) returns boolean
+language sql stable security definer
+set search_path = ''
+as $$ select exists (select 1 from public.organisation_members m where m.organisation_id = p_org and m.user_id = auth.uid() and m.role = 'owner') $$;
+
+create function public.add_organisation_member(p_org uuid, p_email text, p_role public.organisation_member_role default 'manager')
+returns void
+language plpgsql security definer
+set search_path = ''
+as $$
+declare v_user uuid;
+begin
+  if not public.is_org_owner(p_org) and not public.is_admin() then
+    raise exception 'Only the organisation owner can add members' using errcode = '42501';
+  end if;
+  perform public.check_rate_limit('org_member_add', 20, interval '1 day');
+  select u.id into v_user from auth.users u join public.profiles p on p.id = u.id where lower(u.email) = lower(btrim(p_email));
+  if v_user is null then
+    raise exception 'No RunLime account uses that email. Ask them to sign up first.' using errcode = 'P0002';
+  end if;
+  insert into public.organisation_members (organisation_id, user_id, role) values (p_org, v_user, p_role)
+  on conflict (organisation_id, user_id) do update set role = excluded.role;
+  if exists (select 1 from public.organisations where id = p_org and status = 'verified') then
+    insert into public.user_roles (user_id, role) values (v_user, 'organiser') on conflict do nothing;
+  end if;
+end;
+$$;
+
+create function public.remove_organisation_member(p_org uuid, p_user uuid) returns void
+language plpgsql security definer
+set search_path = ''
+as $$
+begin
+  if not public.is_org_owner(p_org) and not public.is_admin() and p_user <> auth.uid() then
+    raise exception 'Only the organisation owner can remove members' using errcode = '42501';
+  end if;
+  if (select role from public.organisation_members where organisation_id = p_org and user_id = p_user) = 'owner'
+     and (select count(*) from public.organisation_members where organisation_id = p_org and role = 'owner') = 1 then
+    raise exception 'An organisation needs at least one owner' using errcode = '22023';
+  end if;
+  delete from public.organisation_members where organisation_id = p_org and user_id = p_user;
+  delete from public.user_roles r
+   where r.user_id = p_user and r.role = 'organiser'
+     and not exists (select 1 from public.organisation_members m join public.organisations o on o.id = m.organisation_id
+                      where m.user_id = p_user and o.status = 'verified');
+end;
+$$;
+revoke execute on function public.update_organisation, public.is_org_owner, public.add_organisation_member, public.remove_organisation_member from public, anon;
+grant execute on function public.update_organisation, public.is_org_owner, public.add_organisation_member, public.remove_organisation_member to authenticated;

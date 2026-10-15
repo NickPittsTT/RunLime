@@ -6,18 +6,22 @@ import { decryptString, encryptString, parseKeyVersion } from '../_shared/aesgcm
 import { currentKeyVersion, keyFor } from '../_shared/emergencyContactKey.ts';
 
 const url = Deno.env.get('SUPABASE_URL')!;
-const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const BATCH = 500;
+// Set per request once the caller's key is proven to be a service-level key (legacy service_role JWT or new sb_secret_ key).
+let serviceKey = '';
 
 function reply(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
 }
 
-function constantTimeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return diff === 0;
+/** True only if the key can use the Auth admin API, i.e. it is a service-level key for THIS project. */
+async function isServiceKey(key: string): Promise<boolean> {
+  if (!key) return false;
+  const res = await fetch(`${url}/auth/v1/admin/users?page=1&per_page=1`, {
+    headers: { apikey: key, authorization: `Bearer ${key}` },
+  });
+  await res.body?.cancel();
+  return res.ok;
 }
 
 async function rest(path: string, init: RequestInit = {}) {
@@ -49,8 +53,9 @@ async function* rows(filter = ''): AsyncGenerator<Row[]> {
 }
 
 Deno.serve(async (req) => {
-  const token = req.headers.get('authorization')?.replace(/^Bearer /, '') ?? '';
-  if (!serviceKey || !constantTimeEqual(token, serviceKey)) return reply({ error: 'forbidden' }, 403);
+  const token = req.headers.get('apikey') ?? req.headers.get('authorization')?.replace(/^Bearer /, '') ?? '';
+  if (!(await isServiceKey(token))) return reply({ error: 'forbidden' }, 403);
+  serviceKey = token;
   if (req.method !== 'POST') return reply({ error: 'method_not_allowed' }, 405);
   const { mode } = (await req.json().catch(() => ({}))) as { mode?: string };
   const current = currentKeyVersion();

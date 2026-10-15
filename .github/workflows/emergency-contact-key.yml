@@ -26,7 +26,7 @@ jobs:
         run: |
           set -euo pipefail
           out=$(curl -sS --fail-with-body -X POST "https://${PROJECT_REF}.supabase.co/functions/v1/emergency-contact-keys" \
-            -H "authorization: Bearer ${SERVICE_ROLE_KEY}" -H "content-type: application/json" \
+            -H "apikey: ${SERVICE_ROLE_KEY}" -H "authorization: Bearer ${SERVICE_ROLE_KEY}" -H "content-type: application/json" \
             -d '{"mode":"${{ inputs.mode }}"}')
           echo "$out"
           echo "### ${{ inputs.mode }} on ${{ inputs.target }}" >> "$GITHUB_STEP_SUMMARY"

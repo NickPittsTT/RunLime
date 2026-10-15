@@ -1,4 +1,20 @@
-# Phase 2 plan — prepared, NOT started (waiting for Phase 1 approval)
+# Phase 2 plan
+
+**Status (2026-10-15):** Task 1 (Android build on the owner's phone) is **complete**: phone test sections A–E passed, Google sign-in and legal links work. Phase 2 feature work started.
+
+## Phase 2 feature work (in build order)
+1. **Database:** RunLime listings (`listing_source`, organiser optional, official link required, no flyers/logos), event distances, media + sponsors (organiser events only), co-organisers, change history, race suggestions, duplicate detection, Phase 2 settings (incl. `events.unaffiliated_notice`), public calendar queries. pgTAP for every table/rule.
+2. **Admin (web):** create event (A4) as an organiser event **or a RunLime listing**; event approval queue (A3); race suggestions (A5); Phase 2 settings (A10).
+3. **Organiser portal (web):** dashboard, multi-step event editor with start pin + route (MapLibre; tap points or GPX), duplicate, postpone/cancel, co-organisers, organisation settings.
+4. **Public web:** landing, `/races` calendar, `/e/[slug]` event page with the minors and "not affiliated" notices.
+5. **Mobile:** new navigation (home = calendar, top bar, side menu, fixed "Start run" button, no bottom tabs); age-gate auto-advance; month view + list, filters, search, near me (MapLibre), event detail + route map; onboarding (walkthrough, areas & distances); suggest a race; offline banner.
+6. **Review:** CI green, staging deployed, test build + test script, review report; stop for owner review.
+
+UX notes from the owner's Task 1 testing (2026-10-15): age gate auto-advance; ride-share style navigation (see `03-SCREENS.md` → Navigation). Maps: MapLibre + OpenFreeMap (owner, 2026-10-15). Profile photos: Phase 3.
+
+---
+
+# Task 1 record
 
 ## Task 1 (first): Android build on your phone (internal staging APK)
 Free-tier only, Android only (iOS and Apple sign-in are deferred until there's a paid Apple Developer account).

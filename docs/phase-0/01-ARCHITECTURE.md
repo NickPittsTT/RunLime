@@ -13,7 +13,7 @@
 | Validation | zod | v4 | Shared schemas |
 | Data fetching | TanStack Query | v5 | Persisted cache on mobile (Phase 2) |
 | Local DB (mobile) | expo-sqlite | SDK 57 | Runs + outbox (Phase 5) |
-| Maps | react-native-maps (Apple iOS / Google Android) | — | Approved |
+| Maps | **MapLibre + OpenFreeMap tiles** (`@maplibre/maplibre-react-native` on mobile, `maplibre-gl` on web). Free, no API key, no card (owner, 2026-10-15; replaces Apple/Google native maps, which need a Google billing account with a card) | — | Decided |
 | Location | expo-location + expo-task-manager, foreground service | SDK 57 | Approved (D6) |
 | Subscriptions | RevenueCat | — | Phase 7 |
 | Push | expo-notifications + Expo Push API | SDK 57 | Phase 3 |

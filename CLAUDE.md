@@ -55,7 +55,7 @@ Living record of conventions and decisions. Update at the end of every phase.
 |---|---|---|
 | 2026-10-11 | Stack: Expo SDK 57, Next.js 16, Supabase, pnpm + Turborepo (D1–D14) | Approved |
 | 2026-10-11 | Run tracking: Android foreground service + iOS When-In-Use background mode; fallback to the original design if Phase 5 device tests fail | Approved |
-| 2026-10-11 | Native maps (Apple/Google), no offline tiles in v1 | Approved |
+| 2026-10-11 | Native maps (Apple/Google), no offline tiles in v1 | **Replaced 2026-10-15** by MapLibre + OpenFreeMap (free, no card) |
 | 2026-10-11 | Sign-in: email OTP + Google + Apple; no phone | Approved |
 | 2026-10-11 | 18+ only for all accounts (hard rule) | Owner rule |
 | 2026-10-11 | Followers (private/public) + clubs; QR check-in and photo sharing removed from v1 | Owner rule |
@@ -79,6 +79,10 @@ Living record of conventions and decisions. Update at the end of every phase.
 | 2026-10-15 | Primary club: leaderboard activity counts for one chosen club; other memberships still show + count in turnout. Club assumptions accepted | Owner |
 | 2026-10-15 | Custom domain needed before public launch, not before the pilot; timeline impact (+9–14 working days, Phases 3 and 6) accepted | Owner |
 | 2026-10-15 | Community times use the same three speed tiers + one review queue; pilot under draft terms with a pilot notice + consent; attorney review before public launch | Owner |
+| 2026-10-15 | Maps: MapLibre + OpenFreeMap tiles (no key, no card); route drawer = tap points or GPX upload | Owner |
+| 2026-10-15 | Mobile navigation: ride-share style (home = calendar, top bar with menu + bell, fixed "Start run" button, side menu; no bottom tabs); age gate auto-advance | Owner |
+| 2026-10-15 | Uploaded profile photos in Phase 3, with report + remove tools | Owner |
+| 2026-10-15 | runlimett@gmail.com is the staging super admin (bootstrap workflow), TOTP required | Owner |
 | 2026-10-11 | Seed prices: Premium US$2.99/mo, US$19.99/yr; Basic TT$100; Featured TT$400; charity free Basic via setting | Owner |
 
 ## Conventions

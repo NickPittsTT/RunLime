@@ -8,7 +8,7 @@
 |---|---|---|---|
 | 0 | Questions, architecture, data model, screens, brand, costs | Approved by owner (rev 2) | 100% |
 | 1 | Setup, environments, auth + 18+ age gate, roles, RLS, seed, legal drafts | Approved by owner (2026-10-11) | 100% |
-| 2 | Events: organiser portal, admin approval, onboarding, calendar, event page, public web | In progress | 15% |
+| 2 | Events: organiser portal, admin approval, onboarding, calendar, event page, public web | In progress | 20% |
 | 3 | RSVP, followers, clubs (leaders, approvals, requests, turnout), runner level, notifications/broadcasts, attendance dashboard | Not started | 0% |
 | 4 | GPS check-in | Not started | 0% |
 | 5 | Run tracker, history, totals | Not started | 0% |
@@ -52,7 +52,9 @@
 - [x] First Android staging APK built (EAS build c1e4f42a, commit 290f8b3, 2026-10-15). Earlier failures fixed at the cause: babel-preset-expo not declared; splash image missing; workflow step syntax error
 - [x] **Phone test PASSED (owner, 2026-10-15)** on the staging APK: every step in sections A, B, C and E. Confirmed: 18-tomorrow blocked (step 3) and still blocked after force-close (step 4); code email → "Hi" + Private (7–9); emergency contact reloads (11); data export contains the profile (12); both test accounts deleted, staging clean (16–18). Only the legal links failed, as expected until the staging website is deployed
 - [x] Second staging APK built (2026-10-15, 18 min): Google sign-in + `STAGING_WEB_URL`. APK signing SHA-1 printed from the real APK = `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25` (matches the Google Android client)
-- [ ] Owner tests Section D (Google sign-in) + legal links on the new APK
+- [x] **Task 1 COMPLETE (owner, 2026-10-15):** Section D (Google sign-in) and all Help & legal links passed on the second APK ("Hi, Nicholas"; legal pages show name + support email, no address)
+- [x] Staging super admin: runlimett@gmail.com (created with Google sign-in), granted by the new "Bootstrap super admin" workflow (run #1 green). Owner sets up TOTP at `/admin/mfa`
+- [x] Decisions: maps = MapLibre + OpenFreeMap (free, no card); ride-share navigation + age gate auto-advance (Phase 2); uploaded profile photos (Phase 3)
 
 **Platform**
 - [x] Workflows moved off Node 20 (checkout@v5, setup-node@v5, pnpm/action-setup@v5, upload-artifact@v6, supabase/setup-cli@v2)

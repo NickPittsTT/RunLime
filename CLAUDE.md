@@ -15,7 +15,8 @@ Living record of conventions and decisions. Update at the end of every phase.
   - No teen/minor code paths exist; don't add any.
 - Social: followers, with account privacy Private (default, approval needed) or Public. Followers see the race passport and races attending. Runs, routes, times and history stay private unless shared to community times.
 - Clubs: admin-approved list; users can request a new club (admin approves); per-club leaders approve members; only approved memberships count. Club turnout shows counts only, from opted-in members, hidden below a minimum (setting).
-- Runner level is self-declared and never bypasses speed checks; only admin "verified runner" status does (still with a limit).
+- Runner level is self-declared and never bypasses speed checks.
+- Speed checks (leaderboards, settings): ≥ 3:00 /km avg and every split → counted; 2:35–3:00 → admin review, excluded until approved; < 2:35 → rejected. Verified runners skip the review tier only. Admin review sees pace/split numbers, never routes.
 - Check-in is GPS only in v1 (no QR).
 - Participant Premium sold ONLY via Apple IAP / Google Play Billing (RevenueCat).
 - Organiser payments ONLY via web portal bank transfer. The mobile app has no payment links or wording for them.
@@ -74,6 +75,7 @@ Living record of conventions and decisions. Update at the end of every phase.
 | 2026-10-15 | Activity leaderboards (km + races; weekly/monthly/year; everyone/following; top 20 + own rank; opt-in; verified only; no prizes) in Phase 6 | Owner |
 | 2026-10-15 | Testing: no early tester link; real-race pilot after Phase 6; owner enters real races as fact-only RunLime listings | Owner |
 | 2026-10-15 | Runner level (Phase 3), clubs with leader approval + club requests + turnout (Phase 3), club leaderboards (Phase 6) | Owner |
+| 2026-10-15 | Two-tier speed checks (3:00 accept / 2:35–3:00 review / 2:35 reject); verified runners skip review; listings include venue + start pin; calendar periods confirmed | Owner |
 | 2026-10-11 | Seed prices: Premium US$2.99/mo, US$19.99/yr; Basic TT$100; Featured TT$400; charity free Basic via setting | Owner |
 
 ## Conventions

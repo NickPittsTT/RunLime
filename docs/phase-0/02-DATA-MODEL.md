@@ -81,7 +81,7 @@ erDiagram
 | `organisation_members` | `organisation_id`, `user_id`, `role` (`owner`,`manager`) |
 | `organiser_applications` | applicant details, ID/document upload refs, 18+ check result, review fields |
 | `events` | `organisation_id`, `slug`, `name`, `description`, `starts_at timestamptz`, `timezone`, `country_code`, `region_id`, `venue_name`, `start_location geography(Point)`, `route_polyline NULL`, `registration_url NULL`, `registration_instructions`, `package_collection`, `parking`, `contact_*`, `cause`, `charity_name`, `walk_friendly bool`, `fee_min`, `fee_max`, `currency`, `status` (`draft`,`pending_approval`,`published`,`postponed`,`cancelled`,`unpublished`,`rejected`), `featured_until`, `checkin_radius_m NULL`, `checkin_opens_at`/`closes_at NULL` (overrides), `duplicated_from_id`, `published_at`, `approved_by` |
-| *RunLime listings (owner decision 2026-10-15)* | Events the admin enters from public facts before organisers join. **Phase 2 migration:** `organisation_id` becomes nullable and a new column `listing_source` (`organiser` default / `runlime`) is added. CHECK: `organiser` ⇒ `organisation_id NOT NULL`; `runlime` ⇒ `organisation_id IS NULL` **and** `registration_url NOT NULL` (the official link). A trigger rejects `event_media` and `event_sponsors` rows for `runlime` listings (no flyers or logos without permission). Public pages show the notice from setting `events.unaffiliated_notice`. An organiser who later joins can claim the listing (admin moves it to their organisation; `listing_source` → `organiser`) |
+| *RunLime listings (owner decision 2026-10-15)* | Events the admin enters from public facts before organisers join. Include the venue and start pin (owner confirmed 2026-10-15; GPS check-in needs them). **Phase 2 migration:** `organisation_id` becomes nullable and a new column `listing_source` (`organiser` default / `runlime`) is added. CHECK: `organiser` ⇒ `organisation_id NOT NULL`; `runlime` ⇒ `organisation_id IS NULL` **and** `registration_url NOT NULL` (the official link). A trigger rejects `event_media` and `event_sponsors` rows for `runlime` listings (no flyers or logos without permission). Public pages show the notice from setting `events.unaffiliated_notice`. An organiser who later joins can claim the listing (admin moves it to their organisation; `listing_source` → `organiser`) |
 | `event_distances` | `event_id`, `distance_km numeric(5,2)`, `label` ("5K", "10K", "2K fun walk") |
 | `event_members` | per-event co-organisers: `event_id`, `user_id`, `role` (`co_organiser`), `invited_by`, `accepted_at` |
 | `event_media` | `kind` (`flyer`,`route_map`,`gallery`), `storage_path`, `alt_text` (required — accessibility) |
@@ -122,10 +122,22 @@ Two boards: **Kilometres** (tracked runs) and **Races attended** (GPS check-ins)
 | `leaderboard_totals` | `user_id`, `board` (`km`,`races`), `period` (`week`,`month`,`year`), `period_start date`, `value numeric(10,2)`, `updated_at`. PK (user_id, board, period, period_start). Recomputed for one user on run insert/update/delete and on check-in, plus a nightly pg_cron rebuild. **No direct read access (RLS: none)**; read only through the RPC below |
 | RPC `leaderboard(board, period, scope)` | `SECURITY DEFINER`. Returns the top N + the caller's row with rank (competition ranking: 1, 2, 2, 4). Includes only opted-in users who are not suspended, not excluded by moderation, and not blocked by or blocking the viewer. `following` scope = accepted follows of the caller + the caller. Returns name, rank and value only, never routes, run times or areas |
 
-**Runner level vs speed checks:** a self-declared `runner_level` never changes any check. Only admin **verified runner** status (`profiles.verified_runner_at`, set in A6, audited) applies the faster limit `leaderboard.verified_min_pace_sec_per_km` instead of `leaderboard.min_pace_sec_per_km` (assumption: verified runners still have a limit, so a car or bike trip can never count; both values are settings).
+**Speed checks: two tiers (owner decision 2026-10-15).** Applied to every tracked run before it can count on a leaderboard. Thresholds are admin settings:
+
+| Average pace and **every** 1 km split | Result | `runs.leaderboard_status` |
+|---|---|---|
+| all slower than **3:00 /km** (`leaderboard.accept_slower_than_sec_per_km` = 180) | counted automatically | `counted` |
+| fastest between **2:35 and 3:00 /km** | **flagged for admin review**; excluded from leaderboards until an admin approves | `pending_review` → `approved` / `excluded` |
+| any faster than **2:35 /km** (`leaderboard.reject_faster_than_sec_per_km` = 155) | rejected for leaderboards (the run stays in the runner's private history, marked "not counted") | `excluded` |
+
+- New columns on `runs`: `leaderboard_status`, `reviewed_by`, `reviewed_at`, `review_note`. Set by a trigger on insert/update (re-checked if the run changes).
+- **Verified runner:** when an admin approves a flagged run, they can also mark the runner as verified (`profiles.verified_runner_at`, `verified_runner_by`; audited). A verified runner's runs in the 2:35–3:00 band are counted without review. The 2:35 rejection still applies to everyone.
+- A self-declared `runner_level` never changes any check.
+- **Privacy:** runs are owner-only. The review queue (A15) shows admins only what the decision needs: distance, moving time, average pace and split paces. Never the route or map. The Privacy Policy gets a line about this in Phase 6.
+- Community times keep their own single limit (`community.pace_limit_sec_per_km`, 2:35) unless the owner wants the same review tier there.
 
 **Verified data only:**
-- **Kilometres:** only `runs.source = 'tracked'` (recorded by the app's GPS tracker). Typed-in times never count. A run is excluded if its average pace is faster than `leaderboard.min_pace_sec_per_km`, or any 1 km split is faster than that limit (impossible speed: car, bike, GPS jump). A run longer than `leaderboard.max_run_km` is excluded too.
+- **Kilometres:** only `runs.source = 'tracked'` (recorded by the app's GPS tracker) with `leaderboard_status` `counted` or `approved` (see the speed checks above). Typed-in times never count. A run longer than `leaderboard.max_run_km` is excluded too.
 - **Races attended:** count of the user's GPS `check_ins` in the period (one per event, by design).
 - Limit (stated in the in-app disclaimer): tracked runs come from the user's phone, so a determined user could fake GPS. The server checks above remove impossible values; reports and the admin `exclude_from_leaderboards` action handle the rest.
 
@@ -146,7 +158,7 @@ Ranks clubs on three measures, each shown as a **total** and **per member** (so 
 ### Club turnout on race pages (Phase 3, owner decision 2026-10-15)
 Race pages (app + web) and organiser dashboards show "Club X: 25 attending". The count includes only members with an `approved` membership who turned on **show my attendance in club turnout** (`profiles.show_attendance_to_clubs`, existing, opt-in, off by default; its wording now says the count is public). Counts below `clubs.turnout_min_count` (setting, default 3) are hidden, so nobody is singled out by a "1 attending". Read via a view/RPC returning counts only, never names.
 
-**Settings (admin-editable, never hardcoded):** `clubs.turnout_min_count` (3), `clubs.leaderboard_min_members` (3), `leaderboard.verified_min_pace_sec_per_km` (e.g. 140 = 2:20 /km), `leaderboard.enabled` (bool), `leaderboard.size` (20), `leaderboard.min_pace_sec_per_km` (155 = 2:35 /km), `leaderboard.max_run_km` (100), `leaderboard.disclaimer` ("Just for fun. Based on runs tracked in RunLime and GPS race check-ins. No prizes.").
+**Settings (admin-editable, never hardcoded):** `clubs.turnout_min_count` (3), `clubs.leaderboard_min_members` (3), `leaderboard.accept_slower_than_sec_per_km` (180 = 3:00 /km), `leaderboard.reject_faster_than_sec_per_km` (155 = 2:35 /km), `leaderboard.enabled` (bool), `leaderboard.size` (20), `leaderboard.max_run_km` (100), `leaderboard.disclaimer` ("Just for fun. Based on runs tracked in RunLime and GPS race check-ins. No prizes.").
 
 ### Notifications
 | Table | Notes |

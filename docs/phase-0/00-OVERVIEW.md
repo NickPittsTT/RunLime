@@ -94,6 +94,8 @@ A9 revised: the public "attending" count = sum of (`group_size` + `children_coun
 - *Club turnout* (Phase 3): "Club X: 25 attending" on race pages and organiser dashboards, from approved members who opted in; small counts hidden.
 - *Club leaderboards* (Phase 6): km, races attended, average members per race; each as a total and per member; opted-in approved members only.
 
+**Speed checks (owner, 2026-10-15), Phase 6.** Two tiers, thresholds as admin settings: runs with average pace and every 1 km split slower than 3:00 /km count automatically; 2:35–3:00 /km is flagged for admin review and excluded from leaderboards until approved; faster than 2:35 /km is rejected for leaderboards. Admins can mark a reviewed runner as verified so their 2:35–3:00 runs aren't flagged again. RunLime listings include the venue and start pin (confirmed). Leaderboard periods are calendar periods (confirmed).
+
 ## 5. Open items (owner)
 
 1. Items 2, 3, 4 above came through as unfilled template text. Legal drafts use the tokens `{{operator_name}}`, `{{support_email}}`, `{{website}}`. (The operator address is not a token: owner decision 2026-10-15, kept non-public for official records only.) They are filled from settings at render time, and the web portal shows a visible "DRAFT — operator details missing" banner until they're set.

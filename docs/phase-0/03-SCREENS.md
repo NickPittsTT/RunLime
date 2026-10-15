@@ -23,7 +23,7 @@ Phase tag = the phase in which the screen is built.
 | # | Screen | Phase |
 |---|---|---|
 | M11 | Calendar: list view (sticky month headers, "N attending") | 2 |
-| M12 | Calendar: month view | 2 |
+| M12 | Calendar: month view: swipe left/right month by month (January to December and on into the next year), days with races marked, tap a day for its races; toggle with the list view | 2 |
 | M13 | Filters sheet (date, area, distance, price, cause, walk-friendly) | 2 |
 | M14 | Search | 2 |
 | M15 | Near me (map with event pins + list) | 2 |
@@ -39,7 +39,7 @@ Phase tag = the phase in which the screen is built.
 | M26 | Run: live (time, distance, pace, map, pause/stop; lock-screen-friendly) | 5 |
 | M27 | Run: summary (map, splits, steps est., calories est., save/discard, link to event) | 5 |
 | M28 | History list + totals header (km, steps, calories, time) | 5 |
-| M29 | Run detail | 5 |
+| M29 | Run detail (Phase 6: leaderboard status: counted / under review / not counted) | 5 / 6 |
 | M30 | Personal bests & pace trend | 5 |
 | M31 | Same-race year-on-year | 5 |
 | M32 | Add manual time ("Typed in") | 5 |
@@ -100,7 +100,7 @@ Phase tag = the phase in which the screen is built.
 | A3 | Event approval queue (+ duplicate warnings; edit, publish, reject, unpublish, feature) | 2 |
 | A4 | Create event: on behalf of an organiser, **or as a RunLime listing** (facts only: name, date, start time, distance(s), venue + start pin, official registration link; no flyers/logos; "not affiliated" notice shown) | 2 |
 | A5 | Race suggestions queue (convert to event) | 2 |
-| A6 | Users (search, view, suspend; grant/revoke Platform Admin: Super Admin only). **Phase 6:** mark / unmark "verified runner" (audited) | 1 / 6 |
+| A6 | Users (search, view, suspend; grant/revoke Platform Admin: Super Admin only). **Phase 6:** mark / unmark "verified runner" (audited; also from A15) | 1 / 6 |
 | A7 | Moderation queue (reports → remove/warn/suspend; exclude from leaderboards) | 6 |
 | A8 | Organiser payments (proof viewer, mark Paid/Rejected) | 7 |
 | A9 | Plans & features matrix editor | 7 |
@@ -108,6 +108,7 @@ Phase tag = the phase in which the screen is built.
 | A11 | Announcements | 3 |
 | A12 | Support inbox | 7 |
 | A13 | Audit log (filterable, read-only, before/after diff of allowlisted fields) | 7 |
+| A15 | Speed review queue: flagged runs (2:35–3:00 /km band) showing distance, time, average and split paces only (no route); approve / exclude with note; "mark runner as verified" | 6 |
 | A14 | Clubs: create, edit, archive; view member counts (Phase 1). **Phase 3:** club requests queue (approve / reject with reason), assign or remove club leaders, approve members on a leader's behalf | 1 / 3 |
 
 ## Public web

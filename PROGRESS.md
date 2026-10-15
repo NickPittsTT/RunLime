@@ -75,7 +75,8 @@
 - [x] App: ride-share navigation (top bar, side menu, Start run, no tabs), age gate auto-advance, month view + list, search, filters, near me, map, race page + full-screen map, onboarding, suggest a race, offline copy. Jest 42 passing
 - [x] Web E2E 12/12 on Cloudflare's runtime (local)
 - [x] Phase 2 review + owner test script: `docs/phase-2/REVIEW.md`
-- [ ] Staging APK with the Phase 2 app (EAS build started 2026-10-15)
+- [x] Staging APK with the Phase 2 app (EAS build 8d7c4e0d, commit `a062a57`): https://expo.dev/artifacts/eas/FPu2CbE7olEam07BXsIEFCKFPayn05KoGi7kUUhUHp0.apk
+- [x] CI bug fixed: web "Download my data" ignored a tap made before the page was ready (failed runs 82 and 95). Button now disabled until ready; 24/24 repeated runs pass
 - [ ] **Owner review of Phase 2** (test script sections A–C)
 
 ## Phase 1 approval items (owner, 2026-10-11)

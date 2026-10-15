@@ -2,6 +2,9 @@
 
 Date: 2026-10-15 · Branch: `phase-2` (fast-forwarded to `main`) · Staging web: https://runlime-web-staging.runlimett.workers.dev
 
+**Test build (staging APK, EAS build 8d7c4e0d, commit `a062a57`, built in 17 min):** https://expo.dev/artifacts/eas/FPu2CbE7olEam07BXsIEFCKFPayn05KoGi7kUUhUHp0.apk  
+Signing SHA-1 unchanged (`5E:8F:…:F6:25`), so Google sign-in keeps working.
+
 Free tiers only: Supabase Free, Cloudflare Workers Free, EAS Free, OpenFreeMap tiles (no key, no card). Nothing in this phase needs a paid plan.
 
 ## What was built
@@ -25,8 +28,11 @@ Free tiers only: Supabase Free, Cloudflare Workers Free, EAS Free, OpenFreeMap t
 | Vitest (shared, ui-tokens) | 53 + 13 | pass | event schema, time-zone conversion, GPX parsing, calendar grid, filters, near-me distance, fee labels, calendar row parsing, blank optional text |
 | Jest (mobile) | 42 | pass | DOB auto-advance/Next/Done/backspace; Home (top bar, no tabs, month view, list, search, Start run + bell "coming soon", side menu items + profile header, open race, onboarding redirect, offline copy + banner, error + retry); race page (listing notice, minors notice, official link, postponed banner, removed race); suggest a race (validation, RPC, rate limit); onboarding (saves areas/distances; skip) |
 | Playwright (web) | 12 | pass on Cloudflare's runtime (local) | admin creates a RunLime listing → public page shows facts + notice + `.ics`; organiser draft → submit → admin approve → postpone; all Phase 1 flows |
-| CI | — | green on `19c6642` (lint, typecheck, unit, pgTAP, E2E, Worker size); `a062a57` (mobile) running at time of writing | |
+| CI | — | green on `19c6642` and on `phase-2` for `24d094f`. `main` run 95 failed on one intermittent web test (below), fixed in the next commit | |
 | Staging deploy | — | Deploy database (Phase 2 migrations) and Deploy web green on `19c6642` | |
+
+## Bug found by CI and fixed
+- **"Download my data" (web) could ignore a quick tap.** The button was clickable before the page's script had loaded, so an early click did nothing. CI hit this twice (runs 82 and 95, phone-size viewport). I reproduced it locally (1 failure in 12 runs) and the trace showed no request was sent. Fix: the button stays disabled until the page is ready. After the fix: 24/24 repeated runs and the full web suite 12/12 pass on Cloudflare's runtime.
 
 ## Not tested (and why)
 - **The new app screens on a real phone.** Unit tests cover the logic and screens, but maps, location permission, the month swipe and the side menu animation only show on a device. That is what your test script below is for.
@@ -62,7 +68,7 @@ Time needed: about 30 minutes. Use real race facts only. Do not create test acco
 9. Open **Races** on the public site → the race is on its day in the month view and in the list. Open it → expected: the "not affiliated" notice, the children notice, **Register with the organiser** opens the official page, **Add to calendar** downloads a calendar file, the map shows the start pin (and route).
 10. Admin → Events → open the race → **Change: Postpone**, reason "Test, back on shortly" → save. Expected: the public page shows "Postponed" and the reason. Then **Change: Back on (no longer postponed)** → the banner goes. Both changes appear in the race's history. (Duplicate and Cancel are covered by the automated tests; skipping them here keeps made-up races off staging.)
 
-### C. The app (install the new staging APK from the link I send)
+### C. The app (install the new staging APK: https://expo.dev/artifacts/eas/FPu2CbE7olEam07BXsIEFCKFPayn05KoGi7kUUhUHp0.apk)
 11. Fresh install, open the app. Age gate: type the day (2 digits) → the cursor jumps to Month; type 2 digits → jumps to Year. Backspace in the empty Year box → back to Month. Press **Done** on Year → continues. Expected: no typing in the wrong box.
 12. Sign in (email code or Google). First time: the **welcome walkthrough** (3 screens) → choose areas and distances → **Show races**.
 13. Home: top bar with menu (left), "Races", bell (right). Bell → "Coming soon". Big **Start run** button at the bottom → "Coming soon". No tab bar.

@@ -59,12 +59,27 @@ const unsupported = Object.keys(desired).filter((k) => !(k in before));
 const body = Object.fromEntries(Object.entries(desired).filter(([k]) => k in before));
 
 let failed = false;
+let after = before;
 if (apply) {
-  const res = await fetch(api, { method: 'PATCH', headers, body: JSON.stringify(body) });
-  const text = await res.text();
-  console.log(`\nPATCH → HTTP ${res.status}${res.ok ? '' : `: ${text.slice(0, 500)}`}`);
-  if (!res.ok) failed = true;
-  const after = await getConfig();
+  // Apply in independent groups so a plan restriction on one group (e.g. email templates) does not block the others.
+  const groups = {
+    hooks: /^hook_/,
+    mfa: /^mfa_/,
+    'sign-in settings': /^(disable_signup|external_|uri_allow_list|mailer_otp_)/,
+    'email templates': /^mailer_(subjects|templates)_/,
+  };
+  for (const [name, re] of Object.entries(groups)) {
+    const part = Object.fromEntries(Object.entries(body).filter(([k]) => re.test(k) && before[k] !== desired[k]));
+    if (Object.keys(part).length === 0) {
+      console.log(`\n[${name}] already as desired`);
+      continue;
+    }
+    const res = await fetch(api, { method: 'PATCH', headers, body: JSON.stringify(part) });
+    const text = await res.text();
+    console.log(`\n[${name}] PATCH ${Object.keys(part).join(', ')} → HTTP ${res.status}${res.ok ? '' : `: ${text.slice(0, 300)}`}`);
+    if (!res.ok) failed = true;
+  }
+  after = await getConfig();
   report('After update', after);
   const mismatched = Object.keys(body).filter((k) => after[k] !== desired[k]);
   if (mismatched.length) {
@@ -75,12 +90,15 @@ if (apply) {
 if (unsupported.length) console.log(`\nFields not offered by this project's API: ${unsupported.join(', ')}`);
 
 // Functional probe of the Before User Created hook: under-18 / missing DOB must be rejected (no user is created, no email sent).
-if (anonKey) {
+if (anonKey && after.hook_before_user_created_enabled !== true) {
+  console.log('\nHook probe skipped: Before User Created hook is not enabled (a probe could create a real user).');
+  failed = true;
+} else if (anonKey) {
   const probe = async (label, data) => {
     const res = await fetch(`https://${ref}.supabase.co/auth/v1/otp`, {
       method: 'POST',
       headers: { apikey: anonKey, 'content-type': 'application/json' },
-      body: JSON.stringify({ email: `age-gate-probe-${Date.now()}@example.invalid`, create_user: true, ...(data ? { data } : {}) }),
+      body: JSON.stringify({ email: `age-gate-probe-${Date.now()}@example.com`, create_user: true, ...(data ? { data } : {}) }),
     });
     const t = await res.text();
     const pass = res.status === 403 && /18 and over/.test(t);

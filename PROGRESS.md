@@ -51,6 +51,8 @@
 - [x] Email delivery via Gmail SMTP: **owner-confirmed 2026-10-15** — "Your RunLime sign-in code" with 6 digits arrived in the runlimett@gmail.com inbox (Supabase accepted it with HTTP 200 at 16:24 UTC). Earlier failures were because the new app password hadn't been saved
 - [x] First Android staging APK built (EAS build c1e4f42a, commit 290f8b3, 2026-10-15). Earlier failures fixed at the cause: babel-preset-expo not declared; splash image missing; workflow step syntax error
 - [ ] Owner runs the phone test script (sections A, B, C, E on this APK; D after the Google Android client + a rebuild)
+- [x] Owner installed the staging APK on 2026-10-15: "smooth set-up, no issues" (per-section results to confirm)
+- [ ] Logo: owner doesn't like the lime-wedge icon; wants running shoes in the mark → concepts to propose before the next build
 
 **Platform**
 - [x] Workflows moved off Node 20 (checkout@v5, setup-node@v5, pnpm/action-setup@v5, upload-artifact@v6, supabase/setup-cli@v2)

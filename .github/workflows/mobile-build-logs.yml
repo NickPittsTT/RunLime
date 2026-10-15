@@ -1,0 +1,43 @@
+# Fetch the error and log tail of an EAS build so it can be read in GitHub. Uses EXPO_TOKEN; prints no secrets.
+name: Mobile build logs
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_id:
+        description: EAS build ID (from the build page URL)
+        required: true
+
+jobs:
+  logs:
+    runs-on: ubuntu-latest
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Build status, error and failing-phase log tail
+        working-directory: apps/mobile
+        env:
+          BUILD_ID: ${{ inputs.build_id }}
+        run: |
+          set -uo pipefail
+          npx --yes eas-cli@24.12.1 build:view "$BUILD_ID" --json > /tmp/build.json 2>/tmp/err.txt || { cat /tmp/err.txt; exit 1; }
+          node - <<'JS'
+          const b = require('/tmp/build.json');
+          console.log('status:', b.status, '| platform:', b.platform, '| profile:', b.buildProfile);
+          console.log('error:', JSON.stringify(b.error ?? null));
+          (async () => {
+            for (const url of b.logFiles ?? []) {
+              const text = await (await fetch(url)).text();
+              const lines = text.split('\n').filter(Boolean).map((l) => { try { return JSON.parse(l); } catch { return { msg: l }; } });
+              const failedPhase = [...lines].reverse().find((l) => l.result === 'fail' || l.marker === 'END_PHASE' && l.result === 'fail')?.phase;
+              const relevant = failedPhase ? lines.filter((l) => l.phase === failedPhase) : lines;
+              console.log(`\n===== log file (${lines.length} lines) failing phase: ${failedPhase ?? 'unknown'} — last 150 lines =====`);
+              for (const l of relevant.slice(-150)) console.log(`[${l.phase ?? ''}] ${l.msg ?? ''}`);
+            }
+          })();
+          JS

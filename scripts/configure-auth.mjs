@@ -153,7 +153,8 @@ if (process.argv.includes('--mail-log')) {
   try { rows = JSON.parse(text).result ?? []; } catch { console.log(text.slice(0, 300)); }
   const redact = (s) => String(s).replace(/[\w.+-]+@[\w-]+(\.[\w-]+)+/g, '<email>').replace(/"(password|pass|token)"\s*:\s*"[^"]*"/gi, '"$1":"<hidden>"');
   for (const r of rows) console.log(`${new Date(Number(r.timestamp) / 1000).toISOString()} ${redact(r.event_message).slice(0, 600)}`);
-  if (!rows.length) console.log('(no matching rows)');
+  if (!res.ok) console.log('(logs API unavailable: read Dashboard → Logs → Auth instead)');
+  else if (!rows.length) console.log('(no matching rows)');
 }
 
 process.exit(failed ? 1 : 0);

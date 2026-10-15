@@ -101,6 +101,26 @@ jobs:
             [ "$code" = "200" ] || exit 1
           done
 
+      - name: Legal settings check (lists any placeholder still "not yet set"; values come from app_settings)
+        if: steps.check.outputs.ready == 'true'
+        env:
+          URL: ${{ steps.deploy.outputs.url }}
+        run: |
+          missing=""
+          for slug in privacy terms moderation child-safety health community-times; do
+            found=$(curl -s "$URL/legal/$slug" | grep -oE '\[[a-z ]+ — not yet set\]' | sort -u | tr '\n' ' ')
+            [ -n "$found" ] && missing="$missing /legal/$slug: $found;"
+          done
+          found=$(curl -s "$URL/support" | grep -oE '\[[a-z ]+ — not yet set\]' | sort -u | tr '\n' ' ')
+          [ -n "$found" ] && missing="$missing /support: $found;"
+          if [ -n "$missing" ]; then
+            echo "::warning::Legal settings not set yet:$missing"
+            { echo; echo "- Legal settings not set yet:$missing"; } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "All legal placeholders are filled."
+            { echo; echo "- Legal settings: all placeholders filled"; } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       # Edge Functions only answer browser calls from allowed origins (CORS). Point them at the deployed site.
       - if: steps.check.outputs.ready == 'true' && env.SUPABASE_ACCESS_TOKEN != ''
         uses: supabase/setup-cli@v2

@@ -1,0 +1,28 @@
+# Read-only diagnostics against staging (no secrets printed). Run from Actions → "Staging diagnostics".
+#  - api-cache-headers: response headers the app receives for a public calendar query (caching investigation)
+name: Staging diagnostics
+
+on:
+  workflow_dispatch:
+    inputs:
+      check:
+        description: What to check
+        type: choice
+        options: [api-cache-headers]
+        default: api-cache-headers
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Calendar query response headers (anon key, public data only)
+        env:
+          URL: https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co
+          ANON: ${{ vars.SUPABASE_ANON_KEY }}
+        run: |
+          for i in 1 2; do
+            echo "--- request $i"
+            curl -sS -D - -o /dev/null "$URL/rest/v1/events?select=id,status&status=in.(published,postponed,cancelled)&limit=5" \
+              -H "apikey: $ANON" -H "Authorization: Bearer $ANON" | grep -viE '^(set-cookie|sb-|x-sb-)'
+          done

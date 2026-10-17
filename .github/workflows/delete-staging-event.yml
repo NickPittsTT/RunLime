@@ -1,0 +1,26 @@
+# Delete one made-up event from STAGING by its exact name (never production). Audited in the database.
+name: Delete staging event
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: Exact event name
+        required: true
+
+jobs:
+  delete:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Delete
+        env:
+          SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NAME: ${{ inputs.name }}
+        run: node scripts/delete-event.mjs "$NAME"

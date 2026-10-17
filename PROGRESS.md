@@ -88,7 +88,7 @@
 - [x] **Owner final re-test (2026-10-18):** everything passed except postponing to a new date (the new date wasn't shown)
 - [x] Root cause from staging's history: the new date overwrote the race's date and the original was discarded, so nothing could say "Postponed to". Fixed: `events.original_starts_at` keeps the original; app list cards, race page and month view show "Postponed to <date, time>" with the original struck through; "Back on" restores the original date. pgTAP 015, Jest, Playwright end-to-end. CI run #113 green on `9495f05`: https://github.com/NickPittsTT/RunLime/actions/runs/39077821831
 - [x] Earlier fixes confirmed deployed: reason box + website map (`c5604be`, CI run #110 https://github.com/NickPittsTT/RunLime/actions/runs/39072081100, Deploy web run 39072404213)
-- [x] **Phase 2 approved by the owner (2026-10-18)**, on CI passing for the postponement fix. Owner's phone re-check of RETEST.md section C (new APK) still to report; item 7 (preferences after reinstall) deferred by the owner
+- [x] **Phase 2 approved by the owner (2026-10-18)**, on CI passing for the postponement fix. Owner's phone re-check of RETEST.md section C still to report (APK: EAS build 5d8970b0, https://expo.dev/artifacts/eas/j3POv-qs8USo_a0i1yR-7ChnPAuGXaYxaJ4m2nsGNOA.apk; Deploy web run 31 and Deploy database run 54 green on `9495f05`); item 7 (preferences after reinstall) deferred by the owner
 - [ ] PSCU listing on staging still shows 18 Nov 2:34 pm from the earlier test: owner to set its real date
 - [x] Owner: refund option A (100% after the listing has been live) kept
 

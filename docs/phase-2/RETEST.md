@@ -53,7 +53,7 @@ B. **Website map on your phone's browser:** Admin → Events → New RunLime lis
 - *Back on, on the original date*: undoes the postponement and restores the original date.
 - A date is refused when cancelling or putting a race back on, and must be in the future.
 
-**Re-check (install the new APK; it replaces the old one):**
+**Re-check (install the new APK over the old one: https://expo.dev/artifacts/eas/j3POv-qs8USo_a0i1yR-7ChnPAuGXaYxaJ4m2nsGNOA.apk — EAS build 5d8970b0, same signing key):**
 C1. Website → PSCU race → Change status → Postpone, new date a week later, reason "Re-test: new date". The status box says "Postponed to <date, time>. Original date: ~~<old date>~~".
 C2. Phone, list: pull down. The card's yellow strip says **Postponed to <date, time>** and **Original date: ~~<old date>~~**; the card is listed under the new date.
 C3. Month view: the new date is yellow; the original date has a dashed ring and a struck-through number ("Original date" in the key). Tap the original date: the race is listed there with its "Postponed to" strip.

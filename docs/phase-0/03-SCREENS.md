@@ -107,7 +107,7 @@ Phase tag = the phase in which the screen is built.
 | A1 | Dashboard (users, actives, events by status, RSVPs, check-ins, runs, revenue, pending queues) | 3 (basic) / 7 (revenue) |
 | A2 | Organiser verification queue (approve / reject with reason / suspend) | 1 |
 | A3 | Event approval queue (+ duplicate warnings; edit, publish, reject, unpublish, feature) | 2 |
-| A4 | Create event: on behalf of an organiser, **or as a RunLime listing** (facts only: name, date, start time, distance(s), venue + start pin, official registration link; no flyers/logos; "not affiliated" notice shown) | 2 |
+| A4 | Create event: on behalf of an organiser, **or as a RunLime listing** (facts only: name, date, start time, distance(s), venue + start pin, official registration link; flyer/logos/sponsors only after the organiser-permission tick; "not affiliated" notice shown). **Add organisation** (verified, audited) for organisers the owner signs up | 2 |
 | A5 | Race suggestions queue (convert to event) | 2 |
 | A6 | Users (search, view, suspend; grant/revoke Platform Admin: Super Admin only). **Phase 6:** mark / unmark "verified runner" (audited; also from A15) | 1 / 6 |
 | A7 | Moderation queue (reports → remove/warn/suspend; exclude from leaderboards; remove profile photo from Phase 3) | 3 (photos) / 6 |

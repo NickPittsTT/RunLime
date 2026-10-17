@@ -5,17 +5,17 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '@runlime/ui-tokens';
-import { FilterSheet, NO_FILTERS, activeFilterCount, type RaceFilters } from '@/components/FilterSheet';
+import { FilterSheet, NO_FILTERS, activeFilterCount, filterSummary, type RaceFilters } from '@/components/FilterSheet';
 import { MonthPager } from '@/components/MonthPager';
 import { RaceCard } from '@/components/RaceCard';
 import { RaceMap } from '@/components/RaceMap';
 import { SideMenu, type MenuItem } from '@/components/SideMenu';
 import { TopBar } from '@/components/TopBar';
-import { Button, Chip, LinkRow, Notice, T, TextField } from '@/components/ui';
-import { calendarWindow, useCalendar } from '@/lib/calendar';
+import { Button, Chip, LinkRow, Notice, Segmented, T, TextButton, TextField } from '@/components/ui';
+import { calendarWindow, formatUpdated, useCalendar } from '@/lib/calendar';
 import { getNearMe } from '@/lib/location';
 import { loadPreferences } from '@/lib/preferences';
-import { raceDayCounts, selectRaces } from '@/lib/raceQuery';
+import { raceDayMarks, selectRaces } from '@/lib/raceQuery';
 import { useAreas } from '@/lib/regions';
 import { settingNumber, usePublicSettings } from '@/lib/settings';
 import { useTheme } from '@/lib/theme';
@@ -72,7 +72,7 @@ export default function HomeScreen() {
 
   const events = cal.events ?? [];
   const races = useMemo(() => selectRaces(events, { filters, text, near: nearQ, day, today }), [events, filters, text, nearQ?.lat, nearQ?.lng, radiusKm, day, today]); // eslint-disable-line react-hooks/exhaustive-deps
-  const dayCounts = useMemo(() => raceDayCounts(events, { filters, text, near: nearQ }), [events, filters, text, nearQ?.lat, nearQ?.lng, radiusKm]); // eslint-disable-line react-hooks/exhaustive-deps
+  const dayMarks = useMemo(() => raceDayMarks(events, { filters, text, near: nearQ }), [events, filters, text, nearQ?.lat, nearQ?.lng, radiusKm]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!nearMsg) return;
@@ -123,25 +123,43 @@ export default function HomeScreen() {
       {cal.offlineSince ? (
         <View style={{ backgroundColor: c.surface, borderBottomWidth: 1, borderColor: c.border, padding: spacing.sm }} accessibilityLiveRegion="polite">
           <T variant="caption" style={{ textAlign: 'center' }}>
-            Offline. Showing races saved {formatEventDate(cal.offlineSince, TT)}. Pull down to refresh.
+            Offline. Showing races as last updated {formatUpdated(cal.offlineSince)}. Status changes since then are not shown. Pull down to refresh.
           </T>
         </View>
       ) : null}
       <ScrollView
+        testID="races-scroll"
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ paddingBottom: START_RUN_SPACE }}
-        refreshControl={<RefreshControl refreshing={cal.refreshing && cal.events !== null} onRefresh={() => void cal.refresh()} />}
+        refreshControl={<RefreshControl testID="races-refresh" refreshing={cal.refreshing && cal.events !== null} onRefresh={() => void cal.refresh()} />}
       >
-        <MonthPager firstYear={firstYear} initial={{ year: ty, month: tm }} raceDays={dayCounts} today={today} selected={day} onSelect={setDay} />
+        <MonthPager firstYear={firstYear} initial={{ year: ty, month: tm }} raceDays={dayMarks} today={today} selected={day} onSelect={setDay} />
         <View style={{ padding: spacing.lg, gap: spacing.md }}>
           <TextField label="Search races" value={text} onChangeText={setText} placeholder="Race name or venue" returnKeyType="search" autoCorrect={false} />
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, alignItems: 'center' }}>
             <Chip label={fc ? `Filters (${fc})` : 'Filters'} selected={fc > 0} onPress={() => setFiltersOpen(true)} accessibilityHint="Opens race filters" />
             <Chip label="Near me" selected={!!near} onPress={toggleNear} />
-            <Chip label={mode === 'list' ? 'Map' : 'List'} selected={false} onPress={() => setMode(mode === 'list' ? 'map' : 'list')} accessibilityHint="Switches between the list and the map" />
           </View>
+          {fc > 0 ? (
+            <View testID="filter-summary" style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md, flexWrap: 'wrap' }}>
+              <T variant="muted" style={{ flexShrink: 1 }} numberOfLines={2}>
+                Showing: {filterSummary(filters, areas)}
+              </T>
+              <TextButton label="Clear filters" onPress={() => setFilters(NO_FILTERS)} />
+            </View>
+          ) : null}
+          <Segmented
+            label="Show races as"
+            value={mode}
+            onChange={setMode}
+            options={[
+              { value: 'list', label: 'List' },
+              { value: 'map', label: 'Map' },
+            ]}
+          />
           {nearMsg ? <Notice>{nearMsg}</Notice> : null}
           <T variant="title">{day ? `Races on ${formatEventDate(`${day}T16:00:00Z`, 'UTC')}` : near ? `Races within ${radiusKm} km` : 'Upcoming races'}</T>
+          {cal.updatedAt && !cal.offlineSince ? <T variant="caption">Updated {formatUpdated(cal.updatedAt)}. Pull down to refresh.</T> : null}
           {day ? <LinkRow label="Show all upcoming races" onPress={() => setDay(null)} /> : null}
           {cal.events === null && !cal.failed ? <T variant="muted">Loading races…</T> : null}
           {cal.failed ? (

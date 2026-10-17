@@ -4,6 +4,12 @@ import { redirect } from 'next/navigation';
 import { friendlyError, type ActionResult } from '@/lib/errors';
 import { createClient } from '@/lib/supabase/server';
 
+/** Media and sponsors are edited from the organiser portal and, for RunLime listings, the admin console. */
+function revalidateEditors(event: string) {
+  revalidatePath(`/organiser/events/${event}`);
+  revalidatePath(`/admin/events/${event}`);
+}
+
 export async function acceptInvite(formData: FormData) {
   const supabase = await createClient();
   const event = String(formData.get('event'));
@@ -43,7 +49,7 @@ export async function addMedia(_prev: ActionResult, formData: FormData): Promise
     await supabase.storage.from('event-media').remove([path]);
     return { error: friendlyError(error) };
   }
-  revalidatePath(`/organiser/events/${event}`);
+  revalidateEditors(event);
   return { ok: 'Image added.' };
 }
 
@@ -53,7 +59,7 @@ export async function removeMedia(formData: FormData) {
   const id = String(formData.get('id'));
   const { data } = await supabase.from('event_media').delete().eq('id', id).select('storage_path').maybeSingle();
   if (data?.storage_path) await supabase.storage.from('event-media').remove([data.storage_path]);
-  revalidatePath(`/organiser/events/${event}`);
+  revalidateEditors(event);
 }
 
 export async function addSponsor(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
@@ -65,7 +71,7 @@ export async function addSponsor(_prev: ActionResult, formData: FormData): Promi
   const supabase = await createClient();
   const { error } = await supabase.from('event_sponsors').insert({ event_id: event, name, url: url || null });
   if (error) return { error: friendlyError(error) };
-  revalidatePath(`/organiser/events/${event}`);
+  revalidateEditors(event);
   return { ok: 'Sponsor added.' };
 }
 
@@ -73,5 +79,5 @@ export async function removeSponsor(formData: FormData) {
   const supabase = await createClient();
   const event = String(formData.get('event'));
   await supabase.from('event_sponsors').delete().eq('id', String(formData.get('id')));
-  revalidatePath(`/organiser/events/${event}`);
+  revalidateEditors(event);
 }

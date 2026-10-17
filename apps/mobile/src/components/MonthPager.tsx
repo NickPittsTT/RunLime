@@ -3,10 +3,13 @@ import { addMonths, monthGrid, monthLabel } from '@runlime/shared/events';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { FlatList, Pressable, View, useWindowDimensions, type ViewToken } from 'react-native';
 import { colors } from '@runlime/ui-tokens';
+import type { DayMark } from '@/lib/raceQuery';
 import { useTheme } from '@/lib/theme';
 import { T } from './ui';
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const DAY_POSTPONED = '#FCD34D';
+const DAY_CANCELLED = '#FCA5A5';
 
 export interface YearMonth {
   year: number;
@@ -32,8 +35,8 @@ export function MonthPager({
 }: {
   firstYear: number;
   initial: YearMonth;
-  /** Local date keys ("YYYY-MM-DD") -> number of races that day. */
-  raceDays: Map<string, number>;
+  /** Local date keys ("YYYY-MM-DD") -> races that day and their status. */
+  raceDays: Map<string, DayMark>;
   today: string;
   selected: string | null;
   onSelect: (key: string | null) => void;
@@ -105,7 +108,12 @@ export function MonthPager({
             {monthGrid(item.year, item.month).map((week) => (
               <View key={week[0]!.key} style={{ flexDirection: 'row' }}>
                 {week.map((d) => {
-                  const count = d.inMonth ? (raceDays.get(d.key) ?? 0) : 0;
+                  const mark = d.inMonth ? raceDays.get(d.key) : undefined;
+                  const count = mark?.count ?? 0;
+                  const fill = !mark ? 'transparent' : mark.status === 'scheduled' ? colors.lime : mark.status === 'postponed' ? DAY_POSTPONED : DAY_CANCELLED;
+                  const statusNote = mark && (mark.postponed || mark.cancelled)
+                    ? `${mark.postponed ? `, ${mark.postponed} postponed` : ''}${mark.cancelled ? `, ${mark.cancelled} cancelled` : ''}`
+                    : '';
                   const isSel = selected === d.key;
                   const isToday = today === d.key;
                   return (
@@ -113,7 +121,7 @@ export function MonthPager({
                       key={d.key}
                       disabled={!d.inMonth}
                       accessibilityRole="button"
-                      accessibilityLabel={`${d.day} ${monthLabel(item.year, item.month)}${count ? `, ${count} race${count > 1 ? 's' : ''}` : ''}${isToday ? ', today' : ''}`}
+                      accessibilityLabel={`${d.day} ${monthLabel(item.year, item.month)}${count ? `, ${count} race${count > 1 ? 's' : ''}` : ''}${statusNote}${isToday ? ', today' : ''}`}
                       accessibilityState={{ selected: isSel }}
                       onPress={() => onSelect(isSel ? null : d.key)}
                       style={{ width: cell, height: Math.max(44, cell), alignItems: 'center', justifyContent: 'center' }}
@@ -125,7 +133,7 @@ export function MonthPager({
                           borderRadius: 18,
                           alignItems: 'center',
                           justifyContent: 'center',
-                          backgroundColor: isSel ? colors.forest : count ? colors.lime : 'transparent',
+                          backgroundColor: isSel ? colors.forest : fill,
                           borderWidth: isToday && !isSel ? 2 : 0,
                           borderColor: c.leaf,
                         }}
@@ -134,6 +142,7 @@ export function MonthPager({
                           style={{
                             color: !d.inMonth ? 'transparent' : isSel ? '#FFFFFF' : count ? colors.ink : c.ink,
                             fontWeight: count || isToday ? '800' : '400',
+                            textDecorationLine: mark?.status === 'cancelled' && !isSel ? 'line-through' : 'none',
                           }}
                         >
                           {d.day}
@@ -147,6 +156,18 @@ export function MonthPager({
           </View>
         )}
       />
+      <View style={{ flexDirection: 'row', gap: spacing.md, paddingHorizontal: spacing.lg, paddingTop: 4 }} accessible accessibilityLabel="Key: lime, race day; yellow, postponed; red, cancelled">
+        {[
+          [colors.lime, 'Race'],
+          [DAY_POSTPONED, 'Postponed'],
+          [DAY_CANCELLED, 'Cancelled'],
+        ].map(([bg, label]) => (
+          <View key={label} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: bg }} />
+            <T variant="caption">{label}</T>
+          </View>
+        ))}
+      </View>
     </View>
   );
 }

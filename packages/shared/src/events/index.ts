@@ -14,6 +14,7 @@ export interface CalendarEvent {
   starts_at: string;
   timezone: string;
   status: string;
+  status_reason?: string | null;
   listing_source: 'organiser' | 'runlime';
   region_id: string;
   venue_name: string;
@@ -29,7 +30,7 @@ export interface CalendarEvent {
 
 /** Columns for calendar rows (web + mobile select the same shape). */
 export const CALENDAR_COLUMNS =
-  'id, slug, name, starts_at, timezone, status, listing_source, region_id, venue_name, start_lat, start_lng, walk_friendly, fee_min, fee_max, currency, cause, distances:event_distances(distance_km, label)';
+  'id, slug, name, starts_at, timezone, status, status_reason, listing_source, region_id, venue_name, start_lat, start_lng, walk_friendly, fee_min, fee_max, currency, cause, distances:event_distances(distance_km, label)';
 
 /** Validates calendar rows from the API (numeric columns may arrive as strings). */
 export const calendarEventSchema = z.object({
@@ -39,6 +40,7 @@ export const calendarEventSchema = z.object({
   starts_at: z.string(),
   timezone: z.string(),
   status: z.string(),
+  status_reason: z.string().nullable().optional(),
   listing_source: z.enum(['organiser', 'runlime']),
   region_id: z.string(),
   venue_name: z.string(),
@@ -139,13 +141,29 @@ export interface EventFilters {
   from?: string; // YYYY-MM-DD (inclusive, local)
   to?: string; // YYYY-MM-DD (inclusive, local)
   regionIds?: string[];
-  distanceKm?: number[]; // match any distance within ±0.5 km
+  distanceKm?: number[]; // match any distance within ±0.5 km; FUN_WALK_KM (0) = any distance under 5 km
   maxFee?: number; // 0 = free only
   cause?: boolean; // charity / cause races only
   walkFriendly?: boolean;
   text?: string;
   near?: { lat: number; lng: number; radiusKm: number };
 }
+
+/** Distance choice meaning "Fun walk / under 5K": matches any race distance shorter than 5 km. */
+export const FUN_WALK_KM = 0;
+
+export function distanceMatches(raceKm: number, choiceKm: number): boolean {
+  return choiceKm === FUN_WALK_KM ? raceKm < 5 : Math.abs(raceKm - choiceKm) <= 0.5;
+}
+
+/** Distance filter choices (app onboarding + filters; web /races). */
+export const DISTANCE_CHOICES = [
+  { km: FUN_WALK_KM, label: 'Fun walk / under 5K' },
+  { km: 5, label: '5K' },
+  { km: 10, label: '10K' },
+  { km: 21.1, label: 'Half marathon' },
+  { km: 42.2, label: 'Marathon' },
+] as const;
 
 export function filterEvents<T extends CalendarEvent>(events: T[], f: EventFilters): T[] {
   const text = f.text?.trim().toLowerCase();
@@ -154,7 +172,7 @@ export function filterEvents<T extends CalendarEvent>(events: T[], f: EventFilte
     if (f.from && k < f.from) return false;
     if (f.to && k > f.to) return false;
     if (f.regionIds?.length && !f.regionIds.includes(e.region_id)) return false;
-    if (f.distanceKm?.length && !e.distances.some((d) => f.distanceKm!.some((km) => Math.abs(Number(d.distance_km) - km) <= 0.5))) return false;
+    if (f.distanceKm?.length && !e.distances.some((d) => f.distanceKm!.some((km) => distanceMatches(Number(d.distance_km), km)))) return false;
     if (f.maxFee !== undefined && Number(e.fee_min) > f.maxFee) return false;
     if (f.cause && !e.cause) return false;
     if (f.walkFriendly && !e.walk_friendly) return false;

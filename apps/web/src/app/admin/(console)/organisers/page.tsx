@@ -1,9 +1,10 @@
-import { PageTitle } from '@/components/ui';
+import Link from 'next/link';
+import { Notice, PageTitle } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
 import { ReviewForm } from './ReviewForm';
 
-export default async function OrganisersQueue({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
-  const { status = 'applied' } = await searchParams;
+export default async function OrganisersQueue({ searchParams }: { searchParams: Promise<{ status?: string; created?: string }> }) {
+  const { status = 'applied', created } = await searchParams;
   const { supabase } = await requireAdmin('/admin/organisers');
   const { data: orgs } = await supabase
     .from('organisations')
@@ -14,6 +15,13 @@ export default async function OrganisersQueue({ searchParams }: { searchParams: 
   return (
     <>
       <PageTitle lead="Verify organisers before any of their events can go live.">Organisers</PageTitle>
+      {created && <Notice tone="success">Organisation created and verified.</Notice>}
+      <p className="mb-6">
+        <Link className="inline-block rounded-lg bg-leaf text-white px-4 py-2 font-semibold no-underline" href="/admin/organisers/new">
+          Add organisation
+        </Link>{' '}
+        <span className="text-sm text-ink-muted">For organisers you sign up yourself. It is created as verified and recorded in the audit log.</span>
+      </p>
       <nav aria-label="Filter by status" className="flex gap-4 mb-6">
         {tabs.map((t) => (
           <a key={t} href={`?status=${t}`} aria-current={t === status ? 'page' : undefined} className={t === status ? 'font-bold' : ''}>

@@ -1,6 +1,6 @@
 import { NO_FILTERS } from '../src/components/FilterSheet';
 import { initials } from '../src/components/SideMenu';
-import { raceDayCounts, selectRaces } from '../src/lib/raceQuery';
+import { raceDayMarks, selectRaces } from '../src/lib/raceQuery';
 import { race } from '../test-utils/races';
 
 const TT = 'America/Port_of_Spain';
@@ -33,10 +33,22 @@ describe('home race list', () => {
     expect(selectRaces(events, { ...base, near }).map((e) => e.id)).toEqual(['later']);
     expect(selectRaces(events, { ...base, near: { ...near, radiusKm: 100 } })[0]!.id).toBe('later');
   });
-  it('marks race days but not cancelled races', () => {
-    const counts = raceDayCounts(events, { filters: NO_FILTERS, text: '', near: null });
-    expect(counts.get(events[1]!.starts_at.slice(0, 10))).toBe(1);
-    expect(counts.get(events[3]!.starts_at.slice(0, 10))).toBeUndefined();
+  it('marks race days with their status (cancelled days stay visible, marked cancelled)', () => {
+    const marks = raceDayMarks(events, { filters: NO_FILTERS, text: '', near: null });
+    expect(marks.get(events[1]!.starts_at.slice(0, 10))).toMatchObject({ count: 1, status: 'scheduled' });
+    expect(marks.get(events[3]!.starts_at.slice(0, 10))).toMatchObject({ count: 1, status: 'cancelled', cancelled: 1 });
+  });
+
+  it('a day with one race going ahead and one postponed counts as a race day', () => {
+    const a = race('a', 6);
+    const b = race('b', 6, { status: 'postponed' });
+    const m = raceDayMarks([a, b], { filters: NO_FILTERS, text: '', near: null }).get(a.starts_at.slice(0, 10))!;
+    expect(m).toMatchObject({ count: 2, status: 'scheduled', postponed: 1 });
+  });
+
+  it('fun walk / under 5K filter', () => {
+    const walk = race('walk', 3, { distances: [{ distance_km: 3, label: '3K walk' }] });
+    expect(selectRaces([...events, walk], { ...base, filters: { ...NO_FILTERS, distanceKm: [0] } }).map((e) => e.id)).toEqual(['walk']);
   });
 });
 

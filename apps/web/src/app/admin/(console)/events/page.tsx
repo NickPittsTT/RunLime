@@ -23,14 +23,27 @@ export default async function AdminEvents({ searchParams }: { searchParams: Prom
   return (
     <>
       <PageTitle lead="Approve organiser events and enter RunLime listings (public facts only).">Events</PageTitle>
-      <div className="flex flex-wrap gap-3 mb-6">
-        <Link className="rounded-lg bg-leaf text-white px-4 py-3 font-semibold" href="/admin/events/new?type=runlime">
+      <section aria-labelledby="add-race" className="rounded-xl border-2 border-leaf bg-surface p-5 mb-4">
+        <h2 id="add-race" className="text-lg font-bold mb-1">
+          Add a race you found
+        </h2>
+        <p className="text-sm mb-3">Most races: enter the public facts and the official registration link. Runners see a &quot;not affiliated&quot; notice.</p>
+        <Link className="inline-block rounded-lg bg-leaf text-white px-5 py-3 font-semibold no-underline" href="/admin/events/new?type=runlime">
           New RunLime listing
         </Link>
-        <Link className="rounded-lg border border-line px-4 py-3 font-semibold" href="/admin/events/new?type=organiser">
+      </section>
+      <section aria-labelledby="add-org-event" className="rounded-xl border border-line p-4 mb-8">
+        <h2 id="add-org-event" className="text-base font-bold mb-1">
+          Organiser events (less common)
+        </h2>
+        <p className="text-sm mb-3">
+          Only for a <strong>verified organisation</strong> you manage on its behalf. No organisation yet?{' '}
+          <Link href="/admin/organisers/new">Add organisation</Link> first.
+        </p>
+        <Link className="inline-block rounded-lg border border-line px-4 py-2 font-semibold text-sm" href="/admin/events/new?type=organiser">
           New event for an organiser
         </Link>
-      </div>
+      </section>
       <nav aria-label="Filter by status" className="flex flex-wrap gap-2 mb-6">
         {FILTERS.map((f) => (
           <Link

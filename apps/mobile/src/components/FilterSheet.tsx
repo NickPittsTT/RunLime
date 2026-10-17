@@ -3,7 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { Area } from '@/lib/regions';
 import { DISTANCE_CHOICES } from '@/lib/preferences';
 import { useTheme } from '@/lib/theme';
-import { Button, Chip, T } from './ui';
+import { Button, Chip, T, TextButton } from './ui';
 
 export interface RaceFilters {
   regionIds: string[];
@@ -20,6 +20,31 @@ export function activeFilterCount(f: RaceFilters): number {
 }
 
 const toggle = <T,>(list: T[], v: T) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
+
+/** Section title with "Select all" / "Clear all" (item 6). */
+export function SectionHeader({ title, onAll, onNone }: { title: string; onAll: () => void; onNone: () => void }) {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+      <T variant="title" style={{ flex: 1 }}>
+        {title}
+      </T>
+      <TextButton label="Select all" accessibilityHint={`Selects every ${title.toLowerCase()}`} onPress={onAll} />
+      <TextButton label="Clear all" accessibilityHint={`Clears ${title.toLowerCase()}`} onPress={onNone} />
+    </View>
+  );
+}
+
+/** Short summary of active filters, e.g. "Port of Spain, 5K, Free entry". Empty string when none. */
+export function filterSummary(f: RaceFilters, areas: Area[] | null): string {
+  const parts = [
+    ...f.regionIds.map((id) => areas?.find((a) => a.id === id)?.name).filter((x): x is string => Boolean(x)),
+    ...DISTANCE_CHOICES.filter((d) => f.distanceKm.includes(d.km)).map((d) => d.label),
+    ...(f.freeOnly ? ['Free entry'] : []),
+    ...(f.cause ? ['For a cause'] : []),
+    ...(f.walkFriendly ? ['Walkers welcome'] : []),
+  ];
+  return parts.join(', ');
+}
 
 /** M14: race filters (area, distance, price, cause, walk-friendly). */
 export function FilterSheet({
@@ -42,13 +67,21 @@ export function FilterSheet({
       <SafeAreaView style={{ flex: 1, backgroundColor: c.background }}>
         <ScrollView contentContainerStyle={{ padding: spacing.lg, gap: spacing.lg }}>
           <T variant="headline">Filters</T>
-          <T variant="title">Area</T>
+          <SectionHeader
+            title="Areas"
+            onAll={() => onChange({ ...value, regionIds: (areas ?? []).map((a) => a.id) })}
+            onNone={() => onChange({ ...value, regionIds: [] })}
+          />
           <View style={row}>
             {(areas ?? []).map((a) => (
               <Chip key={a.id} label={a.name} selected={value.regionIds.includes(a.id)} onPress={() => onChange({ ...value, regionIds: toggle(value.regionIds, a.id) })} />
             ))}
           </View>
-          <T variant="title">Distance</T>
+          <SectionHeader
+            title="Distances"
+            onAll={() => onChange({ ...value, distanceKm: DISTANCE_CHOICES.map((d) => d.km) })}
+            onNone={() => onChange({ ...value, distanceKm: [] })}
+          />
           <View style={row}>
             {DISTANCE_CHOICES.map((d) => (
               <Chip key={d.km} label={d.label} selected={value.distanceKm.includes(d.km)} onPress={() => onChange({ ...value, distanceKm: toggle(value.distanceKm, d.km) })} />

@@ -60,7 +60,8 @@ describe('legal documents', () => {
   it('refund policy: the three refund cases, bank transfer, timing from a setting, Premium follows the stores', () => {
     const r = docs.find((d) => d.doc.slug === 'refunds')!.doc.body;
     expect(r).toMatch(/We reject your listing/);
-    expect(r).toMatch(/You cancel your race/);
+    expect(r).toMatch(/You cancel your race before your listing is published\*\* \| Full refund/);
+    expect(r).toContain('{{cancel_refund_after_live_percent}}% of the listing fee');
     expect(r).toMatch(/You paid twice/);
     expect(r).toMatch(/By \*\*bank transfer\*\*/);
     expect(r).toContain('{{refund_processing_days}} business days');
@@ -83,6 +84,13 @@ describe('legal documents', () => {
     expect(privacy).toMatch(/Gmail\) for sign-in emails/);
     expect(privacy).toMatch(/OpenFreeMap/);
     expect(privacy).not.toMatch(/Resend/);
+  });
+
+  it('terms explain RunLime listings: facts only; organiser images only with recorded permission; can be withdrawn', () => {
+    const terms = docs.find((d) => d.doc.slug === 'terms')!.doc.body;
+    expect(terms).toMatch(/Races listed by RunLime/);
+    expect(terms).toMatch(/flyer, logo or sponsor names on such a listing only after the organiser has given us permission, and we keep a record/);
+    expect(terms).toMatch(/withdraw their permission/);
   });
 
   it('terms point organisers to the refund policy', () => {

@@ -6,7 +6,7 @@ import { addMedia, addSponsor, inviteCoOrganiser } from '@/app/organiser/events/
 
 const MAX_BYTES = 5 * 1024 * 1024;
 
-export function MediaUploader({ eventId }: { eventId: string }) {
+export function MediaUploader({ eventId, allowPhotos = true }: { eventId: string; allowPhotos?: boolean }) {
   const [state, action, pending] = useActionState(addMedia, {});
   const [path, setPath] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -40,7 +40,7 @@ export function MediaUploader({ eventId }: { eventId: string }) {
         <Select id={`media-kind-${eventId}`} name="kind" defaultValue="flyer">
           <option value="flyer">Flyer</option>
           <option value="route_map">Route map</option>
-          <option value="gallery">Photo</option>
+          {allowPhotos && <option value="gallery">Photo</option>}
         </Select>
       </Field>
       <Field label="Describe the image (alt text, required)" htmlFor={`media-alt-${eventId}`} hint="For people using screen readers, e.g. “Race flyer: 5K on 1 March, 6am start”.">

@@ -1,7 +1,7 @@
 ---
 slug: refunds
 title: Refund Policy
-version: 2026-10-17-draft
+version: 2026-10-17-draft2
 ---
 # RunLime Refund Policy
 
@@ -20,7 +20,8 @@ Organisers pay for event listings through the RunLime web portal, by bank transf
 | Situation | Refund |
 |---|---|
 | **We reject your listing** (it is not approved) | Full refund of the listing fee |
-| **You cancel your race** before race day, and record the cancellation in the organiser portal | Full refund of the listing fee for that race |
+| **You cancel your race before your listing is published** | Full refund of the listing fee for that race |
+| **You cancel your race after your listing has been live** (before race day, recorded in the organiser portal) | {{cancel_refund_after_live_percent}}% of the listing fee for that race |
 | **You paid twice, or paid more than the invoice** | Refund of the duplicate payment or the extra amount |
 
 ### When there is no refund
@@ -48,4 +49,4 @@ You can cancel Premium at any time in your store account settings. Cancelling st
 ## 3. Questions
 Email {{support_email}}. This policy does not take away any rights you have under the consumer protection laws of Trinidad and Tobago.
 
-_Draft notes for the attorney: (1) please confirm the full refund on organiser cancellation (an alternative is a partial refund once the listing has been live); (2) confirm the consumer-rights sentence fits the Consumer Protection and Safety Act; (3) bank charges on refunds are not deducted from the refund amount, so RunLime bears its own bank's fee._
+_Draft notes for the attorney: (1) the refund share for a cancellation after the listing has been live is a setting (currently 100%; the owner is choosing between 100% and 50%); please confirm either is fair under consumer law; (2) confirm the consumer-rights sentence fits the Consumer Protection and Safety Act; (3) bank charges on refunds are not deducted from the refund amount, so RunLime bears its own bank's fee._

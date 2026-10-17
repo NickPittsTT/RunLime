@@ -1,9 +1,11 @@
-import { STATUS_LABEL, feeLabel, formatEventDate, formatEventTime } from '@runlime/shared/events';
+import { feeLabel, formatEventDate, formatEventTime } from '@runlime/shared/events';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { Image, Linking, Share, View } from 'react-native';
+import { Image, Linking, RefreshControl, Share, View } from 'react-native';
 import { RaceMap } from '@/components/RaceMap';
+import { StatusBanner } from '@/components/StatusBanner';
 import { Button, LinkRow, Notice, Row, Screen, T } from '@/components/ui';
+import { formatUpdated } from '@/lib/calendar';
 import { eventMediaUrl, raceWebUrl, useRace } from '@/lib/raceDetail';
 import { settingText, usePublicSettings } from '@/lib/settings';
 import { useTheme } from '@/lib/theme';
@@ -13,7 +15,8 @@ export default function RaceScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { c, spacing, radius } = useTheme();
-  const { race: e, state, reload } = useRace(id);
+  const { race: e, state, reload, updatedAt, offline, refreshing } = useRace(id);
+  const refresh = <RefreshControl testID="race-refresh" refreshing={refreshing} onRefresh={() => void reload()} />;
   const settings = usePublicSettings();
 
   if (state === 'loading' && !e) {
@@ -33,7 +36,7 @@ export default function RaceScreen() {
   }
   if (!e) {
     return (
-      <Screen>
+      <Screen refreshControl={refresh} testID="race-scroll">
         <Stack.Screen options={{ title: 'Race' }} />
         <T>This race is no longer listed.</T>
       </Screen>
@@ -48,14 +51,12 @@ export default function RaceScreen() {
   const web = raceWebUrl(e.slug);
 
   return (
-    <Screen>
+    <Screen refreshControl={refresh} testID="race-scroll">
       <Stack.Screen options={{ title: 'Race details' }} />
-      {e.status !== 'published' ? (
-        <Notice tone={e.status === 'cancelled' ? 'danger' : 'info'}>
-          <T style={{ fontWeight: '800' }}>{STATUS_LABEL[e.status]}.</T>
-          {e.status_reason ? <T>{e.status_reason}</T> : null}
-        </Notice>
+      {offline && updatedAt ? (
+        <Notice>{`Offline. Showing this race as last updated ${formatUpdated(updatedAt)}. Pull down to refresh.`}</Notice>
       ) : null}
+      <StatusBanner status={e.status} reason={e.status_reason} />
       <T variant="headline">{e.name}</T>
       <View style={{ gap: 2 }}>
         <T style={{ fontSize: 18 }}>
@@ -146,6 +147,7 @@ export default function RaceScreen() {
         </View>
       ) : null}
       <T variant="caption">RunLime does not take registrations, entry fees or official times. Results and timing come from the organiser.</T>
+      {updatedAt && !offline ? <T variant="caption">Updated {formatUpdated(updatedAt)}. Pull down to refresh.</T> : null}
     </Screen>
   );
 }

@@ -1,4 +1,4 @@
-import { addMonths, eventsByDay, filterEvents, todayKey, zonedLocalToIso, type EventFilters } from '@runlime/shared/events';
+import { DISTANCE_CHOICES, addMonths, eventsByDay, filterEvents, todayKey, zonedLocalToIso, type EventFilters } from '@runlime/shared/events';
 import type { Metadata } from 'next';
 import { MonthCalendar } from '@/components/calendar/MonthCalendar';
 import { RaceList } from '@/components/calendar/RaceList';
@@ -30,7 +30,7 @@ export default async function Races({ searchParams }: { searchParams: Promise<SP
   ]);
   const filters: EventFilters = {
     regionIds: sp.area ? [sp.area] : undefined,
-    distanceKm: sp.distance ? [Number(sp.distance)] : undefined,
+    distanceKm: sp.distance !== undefined && sp.distance !== '' && Number.isFinite(Number(sp.distance)) ? [Number(sp.distance)] : undefined,
     maxFee: sp.free ? 0 : undefined,
     walkFriendly: Boolean(sp.walk),
     cause: Boolean(sp.cause),
@@ -76,9 +76,11 @@ export default async function Races({ searchParams }: { searchParams: Promise<SP
           <span className="text-sm font-semibold">Distance</span>
           <Select name="distance" defaultValue={sp.distance ?? ''}>
             <option value="">Any</option>
-            <option value="5">5K</option>
-            <option value="10">10K</option>
-            <option value="21.1">Half marathon</option>
+            {DISTANCE_CHOICES.map((d) => (
+              <option key={d.km} value={String(d.km)}>
+                {d.label}
+              </option>
+            ))}
           </Select>
         </label>
         <div className="flex flex-wrap gap-4 items-center sm:col-span-2">

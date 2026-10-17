@@ -1,7 +1,7 @@
 ---
 slug: terms
 title: Terms of Use
-version: 2026-10-17-draft3
+version: 2026-10-17-draft4
 ---
 # RunLime Terms of Use
 
@@ -41,6 +41,8 @@ You can make your account Private (followers need your approval) or Public. You 
 
 ## 6. Organiser listings
 Organisers buy event listings through the RunLime web portal only, and pay by bank transfer. Listing terms, prices and invoices are shown in the portal. A listing activates once we confirm payment. Refunds of listing fees (rejected listings, races you cancel, duplicate payments) follow our Refund Policy at {{website}}/legal/refunds. Organisers are responsible for their events and for the accuracy of their information, and must not use RunLime to collect participants' personal data.
+
+**Races listed by RunLime.** Some races are listed by RunLime itself from public information, so runners can find them. These listings show facts only (name, date, start time, distance, venue and start point) and the organiser's official registration link, with a notice that RunLime is not affiliated with the race. We show an organiser's flyer, logo or sponsor names on such a listing only after the organiser has given us permission, and we keep a record of that permission. Organisers can ask us at {{support_email}} to correct or remove a listing, or to withdraw their permission, at any time.
 
 ## 7. Health
 Running carries risk. Read the [Health Disclaimer](/legal/health). RunLime doesn't give medical advice. Distance, pace, steps and calories are estimates.

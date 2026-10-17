@@ -99,3 +99,14 @@ export async function suggestRaceAction(_prev: ActionResult, formData: FormData)
   if (error) return { error: friendlyError(error) };
   return { ok: 'Thanks! Our team will check it and add it to the calendar if we can confirm the details.' };
 }
+
+/** RunLime listing: record (or withdraw) the organiser's permission to show their flyer, logo and sponsors. Audited. */
+export async function setMediaPermissionAction(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
+  const id = String(formData.get('id'));
+  const granted = formData.get('granted') === 'on';
+  const supabase = await createClient();
+  const { error } = await supabase.rpc('set_listing_media_permission', { p_event: id, p_granted: granted });
+  if (error) return { error: friendlyError(error) };
+  revalidatePath(`/admin/events/${id}`);
+  return { ok: granted ? 'Permission recorded. You can add the flyer and sponsors below.' : 'Permission withdrawn.' };
+}

@@ -1,17 +1,17 @@
-import { STATUS_LABEL, feeLabel, formatEventDate, formatEventTime, haversineKm, type CalendarEvent } from '@runlime/shared/events';
+import { feeLabel, formatEventDate, formatEventTime, haversineKm, type CalendarEvent } from '@runlime/shared/events';
 import { Pressable, View } from 'react-native';
 import { useTheme } from '@/lib/theme';
+import { StatusBanner } from './StatusBanner';
 import { T } from './ui';
 
 export function RaceCard({ event: e, onPress, near }: { event: CalendarEvent; onPress: () => void; near?: { lat: number; lng: number } | null }) {
   const { c, radius, spacing } = useTheme();
   const distances = e.distances.map((d) => d.label).join(' · ');
   const away = near ? haversineKm(near, { lat: e.start_lat, lng: e.start_lng }) : null;
-  const status = e.status !== 'published' ? STATUS_LABEL[e.status] : null;
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={[e.name, status, formatEventDate(e.starts_at, e.timezone), formatEventTime(e.starts_at, e.timezone), e.venue_name, distances, feeLabel(e)]
+      accessibilityLabel={[e.name, e.status === 'postponed' ? 'Postponed' : e.status === 'cancelled' ? 'Cancelled' : null, e.status_reason, formatEventDate(e.starts_at, e.timezone), formatEventTime(e.starts_at, e.timezone), e.venue_name, distances, feeLabel(e)]
         .filter(Boolean)
         .join(', ')}
       onPress={onPress}
@@ -25,7 +25,7 @@ export function RaceCard({ event: e, onPress, near }: { event: CalendarEvent; on
         opacity: pressed ? 0.85 : 1,
       })}
     >
-      {status ? <T style={{ color: e.status === 'cancelled' ? c.danger : c.warning, fontWeight: '800' }}>{status}</T> : null}
+      <StatusBanner status={e.status} reason={e.status_reason} compact />
       <T style={{ fontWeight: '800', fontSize: 17, textDecorationLine: e.status === 'cancelled' ? 'line-through' : 'none' }}>{e.name}</T>
       <T variant="muted">
         {formatEventDate(e.starts_at, e.timezone)} · {formatEventTime(e.starts_at, e.timezone)}

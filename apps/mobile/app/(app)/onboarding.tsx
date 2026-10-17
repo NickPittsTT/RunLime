@@ -1,6 +1,7 @@
 import { Stack, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
+import { SectionHeader } from '@/components/FilterSheet';
 import { Button, Chip, Screen, T } from '@/components/ui';
 import { DISTANCE_CHOICES, savePreferences } from '@/lib/preferences';
 import { useAreas } from '@/lib/regions';
@@ -49,8 +50,8 @@ export default function OnboardingScreen() {
             {SLIDES.length + 1} of {SLIDES.length + 1}
           </T>
           <T variant="headline">What races do you want to see?</T>
-          <T variant="muted">Optional. We use these as your starting filters. Change them any time with Filters.</T>
-          <T variant="title">Areas</T>
+          <T variant="muted">Optional. Saved to your account as your starting filters. Change them any time with Filters.</T>
+          <SectionHeader title="Areas" onAll={() => setRegionIds((areas ?? []).map((a) => a.id))} onNone={() => setRegionIds([])} />
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
             {(areas ?? []).map((a) => (
               <Chip
@@ -61,7 +62,7 @@ export default function OnboardingScreen() {
               />
             ))}
           </View>
-          <T variant="title">Distances</T>
+          <SectionHeader title="Distances" onAll={() => setDistanceKm(DISTANCE_CHOICES.map((d) => d.km))} onNone={() => setDistanceKm([])} />
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
             {DISTANCE_CHOICES.map((d) => (
               <Chip

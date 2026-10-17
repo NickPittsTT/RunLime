@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { expect, type Page } from '@playwright/test';
+import { expect, type Browser, type Page } from '@playwright/test';
 import { totp } from '../../scripts/lib/totp';
 
 export const SUPABASE_URL = process.env.SUPABASE_URL ?? 'http://127.0.0.1:54321';
@@ -76,4 +76,19 @@ export async function createUserWithProfile(email: string, displayName: string, 
 
 export function currentTotp(secret: string) {
   return totp(secret);
+}
+
+/** A platform admin signed in with TOTP (aal2) in a fresh browser context. */
+export async function signInAdmin(browser: Browser) {
+  const email = uniqueEmail('admin');
+  await createUserWithProfile(email, 'Ada Admin', 'platform_admin');
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await signInWithEmail(page, email, '1985-02-02', '/admin');
+  await expect(page).toHaveURL(/\/admin\/mfa/);
+  const secret = (await page.getByTestId('totp-secret').textContent())!.trim();
+  await page.getByLabel('Authenticator code').fill(currentTotp(secret));
+  await page.getByRole('button', { name: 'Verify' }).click();
+  await expect(page.getByRole('heading', { name: 'Admin overview' })).toBeVisible();
+  return { ctx, page };
 }

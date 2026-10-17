@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import { parseGpx } from '@runlime/shared/events';
 import dynamic from 'next/dynamic';
 import { useActionState, useState } from 'react';
@@ -72,13 +73,20 @@ export function EventForm({ initial, areas, organisations, back, suggestionId }:
       {isListing && (
         <Notice tone="info">
           <strong>RunLime listing.</strong> Enter public facts only: name, date and start time, distance, venue and start pin, and the official registration
-          link. No flyers or logos without the organiser&apos;s permission. Runners will see the &quot;not affiliated, check with the organiser&quot; notice.
+          link. To show the organiser&apos;s flyer, logo or sponsors, save the listing first, then tick the permission box on its page. Runners will see the &quot;not affiliated, check with the organiser&quot; notice.
         </Notice>
       )}
 
       <h2 className="text-xl font-bold mt-2 mb-4">Basics</h2>
+      {!isListing && organisations && organisations.length === 0 && (
+        <Notice tone="warning">
+          <strong>No organisations to choose yet.</strong> Only <em>verified</em> organisations appear here. Approve an organiser&apos;s application in{' '}
+          <Link href="/admin/organisers">Organisers</Link>, or create one with <Link href="/admin/organisers/new">Add organisation</Link>. For a race you found
+          yourself, use a <Link href="/admin/events/new?type=runlime">RunLime listing</Link> instead.
+        </Notice>
+      )}
       {!isListing && organisations && (
-        <Field label="Organisation" htmlFor="ev-org">
+        <Field label="Organisation" htmlFor="ev-org" hint="Only verified organisations are listed.">
           <Select id="ev-org" value={v.organisationId ?? ''} onChange={(e) => set('organisationId', e.target.value)} required disabled={Boolean(v.id)}>
             <option value="">Choose…</option>
             {organisations.map((o) => (

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MAP_ATTRIBUTION, MAP_ATTRIBUTION_LINKS, addMonths, eventsByDay, feeLabel, filterEvents, haversineKm, localDateKey, monthGrid, parseCalendarEvents, sortEvents, type CalendarEvent } from '../src/events';
+import { FUN_WALK_KM, MAP_ATTRIBUTION, MAP_ATTRIBUTION_LINKS, addMonths, eventsByDay, feeLabel, filterEvents, haversineKm, localDateKey, monthGrid, parseCalendarEvents, sortEvents, type CalendarEvent } from '../src/events';
 import { eventInputSchema, raceSuggestionSchema, isoToZonedLocal, parseGpx, toSaveEventPayload, zonedLocalToIso } from '../src/schemas/event';
 
 const TT = 'America/Port_of_Spain';
@@ -136,5 +136,17 @@ describe('map attribution', () => {
   it('credits OpenStreetMap contributors (linking to the copyright page), OpenFreeMap and OpenMapTiles', () => {
     expect(MAP_ATTRIBUTION).toBe('OpenFreeMap · © OpenMapTiles · © OpenStreetMap contributors');
     expect(MAP_ATTRIBUTION_LINKS.find((l) => l.label.includes('OpenStreetMap'))!.url).toBe('https://www.openstreetmap.org/copyright');
+  });
+});
+
+describe('fun walk / under 5K filter', () => {
+  const base = { id: 'x', slug: 'x', name: 'X', starts_at: '2031-03-01T10:00:00Z', timezone: 'America/Port_of_Spain', status: 'published',
+    listing_source: 'runlime' as const, region_id: 'r', venue_name: 'V', start_lat: 10.6, start_lng: -61.5, walk_friendly: false,
+    fee_min: 0, fee_max: null, currency: 'TTD', cause: null };
+  const walk = { ...base, id: 'walk', distances: [{ distance_km: 3, label: '3K walk' }] };
+  const five = { ...base, id: 'five', distances: [{ distance_km: 5, label: '5K' }] };
+  it('matches races shorter than 5 km only', () => {
+    expect(filterEvents([walk, five], { distanceKm: [FUN_WALK_KM] }).map((e) => e.id)).toEqual(['walk']);
+    expect(filterEvents([walk, five], { distanceKm: [FUN_WALK_KM, 5] }).map((e) => e.id)).toEqual(['walk', 'five']);
   });
 });

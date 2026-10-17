@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { calendarEventSchema } from '@runlime/shared/events';
 import { useCallback, useEffect, useState } from 'react';
 import { z } from 'zod';
@@ -33,30 +34,62 @@ export function raceWebUrl(slug: string): string {
   return `${config.webUrl}/e/${encodeURIComponent(slug)}`;
 }
 
-type RaceLoad = { state: 'ready'; race: RaceDetail } | { state: 'notFound' | 'error'; race: null };
+type RaceLoad =
+  | { state: 'ready'; race: RaceDetail; updatedAt: string; offline: boolean }
+  | { state: 'notFound' | 'error'; race: null; updatedAt: null; offline: boolean };
 
+const cacheKey = (id: string) => `runlime.race.v1.${id}`;
+const cachedSchema = z.object({ savedAt: z.string(), race: z.unknown() });
+
+/** Fresh from the server; if offline, the last copy saved on this phone (with when it was saved). */
 export async function fetchRace(id: string): Promise<RaceLoad> {
   const { data, error } = await supabase.from('events').select(DETAIL_COLUMNS).eq('id', id).in('status', ['published', 'postponed', 'cancelled']).maybeSingle();
-  if (error) return { state: 'error', race: null };
+  if (error) {
+    try {
+      const raw = await AsyncStorage.getItem(cacheKey(id));
+      const c = cachedSchema.safeParse(raw ? JSON.parse(raw) : null);
+      const race = c.success ? raceDetailSchema.safeParse(c.data.race) : null;
+      if (c.success && race?.success) return { state: 'ready', race: race.data, updatedAt: c.data.savedAt, offline: true };
+    } catch {
+      // fall through
+    }
+    return { state: 'error', race: null, updatedAt: null, offline: true };
+  }
   const parsed = raceDetailSchema.safeParse(data);
-  return data && parsed.success ? { state: 'ready', race: parsed.data } : { state: 'notFound', race: null };
+  if (!data || !parsed.success) {
+    await AsyncStorage.removeItem(cacheKey(id)).catch(() => undefined);
+    return { state: 'notFound', race: null, updatedAt: null, offline: false };
+  }
+  const savedAt = new Date().toISOString();
+  await AsyncStorage.setItem(cacheKey(id), JSON.stringify({ savedAt, race: data })).catch(() => undefined);
+  return { state: 'ready', race: parsed.data, updatedAt: savedAt, offline: false };
 }
 
 /** One public race (published, postponed or cancelled). */
 export function useRace(id: string | undefined) {
   const [race, setRace] = useState<RaceDetail | null>(null);
   const [state, setState] = useState<'loading' | RaceLoad['state']>('loading');
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
+  const [offline, setOffline] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const apply = useCallback((r: RaceLoad) => {
-    if (r.race) setRace(r.race);
-    setState(r.state);
+    if (r.race) {
+      setRace(r.race);
+      setUpdatedAt(r.updatedAt);
+    }
+    if (r.state === 'notFound') setRace(null);
+    setOffline(r.offline);
+    // Keep showing what we have if a refresh fails while offline.
+    setState((prev) => (r.state === 'error' && prev === 'ready' ? prev : r.state));
+    setRefreshing(false);
   }, []);
   useEffect(() => {
     if (id) void fetchRace(id).then(apply);
   }, [id, apply]);
   const reload = useCallback(async () => {
     if (!id) return;
-    setState('loading');
+    setRefreshing(true);
     apply(await fetchRace(id));
   }, [id, apply]);
-  return { race, state, reload };
+  return { race, state, reload, updatedAt, offline, refreshing };
 }

@@ -26,8 +26,17 @@ export function selectRaces(events: CalendarEvent[], q: RaceQuery): CalendarEven
   return sortEvents(list, q.near ?? undefined);
 }
 
-/** Race counts per local day, for marking the month view (filters apply; the day/date window does not). */
-export function raceDayCounts(events: CalendarEvent[], q: Omit<RaceQuery, 'day' | 'today'>): Map<string, number> {
+export type DayStatus = 'scheduled' | 'postponed' | 'cancelled';
+export interface DayMark {
+  count: number;
+  /** scheduled if any race that day goes ahead; else postponed if any is postponed; else cancelled. */
+  status: DayStatus;
+  postponed: number;
+  cancelled: number;
+}
+
+/** Race marks per local day for the month view (filters apply; the day/date window does not). */
+export function raceDayMarks(events: CalendarEvent[], q: Omit<RaceQuery, 'day' | 'today'>): Map<string, DayMark> {
   const list = filterEvents(events, {
     regionIds: q.filters.regionIds,
     distanceKm: q.filters.distanceKm,
@@ -37,11 +46,15 @@ export function raceDayCounts(events: CalendarEvent[], q: Omit<RaceQuery, 'day' 
     text: q.text,
     near: q.near ?? undefined,
   });
-  const out = new Map<string, number>();
+  const out = new Map<string, DayMark>();
   for (const e of list) {
-    if (e.status === 'cancelled') continue;
     const k = localDateKey(e.starts_at, e.timezone);
-    out.set(k, (out.get(k) ?? 0) + 1);
+    const m = out.get(k) ?? { count: 0, status: 'cancelled' as DayStatus, postponed: 0, cancelled: 0 };
+    m.count += 1;
+    if (e.status === 'postponed') m.postponed += 1;
+    else if (e.status === 'cancelled') m.cancelled += 1;
+    out.set(k, m);
   }
+  for (const m of out.values()) m.status = m.count > m.postponed + m.cancelled ? 'scheduled' : m.postponed > 0 ? 'postponed' : 'cancelled';
   return out;
 }

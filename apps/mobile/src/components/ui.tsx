@@ -1,4 +1,4 @@
-import type { ReactNode, Ref } from 'react';
+import type { ReactElement, ReactNode, Ref } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -9,19 +9,26 @@ import {
   Text,
   TextInput,
   View,
+  type RefreshControlProps,
   type TextInputProps,
   type TextProps,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/lib/theme';
 
-export function Screen({ children, scroll = true }: { children: ReactNode; scroll?: boolean }) {
+export function Screen({ children, scroll = true, refreshControl, testID }: { children: ReactNode; scroll?: boolean; refreshControl?: ReactElement<RefreshControlProps>; testID?: string }) {
   const { c, spacing } = useTheme();
   const body = <View style={{ padding: spacing.lg, gap: spacing.lg }}>{children}</View>;
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: c.background }} edges={['bottom', 'left', 'right']}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        {scroll ? <ScrollView keyboardShouldPersistTaps="handled">{body}</ScrollView> : body}
+        {scroll ? (
+          <ScrollView testID={testID} keyboardShouldPersistTaps="handled" refreshControl={refreshControl}>
+            {body}
+          </ScrollView>
+        ) : (
+          body
+        )}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -166,6 +173,40 @@ export function Chip({ label, selected, onPress, accessibilityHint }: { label: s
       }}
     >
       <Text style={{ color: selected ? c.leaf : c.ink, fontWeight: selected ? '800' : '500' }}>{selected ? `✓ ${label}` : label}</Text>
+    </Pressable>
+  );
+}
+
+/** Two-or-more option switch (e.g. List | Map). */
+export function Segmented<V extends string>({ options, value, onChange, label }: { options: { value: V; label: string }[]; value: V; onChange: (v: V) => void; label: string }) {
+  const { c, radius } = useTheme();
+  return (
+    <View accessibilityRole="tablist" accessibilityLabel={label} style={{ flexDirection: 'row', borderWidth: 1, borderColor: c.leaf, borderRadius: radius.pill, overflow: 'hidden', alignSelf: 'flex-start' }}>
+      {options.map((o) => {
+        const selected = o.value === value;
+        return (
+          <Pressable
+            key={o.value}
+            accessibilityRole="tab"
+            accessibilityState={{ selected }}
+            accessibilityLabel={o.label}
+            onPress={() => onChange(o.value)}
+            style={{ minHeight: 40, minWidth: 72, paddingHorizontal: 16, justifyContent: 'center', alignItems: 'center', backgroundColor: selected ? c.leaf : c.background }}
+          >
+            <Text style={{ color: selected ? '#FFFFFF' : c.leaf, fontWeight: '800' }}>{o.label}</Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+/** Small text button (e.g. "Select all", "Clear"). */
+export function TextButton({ label, onPress, accessibilityHint }: { label: string; onPress: () => void; accessibilityHint?: string }) {
+  const { c } = useTheme();
+  return (
+    <Pressable accessibilityRole="button" accessibilityLabel={label} accessibilityHint={accessibilityHint} onPress={onPress} hitSlop={8} style={{ minHeight: 36, justifyContent: 'center' }}>
+      <Text style={{ color: c.leaf, fontWeight: '800', textDecorationLine: 'underline' }}>{label}</Text>
     </Pressable>
   );
 }

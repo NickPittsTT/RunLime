@@ -20,6 +20,7 @@ export const LEGAL_TOKEN_SETTINGS = {
   minors_notice: 'legal.minors_notice',
   community_disclaimer: 'community.disclaimer',
   refund_processing_days: 'payments.refund_processing_days',
+  cancel_refund_after_live_percent: 'payments.cancel_refund_after_live_percent',
 } as const;
 export type LegalToken = keyof typeof LEGAL_TOKEN_SETTINGS;
 

@@ -32,6 +32,7 @@ export function race(id: string, daysFromNow: number, over: Partial<CalendarEven
 export function queryMock(result: { data: unknown; error: unknown }) {
   const q: Record<string, unknown> = {};
   for (const m of ['select', 'in', 'gte', 'lt', 'order', 'limit', 'eq']) q[m] = jest.fn(() => q);
+  q.upsert = jest.fn(async () => ({ data: null, error: null }));
   q.maybeSingle = jest.fn(async () => result);
   q.then = (resolve: (v: unknown) => unknown, reject?: (e: unknown) => unknown) => Promise.resolve(result).then(resolve, reject);
   return q;

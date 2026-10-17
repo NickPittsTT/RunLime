@@ -1,23 +1,9 @@
-import { expect, test, type Browser } from '@playwright/test';
-import { admin, createUserWithProfile, currentTotp, signInWithEmail, uniqueEmail } from './helpers';
+import { expect, test } from '@playwright/test';
+import { admin, createUserWithProfile, signInAdmin, signInWithEmail, uniqueEmail } from './helpers';
 
 const nextYear = new Date().getUTCFullYear() + 1;
 const START_LOCAL = `${nextYear}-03-07T06:00`;
 const MONTH = `${nextYear}-03`;
-
-async function signInAdmin(browser: Browser) {
-  const email = uniqueEmail('admin');
-  await createUserWithProfile(email, 'Ada Admin', 'platform_admin');
-  const ctx = await browser.newContext();
-  const page = await ctx.newPage();
-  await signInWithEmail(page, email, '1985-02-02', '/admin');
-  await expect(page).toHaveURL(/\/admin\/mfa/);
-  const secret = (await page.getByTestId('totp-secret').textContent())!.trim();
-  await page.getByLabel('Authenticator code').fill(currentTotp(secret));
-  await page.getByRole('button', { name: 'Verify' }).click();
-  await expect(page.getByRole('heading', { name: 'Admin overview' })).toBeVisible();
-  return { ctx, page };
-}
 
 test('admin enters a RunLime listing; the public sees facts + the not-affiliated notice', async ({ browser }) => {
   const { ctx, page } = await signInAdmin(browser);

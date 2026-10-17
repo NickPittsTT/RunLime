@@ -27,6 +27,7 @@ export function RaceMap({
   height,
   label,
   interactive = true,
+  showLabels = true,
 }: {
   pins?: MapPin[];
   route?: [number, number][] | null;
@@ -34,6 +35,8 @@ export function RaceMap({
   height?: number;
   label: string;
   interactive?: boolean;
+  /** Race name above each pin (on by default). */
+  showLabels?: boolean;
 }) {
   const { c, radius } = useTheme();
   const points: [number, number][] = [...pins.map((p) => [p.lng, p.lat] as [number, number]), ...(route ?? [])];
@@ -58,8 +61,15 @@ export function RaceMap({
           </GeoJSONSource>
         ) : null}
         {pins.map((p) => (
-          <Marker key={p.id} id={p.id} lngLat={[p.lng, p.lat]} anchor="center" onPress={() => onPinPress?.(p.id)}>
-            <Pressable accessibilityRole="button" accessibilityLabel={p.label} onPress={() => onPinPress?.(p.id)} hitSlop={12}>
+          <Marker key={p.id} id={p.id} lngLat={[p.lng, p.lat]} anchor="bottom" onPress={() => onPinPress?.(p.id)}>
+            <Pressable accessibilityRole="button" accessibilityLabel={p.label} onPress={() => onPinPress?.(p.id)} hitSlop={12} style={{ alignItems: 'center' }}>
+              {showLabels ? (
+                <View style={{ backgroundColor: '#FFFFFF', borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2, marginBottom: 2, maxWidth: 160, borderWidth: 1, borderColor: '#D9E3CC' }}>
+                  <Text numberOfLines={1} style={{ fontSize: 12, fontWeight: '700', color: '#0F172A' }}>
+                    {p.label}
+                  </Text>
+                </View>
+              ) : null}
               <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: '#14532D', borderWidth: 3, borderColor: '#FFFFFF' }} />
             </Pressable>
           </Marker>

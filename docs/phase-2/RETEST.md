@@ -41,3 +41,21 @@ Report pass or fail per step, with a screenshot for any failure.
 ## Re-check after the second round of fixes (website only; keep the same APK)
 A. **Reason box:** Admin → Events → PSCU race → Change status → Postpone. The reason box shows "Minimum 5 characters". Type "Rain": the counter reads "4 / 500 characters · minimum 5" in red. Press Update status: "Please give a reason of at least 5 characters (you have 4)." appears and nothing changes. Type a longer reason: the race is postponed. Then **Change status → Back on**.
 B. **Website map on your phone's browser:** Admin → Events → New RunLime listing. The map shows streets, and tapping it fills Start latitude/longitude. Also open any race page on the public site: the map shows the start pin. (Leave without saving if you don't need a new listing.)
+
+---
+
+## Final fix: postponing to a new date (2026-10-18)
+**Root cause.** The new date *was* saved, but it overwrote the race's date and the original was thrown away, so nothing could say "Postponed to". Staging history for the PSCU listing shows it: 30 Oct 6:00 am became 17 Nov 2:33 pm when postponed, then 18 Nov 2:34 pm when it was put back on. The PSCU listing therefore **still says 18 Nov, 2:34 pm**: edit it and set the date back to the real one.
+
+**Now.** The database keeps the original date (`original_starts_at`) and the new date (`starts_at`). Status options:
+- *Postpone*: the new date is optional (leave it blank if not known yet: runners see "New date to be confirmed" and the listed date struck through).
+- *Set or change the new date* (postponed races): the date is required; the original stays the first date.
+- *Back on, on the original date*: undoes the postponement and restores the original date.
+- A date is refused when cancelling or putting a race back on, and must be in the future.
+
+**Re-check (install the new APK; it replaces the old one):**
+C1. Website → PSCU race → Change status → Postpone, new date a week later, reason "Re-test: new date". The status box says "Postponed to <date, time>. Original date: ~~<old date>~~".
+C2. Phone, list: pull down. The card's yellow strip says **Postponed to <date, time>** and **Original date: ~~<old date>~~**; the card is listed under the new date.
+C3. Month view: the new date is yellow; the original date has a dashed ring and a struck-through number ("Original date" in the key). Tap the original date: the race is listed there with its "Postponed to" strip.
+C4. Open the race: same banner; the date line shows the new date.
+C5. Website: Change status → **Back on, on the original date**. Phone: pull down; the race is back on its original date with no strip.

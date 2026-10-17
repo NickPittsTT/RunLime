@@ -1,4 +1,4 @@
-import { feeLabel, formatEventDate, formatEventTime } from '@runlime/shared/events';
+import { feeLabel, formatEventDate, formatEventTime, postponementInfo } from '@runlime/shared/events';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { Image, Linking, RefreshControl, Share, View } from 'react-native';
@@ -49,6 +49,7 @@ export default function RaceScreen() {
   const media = [...e.event_media].sort((a, b) => a.sort - b.sort);
   const sponsors = [...e.event_sponsors].sort((a, b) => a.sort - b.sort);
   const web = raceWebUrl(e.slug);
+  const postponed = postponementInfo(e);
 
   return (
     <Screen refreshControl={refresh} testID="race-scroll">
@@ -56,10 +57,10 @@ export default function RaceScreen() {
       {offline && updatedAt ? (
         <Notice>{`Offline. Showing this race as last updated ${formatUpdated(updatedAt)}. Pull down to refresh.`}</Notice>
       ) : null}
-      <StatusBanner status={e.status} reason={e.status_reason} />
+      <StatusBanner status={e.status} reason={e.status_reason} postponement={postponed} />
       <T variant="headline">{e.name}</T>
       <View style={{ gap: 2 }}>
-        <T style={{ fontSize: 18 }}>
+        <T style={{ fontSize: 18, textDecorationLine: postponed && !postponed.hasNewDate ? 'line-through' : 'none' }}>
           {formatEventDate(e.starts_at, e.timezone)} · {formatEventTime(e.starts_at, e.timezone)}
         </T>
         <T variant="muted">

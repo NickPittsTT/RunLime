@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
-import { Alert } from 'react-native';
+import { formatEventDateTime } from '@runlime/shared/events';
+import { Alert, StyleSheet } from 'react-native';
 import HomeScreen from '../app/(app)/index';
 import { CALENDAR_CACHE_KEY } from '../src/lib/calendar';
 import { queryMock, race } from '../test-utils/races';
@@ -168,6 +169,34 @@ describe('home: status changes, list/map switch, filters summary', () => {
     await pullToRefresh();
     expect(await screen.findByTestId('status-banner-cancelled')).toBeTruthy();
     expect(screen.getByLabelText(/1 race, 1 cancelled/)).toBeTruthy();
+  });
+
+  it('a race postponed to a new date on the server: the app shows "Postponed to", the new date and the struck-through original', async () => {
+    const live = race('p', 3, { name: 'PSCU Anniversary 5K' });
+    const moved = race('p', 10, { name: 'PSCU Anniversary 5K' });
+    const originalKey = live.starts_at.slice(0, 10);
+    const newKey = moved.starts_at.slice(0, 10);
+    backend([live]);
+    render(<HomeScreen />);
+    expect(await screen.findByText('PSCU Anniversary 5K')).toBeTruthy();
+
+    // An admin postpones it on the website to a new date (server keeps the original in original_starts_at).
+    backend([{ ...live, status: 'postponed', status_reason: 'Heavy rain forecast', starts_at: moved.starts_at, original_starts_at: live.starts_at }]);
+    await pullToRefresh();
+
+    const newDate = formatEventDateTime(moved.starts_at, moved.timezone);
+    const originalDate = formatEventDateTime(live.starts_at, live.timezone);
+    expect(await screen.findByTestId('postponed-to')).toBeTruthy();
+    expect(screen.getByText(`Postponed to ${newDate}`)).toBeTruthy();
+    const original = screen.getByTestId('original-date');
+    expect(original.props.children).toBe(originalDate);
+    expect(StyleSheet.flatten(original.props.style)).toMatchObject({ textDecorationLine: 'line-through' });
+    // Calendar: the new date is marked postponed (yellow); the original date is marked as moved (struck through).
+    expect(screen.getByTestId(`day-${newKey}-postponed`)).toBeTruthy();
+    expect(screen.getByTestId(`day-${originalKey}-moved`)).toBeTruthy();
+    // Tapping the original date still finds the race, with its new date.
+    fireEvent.press(screen.getByLabelText(/original date of 1 postponed race/));
+    expect(await screen.findByText(`Postponed to ${newDate}`)).toBeTruthy();
   });
 
   it('offline: the saved copy keeps the last known status, labelled with when it was updated', async () => {

@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { CALENDAR_COLUMNS, parseCalendarEvents, zonedLocalToIso, type CalendarEvent } from '@runlime/shared/events';
+import { CALENDAR_COLUMNS, calendarWindowFilter, parseCalendarEvents, zonedLocalToIso, type CalendarEvent } from '@runlime/shared/events';
 import { useCallback, useEffect, useState } from 'react';
 import { z } from 'zod';
 import { supabase } from './supabase';
@@ -21,8 +21,8 @@ export async function fetchCalendarEvents(now: Date = new Date()): Promise<Calen
     .from('events')
     .select(CALENDAR_COLUMNS)
     .in('status', ['published', 'postponed', 'cancelled'])
-    .gte('starts_at', from)
-    .lt('starts_at', to)
+    // Also races moved out of the window, so their original (struck-through) date still shows.
+    .or(calendarWindowFilter(from, to))
     .order('starts_at')
     .limit(1000);
   if (error) throw error;

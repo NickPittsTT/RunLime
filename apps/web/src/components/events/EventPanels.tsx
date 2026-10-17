@@ -8,21 +8,27 @@ import { changeStatusAction, duplicateEventAction, reviewEventAction } from '@/l
 export function StatusChangePanel({ id, status, timezone, back }: { id: string; status: string; timezone: string; back: string }) {
   const [state, action, pending] = useActionState(changeStatusAction, {});
   const [reasonError, setReasonError] = useState<string>();
+  const [dateError, setDateError] = useState<string>();
+  const [next, setNext] = useState<string>(status === 'published' ? 'postponed' : status === 'postponed' ? 'postponed' : 'published');
   if (!['published', 'postponed', 'cancelled'].includes(status)) return null;
   // Postponing and cancelling need a reason runners will see; "back on" does not.
   const check = (e: FormEvent<HTMLFormElement>) => {
-    const next = String(new FormData(e.currentTarget).get('status'));
-    const err = next === 'published' ? undefined : reasonTooShort(e.currentTarget);
+    const form = new FormData(e.currentTarget);
+    const err = form.get('status') === 'published' ? undefined : reasonTooShort(e.currentTarget);
+    const dErr = dateRequired && !form.get('newStartsLocal') ? 'Choose the new date and time.' : undefined;
     setReasonError(err);
-    if (err) e.preventDefault();
+    setDateError(dErr);
+    if (err || dErr) e.preventDefault();
   };
-  // Allowed changes (database enforces the same): published -> postponed/cancelled; postponed -> cancelled/back on; cancelled -> back on.
+  // Allowed changes (database enforces the same): published -> postponed/cancelled; postponed -> new date/cancelled/back on;
+  // cancelled -> back on. "Back on" restores the original date.
   const options =
     status === 'published'
       ? [['postponed', 'Postpone'], ['cancelled', 'Cancel']]
       : status === 'postponed'
-        ? [['cancelled', 'Cancel'], ['published', 'Back on (no longer postponed)']]
-        : [['published', 'Back on (no longer cancelled)']];
+        ? [['postponed', 'Set or change the new date'], ['cancelled', 'Cancel'], ['published', 'Back on, on the original date']]
+        : [['published', 'Back on, on the original date']];
+  const dateRequired = status === 'postponed' && next === 'postponed';
   return (
     <form action={action} onSubmit={check} noValidate className="rounded-xl border border-line p-5 mb-6">
       <h2 className="text-lg font-bold mb-3">{status === 'published' ? 'Postpone or cancel' : 'Change status'}</h2>
@@ -32,7 +38,7 @@ export function StatusChangePanel({ id, status, timezone, back }: { id: string; 
       <input type="hidden" name="timezone" value={timezone} />
       <input type="hidden" name="back" value={back} />
       <Field label="Change" htmlFor={`st-${id}`}>
-        <Select id={`st-${id}`} name="status" defaultValue={options[0]![0]}>
+        <Select id={`st-${id}`} name="status" value={next} onChange={(e) => setNext(e.target.value)}>
           {options.map(([value, label]) => (
             <option key={value} value={value}>
               {label}
@@ -40,9 +46,16 @@ export function StatusChangePanel({ id, status, timezone, back }: { id: string; 
           ))}
         </Select>
       </Field>
-      <Field label="New date and time (if postponing to a known date)" htmlFor={`st-new-${id}`}>
-        <Input id={`st-new-${id}`} type="datetime-local" name="newStartsLocal" />
-      </Field>
+      {next === 'postponed' && (
+        <Field
+          label={dateRequired ? 'New date and time' : 'New date and time (leave blank if not known yet)'}
+          hint="Runners see “Postponed to” this date, with the original date struck through."
+          htmlFor={`st-new-${id}`}
+          error={dateError}
+        >
+          <Input id={`st-new-${id}`} type="datetime-local" name="newStartsLocal" required={dateRequired} />
+        </Field>
+      )}
       <ReasonField id={`st-reason-${id}`} label="Reason runners will see" error={reasonError} />
       <Button type="submit" variant="secondary" disabled={pending}>
         Update status

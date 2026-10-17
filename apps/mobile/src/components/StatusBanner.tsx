@@ -1,4 +1,4 @@
-import { STATUS_LABEL } from '@runlime/shared/events';
+import { STATUS_LABEL, type PostponementInfo } from '@runlime/shared/events';
 import { View } from 'react-native';
 import { T } from './ui';
 
@@ -8,20 +8,47 @@ const TONE: Record<string, { bg: string; fg: string; border: string }> = {
   postponed: { bg: '#FEF3C7', fg: '#78350F', border: '#B45309' },
 };
 
-/** Clear status strip for postponed / cancelled races (list cards and the race page). Renders nothing when scheduled. */
-export function StatusBanner({ status, reason, compact }: { status: string; reason?: string | null; compact?: boolean }) {
+/**
+ * Clear status strip for postponed / cancelled races (list cards and the race page). Renders nothing when scheduled.
+ * Postponed races show "Postponed to <date, time>" (or "New date to be confirmed") and the original date struck through.
+ */
+export function StatusBanner({
+  status,
+  reason,
+  compact,
+  postponement,
+}: {
+  status: string;
+  reason?: string | null;
+  compact?: boolean;
+  postponement?: PostponementInfo | null;
+}) {
   const tone = TONE[status];
   if (!tone) return null;
   const label = STATUS_LABEL[status] ?? status;
+  const p = status === 'postponed' ? postponement : null;
   return (
     <View
       testID={`status-banner-${status}`}
       accessible
       accessibilityRole="alert"
-      accessibilityLabel={`${label}.${reason ? ` ${reason}` : ''}`}
+      accessibilityLabel={`${label}.${p ? ` ${p.headline}. Original date ${p.originalDate}, no longer the race date.` : ''}${reason ? ` ${reason}` : ''}`}
       style={{ backgroundColor: tone.bg, borderLeftWidth: 5, borderColor: tone.border, paddingHorizontal: 12, paddingVertical: compact ? 6 : 10, borderRadius: 6 }}
     >
       <T style={{ color: tone.fg, fontWeight: '900', letterSpacing: 0.5 }}>{label.toUpperCase()}</T>
+      {p ? (
+        <>
+          <T testID="postponed-to" style={{ color: tone.fg, fontWeight: '800' }}>
+            {p.headline}
+          </T>
+          <T style={{ color: tone.fg }}>
+            {'Original date: '}
+            <T testID="original-date" style={{ color: tone.fg, textDecorationLine: 'line-through' }}>
+              {p.originalDate}
+            </T>
+          </T>
+        </>
+      ) : null}
       {reason ? (
         <T style={{ color: tone.fg }} numberOfLines={compact ? 2 : undefined}>
           {reason}

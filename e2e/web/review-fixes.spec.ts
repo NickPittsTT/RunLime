@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { CALENDAR_COLUMNS } from '../../packages/shared/src/events';
+import { CALENDAR_COLUMNS, calendarWindowFilter, parseCalendarEvents, postponementInfo, zonedLocalToIso, type CalendarEvent } from '../../packages/shared/src/events';
 import { SUPABASE_URL, createUserWithProfile, signInAdmin, uniqueEmail } from './helpers';
 
 const nextYear = new Date().getUTCFullYear() + 1;
@@ -74,6 +74,67 @@ test('postponed and cancelled stay that way: no Publish button undoes them, and 
   await page.getByRole('button', { name: 'Update status' }).click();
   await expect(page.getByText('The event is back on.')).toBeVisible();
   expect(await appSeesStatus(name)).toBe('published');
+  await ctx.close();
+});
+
+/** The app's calendar query for a window (same columns and window filter as apps/mobile/src/lib/calendar.ts). */
+async function appCalendarRow(name: string, fromIso: string, toIso: string): Promise<CalendarEvent | undefined> {
+  const url = new URL(`${SUPABASE_URL}/rest/v1/events`);
+  url.searchParams.set('select', CALENDAR_COLUMNS.replace(/\s+/g, ''));
+  url.searchParams.set('name', `eq.${name}`);
+  url.searchParams.set('status', 'in.(published,postponed,cancelled)');
+  url.searchParams.set('or', `(${calendarWindowFilter(fromIso, toIso)})`);
+  const key = process.env.SUPABASE_ANON_KEY!;
+  return parseCalendarEvents(await (await fetch(url, { headers: { apikey: key, authorization: `Bearer ${key}` } })).json())[0];
+}
+
+test('postponed to a new date: the new date is stored and the app and website show "Postponed to" with the original struck through', async ({ browser }) => {
+  const { ctx, page } = await signInAdmin(browser);
+  const name = `E2E Postpone Date 5K ${Date.now()}`;
+  await createPublishedListing(page, name);
+  const eventUrl = page.url();
+  const TZ = 'America/Port_of_Spain';
+  const april = [zonedLocalToIso(`${nextYear}-04-01T00:00`, TZ), zonedLocalToIso(`${nextYear}-05-01T00:00`, TZ)] as const;
+  const may = [april[1], zonedLocalToIso(`${nextYear}-06-01T00:00`, TZ)] as const;
+
+  await page.getByLabel('Change').selectOption('postponed');
+  await page.getByLabel('New date and time (leave blank if not known yet)').fill(`${nextYear}-05-02T07:30`);
+  await page.getByLabel('Reason runners will see').fill('Heavy rain forecast');
+  await page.getByRole('button', { name: 'Update status' }).click();
+  await expect(page.getByText('The event is now postponed.')).toBeVisible();
+  await page.reload();
+  await expect(page.getByTestId('event-status')).toContainText(/Postponed to \w+,? 2 May \d{4}, 7:30/);
+  await expect(page.getByTestId('event-status').locator('s')).toContainText(/11 Apr \d{4}, 6:00/);
+
+  // What the app receives: the new date, the original date, and the banner text built from them.
+  const row = await appCalendarRow(name, ...may);
+  expect(row?.status).toBe('postponed');
+  expect(row?.starts_at && new Date(row.starts_at).toISOString()).toBe(zonedLocalToIso(`${nextYear}-05-02T07:30`, TZ));
+  expect(row?.original_starts_at && new Date(row.original_starts_at).toISOString()).toBe(zonedLocalToIso(START_LOCAL, TZ));
+  expect(postponementInfo(row!)?.headline).toMatch(/^Postponed to \w+,? 2 May \d{4}, 7:30/);
+  // The original month still returns it, so the app can show the struck-through original date there.
+  expect((await appCalendarRow(name, ...april))?.id).toBe(row!.id);
+
+  // Public race page and the April calendar list.
+  await page.goto(`/e/${row!.slug}`);
+  await expect(page.getByTestId('postponed-to')).toContainText(/Postponed to \w+,? 2 May \d{4}, 7:30/);
+  await expect(page.getByTestId('original-date')).toContainText(/11 Apr \d{4}, 6:00/);
+  await page.goto(`/races?month=${nextYear}-04`);
+  await expect(page.getByRole('listitem').filter({ hasText: name })).toContainText(/Postponed to \w+,? 2 May/);
+
+  // Changing the new date needs a date; "Back on" restores the original date.
+  await page.goto(eventUrl);
+  await expect(page.getByLabel('Change')).toHaveValue('postponed');
+  await page.getByLabel('Reason runners will see').fill('Still raining');
+  await page.getByRole('button', { name: 'Update status' }).click();
+  await expect(page.getByText('Choose the new date and time.')).toBeVisible();
+  await page.getByLabel('Change').selectOption('published');
+  await page.getByRole('button', { name: 'Update status' }).click();
+  await expect(page.getByText('The event is back on.')).toBeVisible();
+  const back = await appCalendarRow(name, ...april);
+  expect(back?.status).toBe('published');
+  expect(back?.original_starts_at ?? null).toBeNull();
+  expect(new Date(back!.starts_at).toISOString()).toBe(zonedLocalToIso(START_LOCAL, TZ));
   await ctx.close();
 });
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { FUN_WALK_KM, MAP_ATTRIBUTION, MAP_ATTRIBUTION_LINKS, addMonths, eventsByDay, feeLabel, filterEvents, haversineKm, localDateKey, monthGrid, parseCalendarEvents, sortEvents, type CalendarEvent } from '../src/events';
+import { FUN_WALK_KM, MAP_ATTRIBUTION, MAP_ATTRIBUTION_LINKS, addMonths, eventsByDay, feeLabel, filterEvents, haversineKm, localDateKey, monthGrid, movedFromDateKey, parseCalendarEvents, postponementInfo, sortEvents, type CalendarEvent } from '../src/events';
 import { eventInputSchema, raceSuggestionSchema, isoToZonedLocal, parseGpx, toSaveEventPayload, zonedLocalToIso } from '../src/schemas/event';
 
 const TT = 'America/Port_of_Spain';
@@ -148,5 +148,29 @@ describe('fun walk / under 5K filter', () => {
   it('matches races shorter than 5 km only', () => {
     expect(filterEvents([walk, five], { distanceKm: [FUN_WALK_KM] }).map((e) => e.id)).toEqual(['walk']);
     expect(filterEvents([walk, five], { distanceKm: [FUN_WALK_KM, 5] }).map((e) => e.id)).toEqual(['walk', 'five']);
+  });
+});
+
+describe('postponed races', () => {
+  const moved = ev({ status: 'postponed', starts_at: '2031-11-17T10:30:00.000Z', original_starts_at: '2031-10-30T10:00:00.000Z' });
+  it('says "Postponed to <date and time>" and keeps the original date', () => {
+    const info = postponementInfo(moved)!;
+    expect(info.hasNewDate).toBe(true);
+    expect(info.headline).toMatch(/^Postponed to Mon,? 17 Nov 2031, 6:30/);
+    expect(info.originalDate).toMatch(/Thu,? 30 Oct 2031, 6:00/);
+    expect(movedFromDateKey(moved)).toBe('2031-10-30');
+  });
+  it('says the new date is to be confirmed when there is none', () => {
+    const info = postponementInfo(ev({ status: 'postponed', starts_at: '2031-10-30T10:00:00.000Z' }))!;
+    expect(info).toMatchObject({ headline: 'New date to be confirmed', hasNewDate: false });
+    expect(info.originalDate).toMatch(/30 Oct 2031/);
+  });
+  it('is null for scheduled and cancelled races', () => {
+    expect(postponementInfo(ev({}))).toBeNull();
+    expect(postponementInfo(ev({ status: 'cancelled', original_starts_at: '2031-10-30T10:00:00.000Z' }))).toBeNull();
+  });
+  it('parses original_starts_at from the API', () => {
+    const [row] = parseCalendarEvents([{ ...moved, distances: [] }]);
+    expect(row?.original_starts_at).toBe('2031-10-30T10:00:00.000Z');
   });
 });

@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import * as WebBrowser from 'expo-web-browser';
+import { StyleSheet } from 'react-native';
 import OnboardingScreen from '../app/(app)/onboarding';
 import RaceScreen from '../app/(app)/race/[id]';
 import SuggestRaceScreen from '../app/(app)/suggest-race';
@@ -113,6 +114,28 @@ describe('race details (M16)', () => {
     expect(await screen.findByTestId('status-banner-cancelled')).toBeTruthy();
     expect(screen.getByText('Venue unavailable')).toBeTruthy();
     expect(screen.getByText(/^Updated /)).toBeTruthy();
+  });
+
+  it('a race postponed to a new date on the server shows "Postponed to <date, time>" and the original date struck through', async () => {
+    backend(detail());
+    render(<RaceScreen />);
+    expect(await screen.findByText('Savannah 5K')).toBeTruthy();
+    backend(detail({ status: 'postponed', status_reason: 'Heavy rain', starts_at: '2031-11-17T10:30:00+00:00', original_starts_at: '2031-10-30T10:00:00+00:00' }));
+    const control = screen.getByTestId('race-scroll').props.refreshControl as { props: { onRefresh: () => void } };
+    await act(async () => {
+      control.props.onRefresh();
+    });
+    expect(await screen.findByText(/^Postponed to Mon,? 17 Nov 2031, 6:30/)).toBeTruthy();
+    const original = screen.getByTestId('original-date');
+    expect(original.props.children).toMatch(/30 Oct 2031, 6:00/);
+    expect(StyleSheet.flatten(original.props.style)).toMatchObject({ textDecorationLine: 'line-through' });
+    expect(screen.getByText(/Mon,? 17 Nov 2031 · 6:30/)).toBeTruthy(); // the date line shows the new date
+  });
+
+  it('postponed with no new date yet: "New date to be confirmed" and the listed date struck through', async () => {
+    backend(detail({ status: 'postponed', status_reason: 'Heavy rain' }));
+    render(<RaceScreen />);
+    expect(await screen.findByText('New date to be confirmed')).toBeTruthy();
   });
 
   it('offline: shows the last saved copy of the race with its status and when it was updated', async () => {

@@ -6,7 +6,7 @@ import { config } from './config';
 import { supabase } from './supabase';
 
 const DETAIL_COLUMNS =
-  'id, slug, name, description, starts_at, timezone, status, status_reason, listing_source, region_id, venue_name, start_lat, start_lng, route, registration_url, registration_instructions, package_collection, parking, contact_email, contact_phone, cause, charity_name, walk_friendly, fee_min, fee_max, currency, regions!events_region_id_fkey(name), distances:event_distances(distance_km, label), event_media(id, kind, storage_path, alt_text, sort), event_sponsors(id, name, url, sort)';
+  'id, slug, name, description, starts_at, original_starts_at, timezone, status, status_reason, listing_source, region_id, venue_name, start_lat, start_lng, route, registration_url, registration_instructions, package_collection, parking, contact_email, contact_phone, cause, charity_name, walk_friendly, fee_min, fee_max, currency, regions!events_region_id_fkey(name), distances:event_distances(distance_km, label), event_media(id, kind, storage_path, alt_text, sort), event_sponsors(id, name, url, sort)';
 
 const text = z.string().nullable().optional().transform((v) => v ?? null);
 export const raceDetailSchema = calendarEventSchema.extend({

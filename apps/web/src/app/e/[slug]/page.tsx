@@ -1,4 +1,4 @@
-import { STATUS_LABEL, feeLabel, formatEventDate, formatEventTime } from '@runlime/shared/events';
+import { STATUS_LABEL, feeLabel, formatEventDate, formatEventTime, postponementInfo } from '@runlime/shared/events';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { EventMap } from '@/components/events/EventMap';
@@ -15,7 +15,7 @@ async function load(slug: string) {
   const { data: e } = await supabase
     .from('events')
     .select(
-      'id, slug, name, description, starts_at, timezone, status, status_reason, listing_source, venue_name, start_lat, start_lng, route, registration_url, registration_instructions, package_collection, parking, contact_email, contact_phone, cause, charity_name, walk_friendly, fee_min, fee_max, currency, regions!events_region_id_fkey(name), event_distances(distance_km, label), event_media(id, kind, storage_path, alt_text, sort), event_sponsors(id, name, url, sort)',
+      'id, slug, name, description, starts_at, original_starts_at, timezone, status, status_reason, listing_source, venue_name, start_lat, start_lng, route, registration_url, registration_instructions, package_collection, parking, contact_email, contact_phone, cause, charity_name, walk_friendly, fee_min, fee_max, currency, regions!events_region_id_fkey(name), event_distances(distance_km, label), event_media(id, kind, storage_path, alt_text, sort), event_sponsors(id, name, url, sort)',
     )
     .eq('slug', slug)
     .in('status', ['published', 'postponed', 'cancelled'])
@@ -49,16 +49,24 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
   const media = [...(e.event_media ?? [])].sort((a, b) => a.sort - b.sort);
   const sponsors = [...(e.event_sponsors ?? [])].sort((a, b) => a.sort - b.sort);
   const isListing = e.listing_source === 'runlime';
+  const postponed = postponementInfo(e);
 
   return (
     <article>
       {e.status !== 'published' && (
         <Notice tone={e.status === 'cancelled' ? 'danger' : 'warning'}>
-          <strong>{STATUS_LABEL[e.status]}.</strong> {e.status_reason}
+          <strong>{STATUS_LABEL[e.status]}.</strong>
+          {postponed && (
+            <>
+              {' '}
+              <strong data-testid="postponed-to">{postponed.headline}.</strong> Original date: <s data-testid="original-date">{postponed.originalDate}</s>.
+            </>
+          )}{' '}
+          {e.status_reason}
         </Notice>
       )}
       <h1 className="text-3xl font-bold mb-2">{e.name}</h1>
-      <p className="text-lg mb-1">
+      <p className={`text-lg mb-1 ${postponed && !postponed.hasNewDate ? 'line-through' : ''}`}>
         {formatEventDate(e.starts_at, e.timezone)} · {formatEventTime(e.starts_at, e.timezone)}
       </p>
       <p className="text-ink-muted mb-4">

@@ -4,7 +4,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { EventFormValues } from '@/components/events/eventValues';
 
 export const EVENT_COLUMNS =
-  'id, slug, name, description, starts_at, timezone, status, status_reason, listing_source, organisation_id, region_id, venue_name, start_lat, start_lng, registration_url, registration_instructions, package_collection, parking, contact_email, contact_phone, cause, charity_name, walk_friendly, fee_min, fee_max, currency, route, published_at, duplicated_from_id, media_permission_at, event_distances(distance_km, label)';
+  'id, slug, name, description, starts_at, original_starts_at, timezone, status, status_reason, listing_source, organisation_id, region_id, venue_name, start_lat, start_lng, registration_url, registration_instructions, package_collection, parking, contact_email, contact_phone, cause, charity_name, walk_friendly, fee_min, fee_max, currency, route, published_at, duplicated_from_id, media_permission_at, event_distances(distance_km, label)';
 
 export interface EventRow {
   id: string;
@@ -12,6 +12,7 @@ export interface EventRow {
   name: string;
   description: string;
   starts_at: string;
+  original_starts_at: string | null;
   timezone: string;
   status: string;
   status_reason: string | null;

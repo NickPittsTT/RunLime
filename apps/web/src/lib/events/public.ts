@@ -1,17 +1,16 @@
 import 'server-only';
 import type { CalendarEvent } from '@runlime/shared/events';
-import { CALENDAR_COLUMNS, parseCalendarEvents, zonedLocalToIso } from '@runlime/shared/events';
+import { CALENDAR_COLUMNS, calendarWindowFilter, parseCalendarEvents, zonedLocalToIso } from '@runlime/shared/events';
 import { createClient } from '@/lib/supabase/server';
 
-/** Public calendar events (published, postponed, cancelled) between two instants. RLS limits rows to public ones. */
+/** Public calendar events (published, postponed, cancelled) between two instants (or postponed away from that window). RLS limits rows to public ones. */
 export async function fetchPublicEvents(fromIso: string, toIso: string): Promise<CalendarEvent[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('events')
     .select(CALENDAR_COLUMNS)
     .in('status', ['published', 'postponed', 'cancelled'])
-    .gte('starts_at', fromIso)
-    .lt('starts_at', toIso)
+    .or(calendarWindowFilter(fromIso, toIso))
     .order('starts_at')
     .limit(500);
   if (error) throw error;

@@ -10,6 +10,7 @@ import { T } from './ui';
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const DAY_POSTPONED = '#FCD34D';
 const DAY_CANCELLED = '#FCA5A5';
+const DAY_MOVED_RING = '#B45309';
 
 export interface YearMonth {
   year: number;
@@ -110,9 +111,10 @@ export function MonthPager({
                 {week.map((d) => {
                   const mark = d.inMonth ? raceDays.get(d.key) : undefined;
                   const count = mark?.count ?? 0;
-                  const fill = !mark ? 'transparent' : mark.status === 'scheduled' ? colors.lime : mark.status === 'postponed' ? DAY_POSTPONED : DAY_CANCELLED;
-                  const statusNote = mark && (mark.postponed || mark.cancelled)
-                    ? `${mark.postponed ? `, ${mark.postponed} postponed` : ''}${mark.cancelled ? `, ${mark.cancelled} cancelled` : ''}`
+                  const moved = mark?.status === 'moved';
+                  const fill = !mark || moved ? 'transparent' : mark.status === 'scheduled' ? colors.lime : mark.status === 'postponed' ? DAY_POSTPONED : DAY_CANCELLED;
+                  const statusNote = mark
+                    ? `${mark.postponed ? `, ${mark.postponed} postponed` : ''}${mark.cancelled ? `, ${mark.cancelled} cancelled` : ''}${mark.movedFrom ? `, original date of ${mark.movedFrom} postponed race${mark.movedFrom > 1 ? 's' : ''}` : ''}`
                     : '';
                   const isSel = selected === d.key;
                   const isToday = today === d.key;
@@ -127,6 +129,7 @@ export function MonthPager({
                       style={{ width: cell, height: Math.max(44, cell), alignItems: 'center', justifyContent: 'center' }}
                     >
                       <View
+                        testID={mark ? `day-${d.key}-${mark.status}` : undefined}
                         style={{
                           width: 36,
                           height: 36,
@@ -134,15 +137,17 @@ export function MonthPager({
                           alignItems: 'center',
                           justifyContent: 'center',
                           backgroundColor: isSel ? colors.forest : fill,
-                          borderWidth: isToday && !isSel ? 2 : 0,
-                          borderColor: c.leaf,
+                          // Original date of a postponed race: yellow ring, number struck through.
+                          borderWidth: (isToday || moved) && !isSel ? 2 : 0,
+                          borderColor: moved ? DAY_MOVED_RING : c.leaf,
+                          borderStyle: moved && !isToday ? 'dashed' : 'solid',
                         }}
                       >
                         <T
                           style={{
                             color: !d.inMonth ? 'transparent' : isSel ? '#FFFFFF' : count ? colors.ink : c.ink,
-                            fontWeight: count || isToday ? '800' : '400',
-                            textDecorationLine: mark?.status === 'cancelled' && !isSel ? 'line-through' : 'none',
+                            fontWeight: count || moved || isToday ? '800' : '400',
+                            textDecorationLine: (mark?.status === 'cancelled' || moved) && !isSel ? 'line-through' : 'none',
                           }}
                         >
                           {d.day}
@@ -156,14 +161,25 @@ export function MonthPager({
           </View>
         )}
       />
-      <View style={{ flexDirection: 'row', gap: spacing.md, paddingHorizontal: spacing.lg, paddingTop: 4 }} accessible accessibilityLabel="Key: lime, race day; yellow, postponed; red, cancelled">
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: spacing.md, rowGap: 2, paddingHorizontal: spacing.lg, paddingTop: 4 }} accessible accessibilityLabel="Key: lime, race day; yellow, postponed (new date); red, cancelled; dashed ring and struck-through number, original date of a postponed race">
         {[
           [colors.lime, 'Race'],
           [DAY_POSTPONED, 'Postponed'],
           [DAY_CANCELLED, 'Cancelled'],
+          ['transparent', 'Original date'],
         ].map(([bg, label]) => (
           <View key={label} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-            <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: bg }} />
+            <View
+              style={{
+                width: 12,
+                height: 12,
+                borderRadius: 6,
+                backgroundColor: bg,
+                borderWidth: bg === 'transparent' ? 1.5 : 0,
+                borderColor: DAY_MOVED_RING,
+                borderStyle: 'dashed',
+              }}
+            />
             <T variant="caption">{label}</T>
           </View>
         ))}

@@ -30,7 +30,7 @@ Living record of conventions and decisions. Update at the end of every phase.
 - Club leaderboards (Phase 6): km, races attended, avg members per race; total and per member (minimum club size, setting); opted-in approved members only.
 - Activity leaderboards (Phase 6): km from tracked runs + races from GPS check-ins; Weekly/Monthly/Year; Everyone/People I follow; top N (setting) + own rank; opt-in; verified data only (typed-in never counts); impossible speeds excluded (setting); no prizes; read only via RPC.
 - RunLime listings (admin-entered races): facts only + official registration link, "not affiliated, check with the organiser" notice (setting). A flyer/route-map image, logos and sponsors only after an admin ticks "I have the organiser's permission" (`events.media_permission_at/_by`, audit-logged; DB trigger enforces it; gallery photos never). Terms §6 "Races listed by RunLime".
-- **Live-race status changes only through "Change status"** (`change_event_status`): Publish (`review_event`) never applies to postponed/cancelled races (owner's Phase 2 test failure, 2026-10-17).
+- **Live-race status changes only through "Change status"** (`change_event_status`): Publish (`review_event`) never applies to postponed/cancelled races (owner's Phase 2 test failure, 2026-10-17). Postponing to a new date keeps the original date (`original_starts_at`); never overwrite it silently.
 - Testing: no outside testers before Phase 6; the first outside test is a real-race pilot after Phase 6, under the draft legal documents with a plain-language pilot notice + recorded `pilot_terms` consent. Attorney review is required before public launch.
 - All limits, prices, radii, windows and legal text live in DB settings, never hardcoded. Exception: the 18+ rule, which is hardcoded by design.
 - New ideas go to BACKLOG.md, not into the build.
@@ -92,6 +92,7 @@ Living record of conventions and decisions. Update at the end of every phase.
 | 2026-10-15 | runlimett@gmail.com is the staging super admin (bootstrap workflow), TOTP required | Owner |
 | 2026-10-17 | Compliance additions: Refund Policy (listing fees: rejected / organiser cancels / duplicate → bank transfer within a setting; Premium per store rules); Privacy Policy cookies section (essential only, no banner, attorney to confirm); visible map attribution everywhere; third-party services register; Premium cancel as easy as subscribing, no confirm-shaming (Phase 7); unsubscribe link on all marketing email | Owner |
 | 2026-10-17 | Phase 2 review fixes: Publish can't undo postponed/cancelled (root cause of the failed status test); admin Add organisation (verified, audited); listing flyer/logos/sponsors with recorded permission; onboarding preferences saved to the account; Fun walk / under 5K; List/Map switch; refund-after-live share as a setting (`payments.cancel_refund_after_live_percent`, default 100, owner choosing 100 or 50) | Owner |
+| 2026-10-18 | Postponing to a new date keeps the original (`events.original_starts_at`, shown struck through); `starts_at` is the new date; "Back on" restores the original date; a date is accepted only when postponing (owner's final Phase 2 re-test) | Owner |
 | 2026-10-11 | Seed prices: Premium US$2.99/mo, US$19.99/yr; Basic TT$100; Featured TT$400; charity free Basic via setting | Owner |
 
 ## Conventions

@@ -40,7 +40,7 @@ export default async function AdminEvent({ params, searchParams }: { params: Pro
       </PageTitle>
       {sp.saved && <Notice tone="success">Saved.</Notice>}
       {sp.duplicated && <Notice tone="success">Draft copy created. Check the details, then publish.</Notice>}
-      <StatusBanner status={e.status} reason={e.status_reason} />
+      <StatusBanner status={e.status} reason={e.status_reason} startsAt={e.starts_at} originalStartsAt={e.original_starts_at} timezone={e.timezone} />
       {(others ?? []).length > 0 && (
         <Notice tone="warning">
           Possible duplicate of:{' '}

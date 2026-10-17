@@ -15,6 +15,8 @@ export interface CalendarEvent {
   timezone: string;
   status: string;
   status_reason?: string | null;
+  /** Start before a postponement moved the race to `starts_at`; null when the date has not moved. */
+  original_starts_at?: string | null;
   listing_source: 'organiser' | 'runlime';
   region_id: string;
   venue_name: string;
@@ -30,7 +32,15 @@ export interface CalendarEvent {
 
 /** Columns for calendar rows (web + mobile select the same shape). */
 export const CALENDAR_COLUMNS =
-  'id, slug, name, starts_at, timezone, status, status_reason, listing_source, region_id, venue_name, start_lat, start_lng, walk_friendly, fee_min, fee_max, currency, cause, distances:event_distances(distance_km, label)';
+  'id, slug, name, starts_at, original_starts_at, timezone, status, status_reason, listing_source, region_id, venue_name, start_lat, start_lng, walk_friendly, fee_min, fee_max, currency, cause, distances:event_distances(distance_km, label)';
+
+/**
+ * PostgREST `or` filter for calendar rows in [fromIso, toIso): races starting in the window, plus races postponed
+ * away from it (so their original date still shows, struck through). Web and app use the same filter.
+ */
+export function calendarWindowFilter(fromIso: string, toIso: string): string {
+  return `and(starts_at.gte.${fromIso},starts_at.lt.${toIso}),and(original_starts_at.gte.${fromIso},original_starts_at.lt.${toIso})`;
+}
 
 /** Validates calendar rows from the API (numeric columns may arrive as strings). */
 export const calendarEventSchema = z.object({
@@ -41,6 +51,7 @@ export const calendarEventSchema = z.object({
   timezone: z.string(),
   status: z.string(),
   status_reason: z.string().nullable().optional(),
+  original_starts_at: z.string().nullable().optional(),
   listing_source: z.enum(['organiser', 'runlime']),
   region_id: z.string(),
   venue_name: z.string(),
@@ -125,6 +136,40 @@ export function formatEventDate(iso: string, timeZone: string, locale = 'en-TT')
 }
 export function formatEventTime(iso: string, timeZone: string, locale = 'en-TT'): string {
   return new Intl.DateTimeFormat(locale, { hour: 'numeric', minute: '2-digit', timeZone }).format(new Date(iso));
+}
+/** "Tue, 17 Nov 2026, 6:30 am" in the event's zone. */
+export function formatEventDateTime(iso: string, timeZone: string, locale = 'en-TT'): string {
+  return `${formatEventDate(iso, timeZone, locale)}, ${formatEventTime(iso, timeZone, locale)}`;
+}
+
+export interface PostponementInfo {
+  /** "Postponed to <date, time>", or "New date to be confirmed" when postponed without a new date. */
+  headline: string;
+  /** Original date and time, shown struck through. */
+  originalDate: string;
+  /** True when a new date is known (`starts_at` is the new date). */
+  hasNewDate: boolean;
+}
+
+/** What to show for a postponed race (banner on list cards and the race page). Null unless postponed. */
+export function postponementInfo(
+  e: Pick<CalendarEvent, 'status' | 'starts_at' | 'timezone'> & { original_starts_at?: string | null },
+  locale = 'en-TT',
+): PostponementInfo | null {
+  if (e.status !== 'postponed') return null;
+  if (e.original_starts_at) {
+    return {
+      headline: `Postponed to ${formatEventDateTime(e.starts_at, e.timezone, locale)}`,
+      originalDate: formatEventDateTime(e.original_starts_at, e.timezone, locale),
+      hasNewDate: true,
+    };
+  }
+  return { headline: 'New date to be confirmed', originalDate: formatEventDateTime(e.starts_at, e.timezone, locale), hasNewDate: false };
+}
+
+/** Local date key of the date a race was moved away from (postponed to a new date), else null. */
+export function movedFromDateKey(e: Pick<CalendarEvent, 'timezone'> & { original_starts_at?: string | null }): string | null {
+  return e.original_starts_at ? localDateKey(e.original_starts_at, e.timezone) : null;
 }
 
 /** Great-circle distance in km. */

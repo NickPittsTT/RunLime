@@ -101,4 +101,6 @@ Living record of conventions and decisions. Update at the end of every phase.
 - Time: store `timestamptz` UTC plus an IANA tz; format in the event's tz.
 - Money: `numeric(12,2)` plus currency.
 - Commits: conventional commits.
+- **Push flow (Actions minutes, 2026-10-17):** push to the phase branch; CI runs there once; only after CI passes, fast-forward `main` (`git push origin phase-N:main`). Deploys run on `main` pushes that touch their paths and refuse commits without a passing CI run. Batch commits; docs-only changes skip CI (except `docs/legal`). Android builds don't wait by default; get the APK from "Mobile build logs".
+- **No secrets or personal data in the repo:** CI's gitleaks scan (`.gitleaks.toml`, whole history) blocks secret-like values; never commit the owner's address, bank details, personal email or phone; scripts never print secrets (CI logs are public while the repo is public).
 - Local Supabase in this cloud environment: start `dockerd`, then `SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io supabase start -x realtime,imgproxy,postgres-meta,supavisor,vector,logflare,studio` (the ECR registry hits a data limit here).

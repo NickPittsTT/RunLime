@@ -1,9 +1,15 @@
 name: CI
 
+# Actions minutes (private repo: 2,000 free/month). CI runs once per commit: on the phase branch (main is only ever
+# fast-forwarded to a commit that already passed here; deploys check that). Docs-only changes skip CI, except
+# docs/legal (legal pages are synced to the database and tested). Newer pushes cancel older runs on the same branch.
 on:
   pull_request:
+    paths: ['**', '!docs/**', '!**/*.md', 'docs/legal/**']
   push:
-    branches: [main, 'phase-*']
+    branches: ['phase-*']
+    paths: ['**', '!docs/**', '!**/*.md', 'docs/legal/**']
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -11,10 +17,34 @@ concurrency:
 
 jobs:
   checks:
-    name: Lint, typecheck, unit tests
+    name: Secret scan, lint, typecheck, unit tests
     runs-on: ubuntu-latest
+    outputs:
+      e2e: ${{ steps.scope.outputs.e2e }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # the secret scan reads the whole history
+      - name: Secret scan (gitleaks, whole history; fails on any secret-like value)
+        run: |
+          set -euo pipefail
+          curl -sSL -o /tmp/gl.tgz https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_linux_x64.tar.gz
+          echo "a65b5253807a68ac0cafa4414031fd740aeb55f54fb7e55f386acb52e6a840eb  /tmp/gl.tgz" | sha256sum -c -
+          tar -xzf /tmp/gl.tgz -C /tmp gitleaks
+          /tmp/gitleaks git --config .gitleaks.toml --redact --no-banner .
+      - name: Does this change need the database + web end-to-end job?
+        id: scope
+        env:
+          BEFORE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          # Skip it only when every changed file is in the mobile app or non-legal docs (Jest covers the app).
+          if [ -z "${BEFORE:-}" ] || ! git cat-file -e "${BEFORE}^{commit}" 2>/dev/null; then echo "e2e=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          changed=$(git diff --name-only "$BEFORE" HEAD)
+          if echo "$changed" | grep -Ev '^(apps/mobile/|docs/)|\.md$' | grep -q . || echo "$changed" | grep -q '^docs/legal/'; then
+            echo "e2e=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "e2e=false" >> "$GITHUB_OUTPUT"; echo "::notice::Only app/docs changes: database + web E2E skipped"
+          fi
       - uses: pnpm/action-setup@v5
       - uses: actions/setup-node@v5
         with:
@@ -23,21 +53,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm turbo run typecheck lint test
 
-  database:
-    name: Database (pgTAP)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: supabase/setup-cli@v2
-        with:
-          version: 2.120.0
-      - run: supabase start -x realtime,imgproxy,postgres-meta,supavisor,vector,logflare,studio,edge-runtime
-      - run: supabase test db
-
   e2e-web:
-    name: Web end-to-end (Playwright on Cloudflare runtime)
+    name: Database (pgTAP) + web end-to-end (Playwright on Cloudflare runtime)
     runs-on: ubuntu-latest
     needs: [checks]
+    if: needs.checks.outputs.e2e == 'true'
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v5
@@ -53,6 +73,8 @@ jobs:
         run: |
           printf 'EMERGENCY_CONTACT_KEY_VERSION=1\nEMERGENCY_CONTACT_KEY_V1=%s\nALLOWED_ORIGINS=http://localhost:3000\n' "$(openssl rand -base64 32)" > supabase/functions/.env
       - run: supabase start -x realtime,imgproxy,postgres-meta,supavisor,vector,logflare,studio
+      - name: Database tests (pgTAP)
+        run: supabase test db
       - name: Export local Supabase keys
         run: |
           supabase status -o env | grep -E '^(ANON_KEY|SERVICE_ROLE_KEY|API_URL)=' | sed 's/"//g' >> "$GITHUB_ENV"

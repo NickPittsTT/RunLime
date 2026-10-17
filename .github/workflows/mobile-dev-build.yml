@@ -13,6 +13,10 @@ on:
         type: choice
         options: [staging, development]
         default: staging
+      wait:
+        description: Wait for the build to finish (costs ~15 Actions minutes). Otherwise get the APK from "Mobile build logs".
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -58,7 +62,21 @@ jobs:
           put EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID "$GOOGLE_WEB_CLIENT_ID" || echo "GOOGLE_WEB_CLIENT_ID not set yet: Google button will be hidden"
           put EXPO_PUBLIC_WEB_URL "$STAGING_WEB_URL" || echo "STAGING_WEB_URL not set yet: legal links will not open"
 
+      - name: Start the build on EAS (no waiting; saves Actions minutes)
+        if: ${{ !inputs.wait }}
+        working-directory: apps/mobile
+        run: |
+          set -euo pipefail
+          $EAS build --profile "${{ inputs.profile }}" --platform android --non-interactive --no-wait --json > build.json
+          node -e "
+            const b=[].concat(require('./build.json'))[0]||{};
+            const lines=['### Android ${{ inputs.profile }} build started','','- Build ID: '+(b.id||'n/a'),'- Build page: https://expo.dev/accounts/runlimes-team/projects/runlime/builds/'+(b.id||''),'- When it finishes (usually 15–30 min), run **Mobile build logs** with this build ID for the APK link and signing SHA-1.'];
+            console.log(lines.join('\n'));
+            require('fs').appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join('\n')+'\n');
+          "
+
       - name: Build on EAS and wait for the result (free queue ~15–30 min)
+        if: ${{ inputs.wait }}
         working-directory: apps/mobile
         timeout-minutes: 150  # free queue has taken 35–60+ min
         run: |
@@ -73,7 +91,7 @@ jobs:
           exit $code
 
       - name: Signing certificate of the APK (SHA-1 for the Google Android OAuth client)
-        if: success()
+        if: ${{ success() && inputs.wait }}
         working-directory: apps/mobile
         run: |
           url=$(node -e "const b=[].concat(require('./build.json'))[0]||{};process.stdout.write((b.artifacts&&b.artifacts.buildUrl)||'')")

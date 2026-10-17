@@ -1,12 +1,13 @@
-# Fetch the error and log tail of an EAS build so it can be read in GitHub. Uses EXPO_TOKEN; prints no secrets.
+# Result of an EAS build: status, APK link and signing SHA-1 when finished; error and log tail when it failed.
+# Uses EXPO_TOKEN; prints no secrets. Leave the build ID empty for the latest Android build.
 name: Mobile build logs
 
 on:
   workflow_dispatch:
     inputs:
       build_id:
-        description: EAS build ID (from the build page URL)
-        required: true
+        description: EAS build ID (from the build page URL); empty = latest Android build
+        required: false
 
 jobs:
   logs:
@@ -27,11 +28,24 @@ jobs:
           BUILD_ID: ${{ inputs.build_id }}
         run: |
           set -uo pipefail
+          if [ -z "${BUILD_ID}" ]; then
+            BUILD_ID=$(npx --yes eas-cli@24.12.1 build:list --platform android --limit 1 --json --non-interactive | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>process.stdout.write(JSON.parse(s)[0].id))")
+          fi
+          echo "build: $BUILD_ID"
           npx --yes eas-cli@24.12.1 build:view "$BUILD_ID" --json > /tmp/build.json 2>/tmp/err.txt || { cat /tmp/err.txt; npx --yes eas-cli@24.12.1 build:view "$BUILD_ID" 2>&1 | tail -40; exit 1; }
+          url=$(node -e "const b=require('/tmp/build.json');process.stdout.write((b.artifacts&&b.artifacts.buildUrl)||'')")
+          if [ -n "$url" ]; then
+            curl -fsSL "$url" -o /tmp/app.apk
+            signer=$(ls -d "$ANDROID_HOME"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -1)
+            raw=$("$signer" verify --print-certs /tmp/app.apk | grep -m1 'certificate SHA-1 digest' | sed 's/.*digest: *//')
+            sha1=$(echo "$raw" | tr 'a-f' 'A-F' | sed 's/../&:/g; s/:$//')
+            printf '### Android build %s: FINISHED\n\n- APK (open on your phone): %s\n- Signing SHA-1: `%s`\n' "$BUILD_ID" "$url" "$sha1" | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
           node - <<'JS'
           const b = require('/tmp/build.json');
           console.log('status:', b.status, '| platform:', b.platform, '| profile:', b.buildProfile);
           console.log('error:', JSON.stringify(b.error ?? null));
+          if (!b.error) process.exit(0);
           (async () => {
             for (const url of b.logFiles ?? []) {
               const text = await (await fetch(url)).text();

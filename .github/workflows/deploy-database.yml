@@ -2,11 +2,12 @@
 # staging: automatically after CI passes on main. production: manual, behind the "production" environment approval.
 name: Deploy database
 
+# Runs when main moves to a commit that changes the database, Edge Functions or legal documents (and only if CI
+# passed for it), or manually (staging or production).
 on:
-  workflow_run:
-    workflows: [CI]
-    types: [completed]
+  push:
     branches: [main]
+    paths: ['supabase/**', 'docs/legal/**', 'scripts/sync-legal.ts', 'packages/shared/src/legal/**', '.github/workflows/deploy-database.yml']
   workflow_dispatch:
     inputs:
       target:
@@ -15,9 +16,12 @@ on:
         options: [staging, production]
         default: staging
 
+permissions:
+  contents: read
+  actions: read
+
 jobs:
   deploy:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     environment: ${{ github.event_name == 'workflow_dispatch' && inputs.target || 'staging' }}
     env:
@@ -25,6 +29,19 @@ jobs:
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
       SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
     steps:
+      # main only ever moves to a commit that passed CI on the phase branch; refuse anything else.
+      - name: CI passed for this commit?
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.sha }}
+        run: |
+          n=$(curl -sS -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/ci.yml/runs?head_sha=$SHA&status=success&per_page=1" | jq '.total_count // 0')
+          if [ "${n:-0}" -lt 1 ]; then
+            echo "::error::CI has not passed for $SHA. Push to the phase branch, wait for CI to pass, then fast-forward main (or run this workflow manually once it has)."
+            exit 1
+          fi
       # Guard: until the owner has added the staging secrets, skip cleanly instead of failing.
       - name: Check deploy settings (names only, never values)
         id: check

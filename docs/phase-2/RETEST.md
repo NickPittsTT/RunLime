@@ -35,3 +35,9 @@ The app was right: the race really was back to "published". Staging's change his
 15. Admin → Settings → `payments.cancel_refund_after_live_percent` shows **100** (option A). If you choose option B, set it to **50**; `/legal/refunds` then says "50% of the listing fee" for cancellations after the listing has been live.
 
 Report pass or fail per step, with a screenshot for any failure.
+
+---
+
+## Re-check after the second round of fixes (website only; keep the same APK)
+A. **Reason box:** Admin → Events → PSCU race → Change status → Postpone. The reason box shows "Minimum 5 characters". Type "Rain": the counter reads "4 / 500 characters · minimum 5" in red. Press Update status: "Please give a reason of at least 5 characters (you have 4)." appears and nothing changes. Type a longer reason: the race is postponed. Then **Change status → Back on**.
+B. **Website map on your phone's browser:** Admin → Events → New RunLime listing. The map shows streets, and tapping it fills Start latitude/longitude. Also open any race page on the public site: the map shows the start pin. (Leave without saving if you don't need a new listing.)

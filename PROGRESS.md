@@ -52,7 +52,7 @@
 - [x] First Android staging APK built (EAS build c1e4f42a, commit 290f8b3, 2026-10-15). Earlier failures fixed at the cause: babel-preset-expo not declared; splash image missing; workflow step syntax error
 - [x] **Phone test PASSED (owner, 2026-10-15)** on the staging APK: every step in sections A, B, C and E. Confirmed: 18-tomorrow blocked (step 3) and still blocked after force-close (step 4); code email → "Hi" + Private (7–9); emergency contact reloads (11); data export contains the profile (12); both test accounts deleted, staging clean (16–18). Only the legal links failed, as expected until the staging website is deployed
 - [x] Second staging APK built (2026-10-15, 18 min): Google sign-in + `STAGING_WEB_URL`. APK signing SHA-1 printed from the real APK = `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25` (matches the Google Android client)
-- [x] **Task 1 COMPLETE (owner, 2026-10-15):** Section D (Google sign-in) and all Help & legal links passed on the second APK ("Hi, Nicholas"; legal pages show name + support email, no address)
+- [x] **Task 1 COMPLETE (owner, 2026-10-15):** Section D (Google sign-in) and all Help & legal links passed on the second APK (greeting shows the owner's name; legal pages show name + support email, no address)
 - [x] Staging super admin: runlimett@gmail.com (created with Google sign-in), granted by the new "Bootstrap super admin" workflow (run #1 green). Owner sets up TOTP at `/admin/mfa`
 - [x] Decisions: maps = MapLibre + OpenFreeMap (free, no card); ride-share navigation + age gate auto-advance (Phase 2); uploaded profile photos (Phase 3)
 
@@ -82,8 +82,11 @@
 - [x] Root cause found from staging's change history: the admin **Publish** button undid each postponement/cancellation (57 s and 7 s later). Fixed in the database (review_event) and the admin page; app status banners, refresh and offline labels added; tests on every layer
 - [x] Review fixes 2–8 (list/map switch, filter summary, admin events page, Add organisation, listing flyer permission, select/clear all, account-saved preferences, fun walk) + refund-after-live setting. "Test 1" not found on staging (no event with that name or containing "test"); nothing deleted
 - [x] Re-test build: staging APK https://expo.dev/artifacts/eas/XMsbXyhkSdIU9TLQG4f8F78XaKFVjtGaHmGiM-gU58Q.apk (EAS build 2a28da77, commit `c59d427`). CI, Deploy database (migration 20261017000200) and Deploy web green on `c59d427`
-- [ ] **Owner re-test** (`docs/phase-2/RETEST.md`) and Phase 2 approval
-- [ ] Owner: refund option A (100) or B (50) for cancellations after the listing has been live (setting; default 100)
+- [x] **Owner re-test (2026-10-17):** items 1, 2, 4, 5, 6, 8 passed; 7 deferred; refund option A (100%) kept. Failed: website map blank on a phone browser
+- [x] Website map fixed (root cause: maplibre-gl.css `position: relative` beat Tailwind's layered `absolute` utilities, map box 0 px); phone-viewport E2E added. Reason boxes: minimum shown, live count, clear error
+- [x] Audit before going private: no secrets or personal data in the repo or history (one first-name mention removed from PROGRESS); logs print no secrets; gitleaks blocks secret-like values in CI; Actions minutes cut (CI once per commit, docs-only skipped, deploys path-filtered and CI-gated, Android builds don't wait). Report: `docs/operations/SECURITY-AND-ACTIONS-AUDIT.md`
+- [ ] **Owner re-check** (RETEST.md, last section) and Phase 2 approval
+- [x] Owner: refund option A (100% after the listing has been live) kept
 
 ## Phase 1 approval items (owner, 2026-10-11)
 - [x] a. CI fully green on GitHub, including web E2E (see the latest run in the Phase 1 review)

@@ -220,6 +220,11 @@ async function main() {
   }
 
   console.log(`Seeded ${USERS.length} users, ${orgs.length} organisations, ${events.length} sample events.`);
+  // Never print credentials into CI logs (public on a public repository).
+  if (process.env.CI || process.env.GITHUB_ACTIONS) {
+    console.log('Dev password and TOTP secrets are not printed in CI. Run the seed locally to see them.');
+    return;
+  }
   console.log(`Dev password for all seeded users: ${DEV_PASSWORD} (dev/staging only; production users have no passwords).`);
   for (const [email, secret] of Object.entries(secrets)) {
     console.log(`TOTP secret for ${email}: ${secret}  (add to an authenticator app; shown only on first enrolment)`);

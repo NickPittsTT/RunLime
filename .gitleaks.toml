@@ -1,0 +1,55 @@
+# Secret scanning (CI "Secret scan" job; run locally: gitleaks git --config .gitleaks.toml .).
+# Default gitleaks rules plus RunLime-specific ones. Public-by-design values (Supabase anon key in GitHub
+# variables, EXPO_PUBLIC_* settings) are never committed either, so no allowlist is needed for them.
+title = "RunLime secret scan"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "supabase-secret-key"
+description = "Supabase secret API key (sb_secret_...)"
+regex = '''sb_secret_[A-Za-z0-9_-]{20,}'''
+keywords = ["sb_secret_"]
+
+[[rules]]
+id = "supabase-access-token"
+description = "Supabase personal access token (sbp_...)"
+regex = '''sbp_[a-f0-9]{40}'''
+keywords = ["sbp_"]
+
+[[rules]]
+id = "supabase-service-role-jwt"
+description = "Supabase service_role JWT"
+regex = '''eyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]*c2VydmljZV9yb2xl[A-Za-z0-9_-]*\.[A-Za-z0-9_-]{20,}'''
+keywords = ["eyj"]
+
+[[rules]]
+id = "google-oauth-client-secret"
+description = "Google OAuth client secret"
+regex = '''GOCSPX-[A-Za-z0-9_-]{20,}'''
+keywords = ["gocspx-"]
+
+[[rules]]
+id = "expo-access-token"
+description = "Expo access token"
+regex = '''(?i)expo[_-]?token["'\s:=]+[A-Za-z0-9_-]{30,}'''
+keywords = ["expo"]
+
+[[rules]]
+id = "cloudflare-api-token-assignment"
+description = "Cloudflare API token assigned in code or config"
+regex = '''(?i)cloudflare[_-]?api[_-]?token["'\s:=]+[A-Za-z0-9_-]{37,}'''
+keywords = ["cloudflare"]
+
+[[rules]]
+id = "emergency-contact-key"
+description = "Emergency-contact AES key value"
+regex = '''EMERGENCY_CONTACT_KEY_V\d+\s*=\s*[A-Za-z0-9+/]{40,}={0,2}'''
+keywords = ["emergency_contact_key"]
+
+[[rules]]
+id = "private-key-block"
+description = "Private key block"
+regex = '''-----BEGIN (RSA |EC |OPENSSH |PGP )?PRIVATE KEY'''
+keywords = ["private key"]

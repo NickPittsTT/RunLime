@@ -5,12 +5,16 @@
 # No custom domain: the site is served at https://runlime-web-staging.<your-subdomain>.workers.dev.
 name: Deploy web
 
+# Runs when main moves to a commit that changes the website (and only if CI passed for it), or manually.
 on:
-  workflow_run:
-    workflows: [CI]
-    types: [completed]
+  push:
     branches: [main]
+    paths: ['apps/web/**', 'packages/**', 'package.json', 'pnpm-lock.yaml', 'scripts/check-worker-size.mjs', '.github/workflows/deploy-web.yml']
   workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
 
 concurrency:
   group: deploy-web-staging
@@ -18,7 +22,6 @@ concurrency:
 
 jobs:
   deploy:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     environment: staging
     env:
@@ -28,6 +31,19 @@ jobs:
       SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
       WRANGLER_SEND_METRICS: 'false'
     steps:
+      # main only ever moves to a commit that passed CI on the phase branch; refuse anything else.
+      - name: CI passed for this commit?
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.sha }}
+        run: |
+          n=$(curl -sS -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/ci.yml/runs?head_sha=$SHA&status=success&per_page=1" | jq '.total_count // 0')
+          if [ "${n:-0}" -lt 1 ]; then
+            echo "::error::CI has not passed for $SHA. Push to the phase branch, wait for CI to pass, then fast-forward main (or run this workflow manually once it has)."
+            exit 1
+          fi
       # Guard: until the owner has added the Cloudflare settings, skip cleanly instead of failing.
       - name: Check deploy settings (names only, never values)
         id: check
@@ -49,7 +65,7 @@ jobs:
       - if: steps.check.outputs.ready == 'true'
         uses: actions/checkout@v5
         with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ github.sha }}
       - if: steps.check.outputs.ready == 'true'
         uses: pnpm/action-setup@v5
       - if: steps.check.outputs.ready == 'true'

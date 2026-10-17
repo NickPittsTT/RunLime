@@ -1,5 +1,6 @@
 # Read-only diagnostics against staging (no secrets printed). Run from Actions → "Staging diagnostics".
 #  - api-cache-headers: response headers the app receives for a public calendar query (caching investigation)
+#  - event-history: events matching a name, with status and change history (also finds near-duplicate names)
 name: Staging diagnostics
 
 on:
@@ -8,15 +9,28 @@ on:
       check:
         description: What to check
         type: choice
-        options: [api-cache-headers]
+        options: [api-cache-headers, event-history]
         default: api-cache-headers
+      name:
+        description: Event name fragment (event-history only)
+        required: false
 
 jobs:
   diagnose:
     runs-on: ubuntu-latest
     environment: staging
     steps:
+      - uses: actions/checkout@v5
+        if: inputs.check == 'event-history'
+      - name: Event status and change history
+        if: inputs.check == 'event-history'
+        env:
+          SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NAME: ${{ inputs.name }}
+        run: node scripts/event-history.mjs "$NAME"
       - name: Calendar query response headers (anon key, public data only)
+        if: inputs.check == 'api-cache-headers'
         env:
           URL: https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co
           ANON: ${{ vars.SUPABASE_ANON_KEY }}

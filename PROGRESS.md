@@ -1,6 +1,6 @@
 # RunLime — Progress
 
-**Last updated:** 2026-10-15 (Phase 2 built, waiting for review)
+**Last updated:** 2026-10-18 (Phase 2 approved; Phase 3 plan waiting for approval)
 
 ## Phases
 
@@ -8,8 +8,8 @@
 |---|---|---|---|
 | 0 | Questions, architecture, data model, screens, brand, costs | Approved by owner (rev 2) | 100% |
 | 1 | Setup, environments, auth + 18+ age gate, roles, RLS, seed, legal drafts | Approved by owner (2026-10-11) | 100% |
-| 2 | Events: organiser portal, admin approval, onboarding, calendar, event page, public web | **Built; waiting for owner review** (`docs/phase-2/REVIEW.md`) | 95% |
-| 3 | RSVP, followers, clubs (leaders, approvals, requests, turnout), runner level, notifications/broadcasts, attendance dashboard | Not started | 0% |
+| 2 | Events: organiser portal, admin approval, onboarding, calendar, event page, public web | **Approved by owner (2026-10-18)** | 100% |
+| 3 | RSVP, followers, clubs (leaders, approvals, requests, turnout), runner level, profile photos, notifications/broadcasts, attendance dashboard | Plan drafted (`docs/phase-3/PLAN.md`); **not started, waiting for owner approval** | 0% |
 | 4 | GPS check-in | Not started | 0% |
 | 5 | Run tracker, history, totals | Not started | 0% |
 | 6 | Community times, activity + club leaderboards, verified runners, sharing, reporting/blocking, finisher card → then the real-race pilot | Not started | 0% |
@@ -36,7 +36,7 @@
 - [x] README (setup, env vars, deployment), .env.example, bootstrap-super-admin script
 - [x] Phase 1 review report (`docs/phase-1/REVIEW.md`)
 
-## Phase 2 checklist (current)
+## Phase 2 checklist (approved 2026-10-18)
 
 **Task 1: Android development build on the owner's phone**
 - [x] Expo project linked (`ca1a5ee2-b15a-488d-b123-8fd075db8be1`), `expo-dev-client`, EAS development profile (APK, debug key)
@@ -85,7 +85,11 @@
 - [x] **Owner re-test (2026-10-17):** items 1, 2, 4, 5, 6, 8 passed; 7 deferred; refund option A (100%) kept. Failed: website map blank on a phone browser
 - [x] Website map fixed (root cause: maplibre-gl.css `position: relative` beat Tailwind's layered `absolute` utilities, map box 0 px); phone-viewport E2E added. Reason boxes: minimum shown, live count, clear error
 - [x] Audit before going private: no secrets or personal data in the repo or history (one first-name mention removed from PROGRESS); logs print no secrets; gitleaks blocks secret-like values in CI; Actions minutes cut (CI once per commit, docs-only skipped, deploys path-filtered and CI-gated, Android builds don't wait). Report: `docs/operations/SECURITY-AND-ACTIONS-AUDIT.md`
-- [ ] **Owner re-check** (RETEST.md, last section) and Phase 2 approval
+- [x] **Owner final re-test (2026-10-18):** everything passed except postponing to a new date (the new date wasn't shown)
+- [x] Root cause from staging's history: the new date overwrote the race's date and the original was discarded, so nothing could say "Postponed to". Fixed: `events.original_starts_at` keeps the original; app list cards, race page and month view show "Postponed to <date, time>" with the original struck through; "Back on" restores the original date. pgTAP 015, Jest, Playwright end-to-end. CI run #113 green on `9495f05`: https://github.com/NickPittsTT/RunLime/actions/runs/39077821831
+- [x] Earlier fixes confirmed deployed: reason box + website map (`c5604be`, CI run #110 https://github.com/NickPittsTT/RunLime/actions/runs/39072081100, Deploy web run 39072404213)
+- [x] **Phase 2 approved by the owner (2026-10-18)**, on CI passing for the postponement fix. Owner's phone re-check of RETEST.md section C (new APK) still to report; item 7 (preferences after reinstall) deferred by the owner
+- [ ] PSCU listing on staging still shows 18 Nov 2:34 pm from the earlier test: owner to set its real date
 - [x] Owner: refund option A (100% after the listing has been live) kept
 
 ## Phase 1 approval items (owner, 2026-10-11)

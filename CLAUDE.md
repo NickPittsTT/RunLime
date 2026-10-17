@@ -19,6 +19,12 @@ Living record of conventions and decisions. Update at the end of every phase.
 - Speed checks (leaderboards **and** community times, one review queue, settings): ≥ 3:00 /km avg and every split → counted; 2:35–3:00 → admin review, excluded until approved; < 2:35 → rejected. Verified runners skip the review tier only. Admin review sees pace/split numbers, never routes.
 - Check-in is GPS only in v1 (no QR).
 - Participant Premium sold ONLY via Apple IAP / Google Play Billing (RevenueCat).
+- **Cancelling Premium must be as easy as subscribing (Phase 7):** a clearly labelled "Manage or cancel subscription" link in the app (paywall/M38 and Settings) opens the store's subscription page in one tap; no more steps than buying; **no confirm-shaming** (no guilt wording such as "No thanks, I don't want to get faster"), no hidden or greyed-out cancel option, no retention screen standing between the user and the store page.
+- **Refunds follow the Refund Policy** (`docs/legal/refund-policy.md`, `/legal/refunds`): organiser listing fees refunded in full when the listing is rejected or the organiser cancels the race, and duplicate payments returned, by bank transfer within `payments.refund_processing_days`; Premium refunds follow Apple/Google rules. Phase 7 builds the refund triggers to match.
+- **Marketing email always carries an unsubscribe link:** every marketing or promotional email (newsletters, feature news, offers) needs opt-in, a working one-click unsubscribe link and a `List-Unsubscribe` header, and honours unsubscribes without sign-in. Sign-in codes and essential account/service emails are not marketing.
+- **Website cookies: strictly necessary only** (the Supabase sign-in cookie; Cloudflare security cookie). Analytics must be cookieless. Any non-essential cookie needs an owner decision, a consent banner and a Privacy Policy update first.
+- **Map attribution on every map:** visible "OpenFreeMap · © OpenMapTiles · © OpenStreetMap contributors" text with links (`MAP_ATTRIBUTION_LINKS` in `@runlime/shared/events`), never only behind an "i" button.
+- **Third-party services register** (`docs/operations/THIRD-PARTY-SERVICES.md`): add a row before any new service receives data, and update the Privacy Policy in the same change. It feeds the Phase 8 store privacy forms.
 - Organiser payments ONLY via web portal bank transfer. The mobile app has no payment links or wording for them.
 - Community times: opt-in, check-in required, Tracked/Typed in label, same speed tiers as leaderboards (flagged times hidden until approved), withdrawable, report/block, no prizes, disclaimer always shown.
 - Club leaderboards (Phase 6): km, races attended, avg members per race; total and per member (minimum club size, setting); opted-in approved members only.
@@ -83,6 +89,7 @@ Living record of conventions and decisions. Update at the end of every phase.
 | 2026-10-15 | Mobile navigation: ride-share style (home = calendar, top bar with menu + bell, fixed "Start run" button, side menu; no bottom tabs); age gate auto-advance | Owner |
 | 2026-10-15 | Uploaded profile photos in Phase 3, with report + remove tools | Owner |
 | 2026-10-15 | runlimett@gmail.com is the staging super admin (bootstrap workflow), TOTP required | Owner |
+| 2026-10-17 | Compliance additions: Refund Policy (listing fees: rejected / organiser cancels / duplicate → bank transfer within a setting; Premium per store rules); Privacy Policy cookies section (essential only, no banner, attorney to confirm); visible map attribution everywhere; third-party services register; Premium cancel as easy as subscribing, no confirm-shaming (Phase 7); unsubscribe link on all marketing email | Owner |
 | 2026-10-11 | Seed prices: Premium US$2.99/mo, US$19.99/yr; Basic TT$100; Featured TT$400; charity free Basic via setting | Owner |
 
 ## Conventions

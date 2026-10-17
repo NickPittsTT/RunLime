@@ -39,7 +39,7 @@ Apple's tiers are 4+ / 9+ / 13+ / 16+ / 18+.
 | 6 | Privacy "nutrition" labels | Generated from the data model in Phase 8 | Phase 8 |
 | 7 | Purpose strings: `NSLocationWhenInUseUsageDescription`, `NSMotionUsageDescription` (steps), `UIBackgroundModes: location` justification | app.config (Phase 5) | Phase 5 |
 | 8 | Health & fitness accuracy (1.4.1): no medical claims, estimates labelled | Health Disclaimer; UI labels | Drafted |
-| 9 | Subscriptions (3.1.2): price, period, auto-renew terms, links to Terms & Privacy on the paywall, Restore Purchases | Terms §5; paywall in Phase 7 | Terms drafted |
+| 9 | Subscriptions (3.1.2): price, period, auto-renew terms, links to Terms & Privacy on the paywall, Restore Purchases; easy cancellation, no confirm-shaming | Terms §5; paywall in Phase 7 | Terms drafted |
 | 10 | No steering to outside payments (3.1.1/3.1.3); no organiser payment UI in the app | Product rule in CLAUDE.md | Enforced by design |
 | 11 | Export compliance: the app uses only standard HTTPS/OS encryption → `ITSAppUsesNonExemptEncryption = false` (encryption of emergency contacts happens server-side) | app.config | Built |
 | 12 | Review notes + demo account (participant, no MFA) | Phase 8 | Phase 8 |
@@ -52,13 +52,13 @@ Apple's tiers are 4+ / 9+ / 13+ / 16+ / 18+.
 |---|---|---|---|
 | 1 | Privacy policy URL (store listing + in-app) | `/legal/privacy` | Draft |
 | 2 | **Account deletion web URL** (Data safety form) | `/delete-account` | Built (Phase 1) |
-| 3 | Data safety form, from the real data model | Phase 8 (privacy policy §2 is the source) | Phase 8 |
+| 3 | Data safety form, from the real data model | Phase 8 (Privacy Policy §2 + `docs/operations/THIRD-PARTY-SERVICES.md`) | Phase 8 |
 | 4 | **Child Safety Standards (CSAE)** for social apps: (a) published standards against CSAE; (b) in-app reporting; (c) action on CSAM; (d) compliance with child-safety laws incl. reporting to NCMEC/authorities; (e) **designated CSAE point of contact named in Play Console** | `/legal/child-safety`; report reasons incl. child safety (Phases 3/6); setting `legal.child_safety_contact_email` | Policy drafted. **Owner: name the contact person** |
 | 5 | Target audience 18+ (section A) | Play Console | Owner, Phase 8 |
 | 6 | **Health apps declaration** (required for every app) → "Activity and fitness" | Play Console | Owner, Phase 8 |
 | 7 | Location: foreground only (`ACCESS_FINE_LOCATION`), no `ACCESS_BACKGROUND_LOCATION`; **foreground service type `location` declaration** (with a short video if requested); prominent disclosure before the permission prompt | Phase 5 (D6 approved) | Phase 5 |
 | 8 | Activity recognition permission for the step counter (`ACTIVITY_RECOGNITION`) with disclosure | Phase 5 | Phase 5 |
-| 9 | Subscriptions via Play Billing; clear cancellation info | Phase 7 | Phase 7 |
+| 9 | Subscriptions via Play Billing; clear cancellation info. Cancel as easy as subscribing, no confirm-shaming (CLAUDE.md rule); Premium refunds per Google rules (`/legal/refunds`) | Phase 7 | Phase 7 |
 | 10 | **Target API level:** new apps and updates must target **Android 16 (API 36)** from 31 Aug 2026 | Expo SDK 57 defaults (verify in Phase 8) | Verify |
 | 11 | UGC policy: in-app reporting, blocking, moderation, published terms | Moderation Policy; Phases 3/6 | Drafted |
 | 12 | Ads declaration: **No ads** | Play Console | Owner, Phase 8 |

@@ -46,6 +46,11 @@ test('admin enters a RunLime listing; the public sees facts + the not-affiliated
   await expect(anon.getByRole('heading', { name })).toBeVisible();
   await expect(anon.getByText('not affiliated', { exact: false })).toBeVisible();
   await expect(anon.getByText('Children:', { exact: false })).toBeVisible();
+  // Map credit is visible text on the map (OSM licence), not hidden behind a button.
+  const credit = anon.getByTestId('map-attribution');
+  await expect(credit).toBeVisible();
+  await expect(credit.getByRole('link', { name: '© OpenStreetMap contributors' })).toHaveAttribute('href', 'https://www.openstreetmap.org/copyright');
+  await expect(credit.getByRole('link', { name: 'OpenFreeMap' })).toBeVisible();
   await expect(anon.getByRole('link', { name: /Register with the organiser/ })).toHaveAttribute('href', 'https://example.org/savannah-sunrise');
   const ics = await anon.request.get(`${new URL(anon.url()).pathname}/calendar.ics`);
   expect(ics.status()).toBe(200);

@@ -12,6 +12,7 @@ Status: **DRAFT v2026-10-11-draft. Not legal advice. Must be reviewed by a Trini
 | moderation-policy.md | `/legal/moderation` | UGC policy (Apple 1.2, Google UGC) |
 | child-safety-policy.md | `/legal/child-safety` | Google Play child safety standards (CSAE) |
 | health-disclaimer.md | `/legal/health` | In-app before tracking; Apple 1.4.1 |
+| refund-policy.md | `/legal/refunds` | Organiser listing-fee refunds (web only); Premium refunds per store rules |
 | community-times-notice.md | `/legal/community-times` | Shown on boards and the share screen |
 | account-deletion.md | `/delete-account` (page content) | Google's account deletion URL |
 | support.md | `/support` (page content) | Apple support URL |

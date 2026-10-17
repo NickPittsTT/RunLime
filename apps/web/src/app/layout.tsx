@@ -42,6 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <nav aria-label="Legal" className="mx-auto max-w-5xl px-4 py-6 flex flex-wrap gap-x-5 gap-y-2 text-sm">
             <Link href="/legal/privacy">Privacy</Link>
             <Link href="/legal/terms">Terms</Link>
+            <Link href="/legal/refunds">Refunds</Link>
             <Link href="/legal/moderation">Moderation</Link>
             <Link href="/legal/child-safety">Child safety</Link>
             <Link href="/legal/health">Health</Link>

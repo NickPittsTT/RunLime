@@ -1,8 +1,7 @@
 import { Camera, GeoJSONSource, Layer, Map, Marker, type InitialViewState } from '@maplibre/maplibre-react-native';
-import { MAP_ATTRIBUTION, MAP_STYLE_URL, TT_CENTER } from '@runlime/shared/events';
-import { Pressable, View } from 'react-native';
+import { MAP_ATTRIBUTION_LINKS, MAP_STYLE_URL, TT_CENTER } from '@runlime/shared/events';
+import { Linking, Pressable, Text, View } from 'react-native';
 import { useTheme } from '@/lib/theme';
-import { T } from './ui';
 
 export interface MapPin {
   id: string;
@@ -44,7 +43,7 @@ export function RaceMap({
         style={{ flex: 1 }}
         mapStyle={MAP_STYLE_URL}
         logo={false}
-        attribution
+        attribution={false}
         compass={false}
         dragPan={interactive}
         touchZoom={interactive}
@@ -66,9 +65,19 @@ export function RaceMap({
           </Marker>
         ))}
       </Map>
-      <T variant="caption" style={{ position: 'absolute', bottom: 2, left: 6, fontSize: 10 }} importantForAccessibility="no">
-        {MAP_ATTRIBUTION}
-      </T>
+      {/* Map credit (OSM licence): always-visible text with links, replacing the native "i" button. */}
+      <View testID="map-attribution" style={{ position: 'absolute', right: 0, bottom: 0, backgroundColor: 'rgba(255,255,255,0.9)', paddingHorizontal: 6, paddingVertical: 2, borderTopLeftRadius: 6 }}>
+        <Text style={{ fontSize: 11, color: '#0F172A' }}>
+          {MAP_ATTRIBUTION_LINKS.map((l, i) => (
+            <Text key={l.url}>
+              {i > 0 ? ' · ' : ''}
+              <Text accessibilityRole="link" onPress={() => void Linking.openURL(l.url)} style={{ textDecorationLine: 'underline' }}>
+                {l.label}
+              </Text>
+            </Text>
+          ))}
+        </Text>
+      </View>
     </View>
   );
 }

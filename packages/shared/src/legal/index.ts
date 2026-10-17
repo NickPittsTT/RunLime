@@ -19,6 +19,7 @@ export const LEGAL_TOKEN_SETTINGS = {
   hosting_region: 'legal.hosting_region',
   minors_notice: 'legal.minors_notice',
   community_disclaimer: 'community.disclaimer',
+  refund_processing_days: 'payments.refund_processing_days',
 } as const;
 export type LegalToken = keyof typeof LEGAL_TOKEN_SETTINGS;
 

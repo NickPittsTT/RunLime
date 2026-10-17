@@ -11,7 +11,7 @@ const docs = readdirSync(LEGAL_DIR)
 describe('legal documents', () => {
   it('all required documents exist', () => {
     expect(docs.map((d) => d.doc.slug).sort()).toEqual(
-      ['child-safety', 'community-times', 'delete-account', 'health', 'moderation', 'privacy', 'support', 'terms'].sort(),
+      ['child-safety', 'community-times', 'delete-account', 'health', 'moderation', 'privacy', 'refunds', 'support', 'terms'].sort(),
     );
   });
 
@@ -55,6 +55,39 @@ describe('legal documents', () => {
     for (const slug of ['privacy', 'terms']) {
       expect(docs.find((d) => d.doc.slug === slug)!.doc.body).toMatch(/\{\{operator_name\}\} · \{\{support_email\}\}/);
     }
+  });
+
+  it('refund policy: the three refund cases, bank transfer, timing from a setting, Premium follows the stores', () => {
+    const r = docs.find((d) => d.doc.slug === 'refunds')!.doc.body;
+    expect(r).toMatch(/We reject your listing/);
+    expect(r).toMatch(/You cancel your race/);
+    expect(r).toMatch(/You paid twice/);
+    expect(r).toMatch(/By \*\*bank transfer\*\*/);
+    expect(r).toContain('{{refund_processing_days}} business days');
+    expect(r).toMatch(/refunds follow Apple's and Google's rules/);
+    expect(r).not.toMatch(/\b\d+ business days/);
+  });
+
+  it('privacy policy: cookies section (essential sign-in only, no analytics cookies, no banner) + attorney flag', () => {
+    const privacy = docs.find((d) => d.doc.slug === 'privacy')!.doc.body;
+    expect(privacy).toMatch(/## \d+\. Cookies/);
+    expect(privacy).toMatch(/only cookie the website sets is the sign-in cookie/);
+    expect(privacy).toMatch(/no analytics or advertising cookies/i);
+    expect(privacy).toMatch(/cookieless/);
+    expect(privacy).toMatch(/do not show a cookie banner/);
+    expect(privacy).toMatch(/attorney[^_]*cookie/i);
+  });
+
+  it('privacy policy names the providers actually used', () => {
+    const privacy = docs.find((d) => d.doc.slug === 'privacy')!.doc.body;
+    expect(privacy).toMatch(/Gmail\) for sign-in emails/);
+    expect(privacy).toMatch(/OpenFreeMap/);
+    expect(privacy).not.toMatch(/Resend/);
+  });
+
+  it('terms point organisers to the refund policy', () => {
+    const terms = docs.find((d) => d.doc.slug === 'terms')!.doc.body;
+    expect(terms).toMatch(/\/legal\/refunds/);
   });
 
   it('privacy policy never mentions teen/minor accounts', () => {

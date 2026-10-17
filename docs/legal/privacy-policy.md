@@ -1,11 +1,11 @@
 ---
 slug: privacy
 title: Privacy Policy
-version: 2026-10-15-draft2
+version: 2026-10-17-draft3
 ---
 # RunLime Privacy Policy
 
-**Last updated:** 15 October 2026 (draft)
+**Last updated:** 17 October 2026 (draft)
 
 RunLime is a calendar for 5K and similar road races in Trinidad and Tobago, with tools to RSVP, check in on race day, track your own runs and follow other runners. RunLime is operated by {{operator_name}} ("RunLime", "we", "us"). Contact us at {{support_email}}.
 
@@ -53,12 +53,11 @@ RunLime accounts are only for adults aged **18 and over**. When you first open t
 We use trusted providers that process data on our behalf under contract:
 - Supabase (database, authentication, file storage). **Your data is stored in {{hosting_region}}.**
 - Cloudflare (website hosting)
-- Expo (push notification delivery)
-- Apple and Google (sign-in, app stores, in-app purchases, maps)
-- RevenueCat (subscription status)
-- Resend (sign-in emails)
-- Sentry (crash reports)
-- PostHog (privacy-respecting analytics)
+- Google (Gmail) for sign-in emails: your email address and the one-time code
+- OpenFreeMap (map tiles). Like any website your device loads, it receives your device's IP address and the map area being shown. It receives no account details.
+- Apple and Google (sign-in, app stores, in-app purchases)
+- Expo (app builds and push notification delivery)
+- When these features are added: RevenueCat (subscription status), Sentry (crash reports) and PostHog (privacy-respecting analytics, without cookies)
 
 This means your data is transferred to and stored outside Trinidad and Tobago, mainly in the United States. Where it is, we rely on our providers' contractual safeguards.
 
@@ -84,10 +83,25 @@ This means your data is transferred to and stored outside Trinidad and Tobago, m
 ## 7. Security
 Data is encrypted in transit (HTTPS) and at rest. Your emergency contact is also encrypted with a separate key before it is stored. Access is controlled by row-level security in our database. Administrators must use two-factor authentication.
 
-## 8. Changes
+## 8. Cookies and similar technologies
+**The only cookie the website sets is the sign-in cookie.** It is set by our authentication provider (Supabase) when you sign in, keeps you signed in, and is deleted when you sign out. Without it, sign-in can't work, so it is strictly necessary. If you never sign in, the website sets no cookie of its own.
+
+The website also stores two small items in your browser (not cookies), both needed for the 18+ age check:
+- your date of birth, kept only until you close the browser tab, so you don't have to type it twice while signing up;
+- if you are under 18, a note of the time the age check stopped you (no date of birth, nothing else), so the website keeps showing the block for 24 hours. It is never sent to us.
+
+We use **no analytics or advertising cookies**, and no tracking pixels. If we add website analytics, it will be **cookieless** (no cookies and no device identifiers stored in your browser). Our hosting provider, Cloudflare, may set a strictly necessary security cookie to protect the website from attacks.
+
+Because we only use strictly necessary cookies and storage, we **do not show a cookie banner**. You can still block or delete cookies in your browser settings; if you block the sign-in cookie you won't be able to sign in.
+
+The mobile app does not use cookies. It keeps your sign-in securely on your device.
+
+_Draft note for the attorney: please confirm that no cookie consent banner is needed for strictly necessary cookies and storage under Trinidad and Tobago law, and for visitors from other countries (for example the EU ePrivacy rules)._
+
+## 9. Changes
 If we make material changes, we'll tell you in the app before they take effect. The version and date are shown at the top of this page.
 
-## 9. Contact
+## 10. Contact
 {{operator_name}} · {{support_email}}
 
 _Draft note for the attorney: RunLime identifies its operator by name and contact email only; the operator's residential address is deliberately not published here (owner decision, 15 October 2026). Please confirm that no postal address is legally required on this page._

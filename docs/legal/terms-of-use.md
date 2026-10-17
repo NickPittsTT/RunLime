@@ -1,7 +1,7 @@
 ---
 slug: terms
 title: Terms of Use
-version: 2026-10-15-draft
+version: 2026-10-17-draft3
 ---
 # RunLime Terms of Use
 
@@ -34,13 +34,13 @@ You can make your account Private (followers need your approval) or Public. You 
 - **Price and period** are shown before you buy. Payment is charged to your store account when you confirm the purchase.
 - The subscription **renews automatically** unless you turn off auto-renew at least 24 hours before the end of the current period. Your store account is charged for renewal within the 24 hours before the period ends.
 - **Manage or cancel** in your store account settings (Apple ID → Subscriptions, or Google Play → Payments & subscriptions). The app links there. Deleting the app or your RunLime account does not cancel a store subscription.
-- **Refunds** are handled by Apple or Google under their policies.
+- **Refunds** are handled by Apple or Google under their policies (see our Refund Policy at {{website}}/legal/refunds).
 - If we change the price, your store will notify you as its rules require.
 - Use **Restore purchases** in the app to restore Premium on a new device.
 - Any free-trial period not used is forfeited when you buy a subscription, where applicable.
 
 ## 6. Organiser listings
-Organisers buy event listings through the RunLime web portal only, and pay by bank transfer. Listing terms, prices and invoices are shown in the portal. A listing activates once we confirm payment. Organisers are responsible for their events and for the accuracy of their information, and must not use RunLime to collect participants' personal data.
+Organisers buy event listings through the RunLime web portal only, and pay by bank transfer. Listing terms, prices and invoices are shown in the portal. A listing activates once we confirm payment. Refunds of listing fees (rejected listings, races you cancel, duplicate payments) follow our Refund Policy at {{website}}/legal/refunds. Organisers are responsible for their events and for the accuracy of their information, and must not use RunLime to collect participants' personal data.
 
 ## 7. Health
 Running carries risk. Read the [Health Disclaimer](/legal/health). RunLime doesn't give medical advice. Distance, pace, steps and calories are estimates.

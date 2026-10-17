@@ -59,7 +59,7 @@ Phase tag = the phase in which the screen is built.
 | M37 | Finisher card builder + share | 6 |
 | M37b | **Club leaderboards**: Kilometres / Races attended / Avg members per race; Total vs Per member; Weekly · Monthly · Year; your clubs highlighted | 6 |
 | M37a | **Leaderboards**: Kilometres / Races attended; Weekly · Monthly · Year tabs; Everyone / People I follow; top 20 + your rank; disclaimer ("just for fun, no prizes"); opt-in prompt if you're not on the boards; tap a name → their profile (if allowed) or report | 6 |
-| M38 | Premium paywall (store prices, restore, manage subscription, terms links) | 7 |
+| M38 | Premium paywall (store prices, restore, manage subscription, terms links). **Cancel as easy as subscribing:** "Manage or cancel subscription" opens the store page in one tap (also in Settings); no confirm-shaming, no retention screen | 7 |
 
 ### Profile & settings
 | # | Screen | Phase |

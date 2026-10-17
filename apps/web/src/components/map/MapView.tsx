@@ -1,6 +1,6 @@
 'use client';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { MAP_STYLE_URL, TT_CENTER } from '@runlime/shared/events';
+import { MAP_ATTRIBUTION_LINKS, MAP_STYLE_URL, TT_CENTER } from '@runlime/shared/events';
 import * as maplibregl from 'maplibre-gl';
 import type { GeoJSONSource, Map as MlMap, MapMouseEvent, Marker } from 'maplibre-gl';
 import { useEffect, useRef } from 'react';
@@ -44,7 +44,8 @@ export default function MapView({ pins = [], route, onMapClick, fit = true, heig
       style: MAP_STYLE_URL,
       center: [TT_CENTER.lng, TT_CENTER.lat],
       zoom: 8,
-      attributionControl: { compact: true },
+      // Our own always-visible credit below replaces the collapsible control (OSM licence).
+      attributionControl: false,
     });
     m.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
     // Tile/style errors (offline, blocked network) must never break the page: the map just stays blank.
@@ -92,5 +93,19 @@ export default function MapView({ pins = [], route, onMapClick, fit = true, heig
     else m.once('load', apply);
   }, [pins, route, fit]);
 
-  return <div ref={box} role="region" aria-label={label} style={{ height }} className="w-full rounded-lg border border-line overflow-hidden" />;
+  return (
+    <div className="relative w-full rounded-lg border border-line overflow-hidden" style={{ height }}>
+      <div ref={box} role="region" aria-label={label} className="absolute inset-0" />
+      <p data-testid="map-attribution" className="absolute bottom-0 right-0 m-0 px-1.5 py-0.5 text-[11px] leading-4 bg-white/90 text-[#0F172A] rounded-tl">
+        {MAP_ATTRIBUTION_LINKS.map((l, i) => (
+          <span key={l.url}>
+            {i > 0 && ' · '}
+            <a href={l.url} target="_blank" rel="noopener noreferrer" className="text-[#0F172A] underline">
+              {l.label}
+            </a>
+          </span>
+        ))}
+      </p>
+    </div>
+  );
 }

@@ -197,6 +197,15 @@ export const STATUS_LABEL: Record<string, string> = {
 
 /** OpenFreeMap vector style (free, no key). Used by MapLibre on web and mobile. */
 export const MAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
-export const MAP_ATTRIBUTION = '© OpenStreetMap contributors, OpenFreeMap';
+/**
+ * Map credit required by the OpenStreetMap licence (ODbL) and OpenFreeMap / OpenMapTiles.
+ * Shown as visible text on every map, web and app (not hidden behind an "i" button).
+ */
+export const MAP_ATTRIBUTION_LINKS = [
+  { label: 'OpenFreeMap', url: 'https://openfreemap.org' },
+  { label: '© OpenMapTiles', url: 'https://www.openmaptiles.org/' },
+  { label: '© OpenStreetMap contributors', url: 'https://www.openstreetmap.org/copyright' },
+] as const;
+export const MAP_ATTRIBUTION = MAP_ATTRIBUTION_LINKS.map((l) => l.label).join(' · ');
 /** Default map centre for TT. */
 export const TT_CENTER = { lat: 10.45, lng: -61.3 };

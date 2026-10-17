@@ -6,7 +6,7 @@ import { getPublishedLegal } from '@/lib/legal';
 
 export const dynamic = 'force-dynamic';
 
-const ALLOWED = new Set(['privacy', 'terms', 'moderation', 'child-safety', 'health', 'community-times']);
+const ALLOWED = new Set(['privacy', 'terms', 'moderation', 'child-safety', 'health', 'community-times', 'refunds']);
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;

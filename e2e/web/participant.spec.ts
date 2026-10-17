@@ -33,6 +33,7 @@ test('legal pages are public and marked as drafts', async ({ page }) => {
     ['/legal/moderation', 'RunLime Moderation Policy'],
     ['/legal/health', 'Health Disclaimer'],
     ['/legal/community-times', 'Community Times'],
+    ['/legal/refunds', 'RunLime Refund Policy'],
     ['/support', 'RunLime Support'],
     ['/delete-account', 'Delete your RunLime account'],
   ] as const) {
@@ -46,8 +47,13 @@ test('legal pages are public and marked as drafts', async ({ page }) => {
   await expect(page.getByRole('cell', { name: 'Account and profile' })).toBeVisible();
   await expect(page.getByText('| Data |')).toHaveCount(0);
   await expect(page.getByText('Cloudflare (website hosting)')).toBeVisible();
+  await expect(page.getByText(/only cookie the website sets is the sign-in cookie/)).toBeVisible();
   await page.goto('/legal/terms');
   await expect(page.getByText(/must be accompanied by a parent or guardian/)).toBeVisible();
+  await page.goto('/legal/refunds');
+  await expect(page.getByRole('cell', { name: /We reject your listing/ })).toBeVisible();
+  await expect(page.getByText(/within 10 business days/)).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Legal' }).getByRole('link', { name: 'Refunds' })).toBeVisible();
   const res = await page.goto('/legal/not-a-page');
   expect(res?.status()).toBe(404);
 });

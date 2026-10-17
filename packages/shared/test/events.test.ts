@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addMonths, eventsByDay, feeLabel, filterEvents, haversineKm, localDateKey, monthGrid, parseCalendarEvents, sortEvents, type CalendarEvent } from '../src/events';
+import { MAP_ATTRIBUTION, MAP_ATTRIBUTION_LINKS, addMonths, eventsByDay, feeLabel, filterEvents, haversineKm, localDateKey, monthGrid, parseCalendarEvents, sortEvents, type CalendarEvent } from '../src/events';
 import { eventInputSchema, raceSuggestionSchema, isoToZonedLocal, parseGpx, toSaveEventPayload, zonedLocalToIso } from '../src/schemas/event';
 
 const TT = 'America/Port_of_Spain';
@@ -129,5 +129,12 @@ describe('raceSuggestionSchema', () => {
   it('turns blank optional text into undefined', () => {
     const v = raceSuggestionSchema.parse({ name: 'Mayaro 5K', eventDate: '', location: '  ', url: '', notes: '' });
     expect(v).toEqual({ name: 'Mayaro 5K', eventDate: undefined, location: undefined, url: undefined, notes: undefined });
+  });
+});
+
+describe('map attribution', () => {
+  it('credits OpenStreetMap contributors (linking to the copyright page), OpenFreeMap and OpenMapTiles', () => {
+    expect(MAP_ATTRIBUTION).toBe('OpenFreeMap · © OpenMapTiles · © OpenStreetMap contributors');
+    expect(MAP_ATTRIBUTION_LINKS.find((l) => l.label.includes('OpenStreetMap'))!.url).toBe('https://www.openstreetmap.org/copyright');
   });
 });

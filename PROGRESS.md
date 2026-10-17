@@ -77,6 +77,7 @@
 - [x] Phase 2 review + owner test script: `docs/phase-2/REVIEW.md`
 - [x] Staging APK with the Phase 2 app (EAS build 8d7c4e0d, commit `a062a57`): https://expo.dev/artifacts/eas/FPu2CbE7olEam07BXsIEFCKFPayn05KoGi7kUUhUHp0.apk
 - [x] CI bug fixed: web "Download my data" ignored a tap made before the page was ready (failed runs 82 and 95). Button now disabled until ready; 24/24 repeated runs pass
+- [x] **Compliance additions (owner, 2026-10-17):** Refund Policy (`/legal/refunds`, setting `payments.refund_processing_days` = 10); Privacy Policy cookies section + corrected provider list (Gmail, OpenFreeMap; planned services marked); visible map credit with links on every web and app map; third-party services register (`docs/operations/THIRD-PARTY-SERVICES.md`); rules in CLAUDE.md: Premium cancel as easy as subscribing with no confirm-shaming (Phase 7), unsubscribe link on all marketing email, strictly necessary cookies only, register before any new service. Attorney flags added (cookie banner; refund on organiser cancellation; consumer-rights wording)
 - [ ] **Owner review of Phase 2** (test script sections A–C)
 
 ## Phase 1 approval items (owner, 2026-10-11)
@@ -102,7 +103,7 @@
    - **Owner decision (2026-10-15): the pilot runs under the draft legal documents, without attorney review first.** Before friends sign up they see a short plain-language notice: this is a test version under draft terms, their data may be wiped when the test ends, and they take part on that basis. Their agreement is recorded in `consents` (kind `pilot_terms`). **Attorney review stays required before public launch.**
    - Still needed before the pilot: the pilot notice screen (M7a) + consent, every friend 18+ (enforced by the app), and a plan for wiping pilot data when the test ends.
 5. Confirm "RunLime" availability (stores, domains, TT IPO/USPTO/WIPO) before store bundle IDs are fixed (Phase 8).
-6. Attorney review of `docs/legal/` before launch.
+6. Attorney review of `docs/legal/` before launch. Specific questions flagged in the drafts: no postal address on legal pages; no cookie banner for strictly necessary cookies (TT law and EU visitors); full refund when an organiser cancels; consumer-rights sentence in the Refund Policy.
 6a. **Final logo (owner designs it in Canva), before store submission.** Direction: a running shoe with lime wedges as a motion trail. Staging keeps the current lime-wedge icon. When the files are ready, I'll give the exact sizes and formats needed (app icon, Android adaptive icon layers, splash, store listing, web).
 7. Apple Developer account (paid) — deferred until budget allows; iOS testing and Sign in with Apple wait for it.
 

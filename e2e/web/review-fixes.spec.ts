@@ -43,7 +43,15 @@ test('postponed and cancelled stay that way: no Publish button undoes them, and 
   expect(await appSeesStatus(name)).toBe('published');
 
   await page.getByLabel('Change').selectOption('postponed');
-  await page.getByLabel('Reason runners will see').fill('Heavy rain forecast');
+  // Reason box: minimum shown up front, live count, clear error if too short (nothing is sent).
+  const reason = page.getByLabel('Reason runners will see');
+  await expect(reason).toHaveAttribute('placeholder', 'Minimum 5 characters');
+  await reason.fill('Rain');
+  await expect(page.getByText('4 / 500 characters · minimum 5')).toBeVisible();
+  await page.getByRole('button', { name: 'Update status' }).click();
+  await expect(page.getByRole('alert').filter({ hasText: 'Please give a reason of at least 5 characters (you have 4).' })).toBeVisible();
+  expect(await appSeesStatus(name)).toBe('published');
+  await reason.fill('Heavy rain forecast');
   await page.getByRole('button', { name: 'Update status' }).click();
   await expect(page.getByText('The event is now postponed.')).toBeVisible();
   await page.reload();

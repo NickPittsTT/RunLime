@@ -95,7 +95,9 @@ export default function MapView({ pins = [], route, onMapClick, fit = true, heig
 
   return (
     <div className="relative w-full rounded-lg border border-line overflow-hidden" style={{ height }}>
-      <div ref={box} role="region" aria-label={label} className="absolute inset-0" />
+      {/* Inline position: maplibre-gl.css sets .maplibregl-map { position: relative } outside Tailwind's cascade layers,
+          which beat the `absolute inset-0` utilities and collapsed the map to 0 px (blank map, owner re-test 2026-10-17). */}
+      <div ref={box} role="region" aria-label={label} style={{ position: 'absolute', inset: 0 }} />
       <p data-testid="map-attribution" className="absolute bottom-0 right-0 m-0 px-1.5 py-0.5 text-[11px] leading-4 bg-white/90 text-[#0F172A] rounded-tl">
         {MAP_ATTRIBUTION_LINKS.map((l, i) => (
           <span key={l.url}>

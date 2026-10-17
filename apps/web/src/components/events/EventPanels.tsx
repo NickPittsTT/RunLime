@@ -1,12 +1,21 @@
 'use client';
-import { useActionState } from 'react';
-import { Button, Field, Input, Notice, Select, Textarea } from '@/components/ui';
+import { useActionState, useState, type FormEvent } from 'react';
+import { Button, Field, Input, Notice, Select } from '@/components/ui';
+import { ReasonField, reasonTooShort } from './ReasonField';
 import { changeStatusAction, duplicateEventAction, reviewEventAction } from '@/lib/events/actions';
 
 /** Postpone / cancel / reinstate a live event (organiser or admin). */
 export function StatusChangePanel({ id, status, timezone, back }: { id: string; status: string; timezone: string; back: string }) {
   const [state, action, pending] = useActionState(changeStatusAction, {});
+  const [reasonError, setReasonError] = useState<string>();
   if (!['published', 'postponed', 'cancelled'].includes(status)) return null;
+  // Postponing and cancelling need a reason runners will see; "back on" does not.
+  const check = (e: FormEvent<HTMLFormElement>) => {
+    const next = String(new FormData(e.currentTarget).get('status'));
+    const err = next === 'published' ? undefined : reasonTooShort(e.currentTarget);
+    setReasonError(err);
+    if (err) e.preventDefault();
+  };
   // Allowed changes (database enforces the same): published -> postponed/cancelled; postponed -> cancelled/back on; cancelled -> back on.
   const options =
     status === 'published'
@@ -15,7 +24,7 @@ export function StatusChangePanel({ id, status, timezone, back }: { id: string; 
         ? [['cancelled', 'Cancel'], ['published', 'Back on (no longer postponed)']]
         : [['published', 'Back on (no longer cancelled)']];
   return (
-    <form action={action} className="rounded-xl border border-line p-5 mb-6">
+    <form action={action} onSubmit={check} noValidate className="rounded-xl border border-line p-5 mb-6">
       <h2 className="text-lg font-bold mb-3">{status === 'published' ? 'Postpone or cancel' : 'Change status'}</h2>
       {state.error && <Notice tone="danger">{state.error}</Notice>}
       {state.ok && <Notice tone="success">{state.ok}</Notice>}
@@ -34,9 +43,7 @@ export function StatusChangePanel({ id, status, timezone, back }: { id: string; 
       <Field label="New date and time (if postponing to a known date)" htmlFor={`st-new-${id}`}>
         <Input id={`st-new-${id}`} type="datetime-local" name="newStartsLocal" />
       </Field>
-      <Field label="Reason runners will see" htmlFor={`st-reason-${id}`}>
-        <Textarea id={`st-reason-${id}`} name="reason" rows={2} maxLength={500} />
-      </Field>
+      <ReasonField id={`st-reason-${id}`} label="Reason runners will see" error={reasonError} />
       <Button type="submit" variant="secondary" disabled={pending}>
         Update status
       </Button>
@@ -66,6 +73,14 @@ export function DuplicatePanel({ id, timezone, back }: { id: string; timezone: s
 /** Admin: publish / reject / unpublish. */
 export function ReviewPanel({ id, status }: { id: string; status: string }) {
   const [state, action, pending] = useActionState(reviewEventAction, {});
+  const [reasonError, setReasonError] = useState<string>();
+  // Reject and Unpublish need a reason.
+  const check = (e: FormEvent<HTMLFormElement>) => {
+    const submitter = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+    const err = submitter && ['rejected', 'unpublished'].includes(submitter.value) ? reasonTooShort(e.currentTarget) : undefined;
+    setReasonError(err);
+    if (err) e.preventDefault();
+  };
   return (
     <div className="rounded-xl border border-line p-5 mb-6">
       <h2 className="text-lg font-bold mb-3">Review</h2>
@@ -81,11 +96,9 @@ export function ReviewPanel({ id, status }: { id: string; status: string }) {
           </Button>
         </form>
       )}
-      <form action={action}>
+      <form action={action} onSubmit={check} noValidate>
         <input type="hidden" name="id" value={id} />
-        <Field label="Reason (required to reject or unpublish)" htmlFor={`rv-reason-${id}`}>
-          <Textarea id={`rv-reason-${id}`} name="reason" rows={2} maxLength={500} />
-        </Field>
+        <ReasonField id={`rv-reason-${id}`} label="Reason (required to reject or unpublish)" error={reasonError} />
         <div className="flex gap-3 flex-wrap">
           {status === 'pending_approval' && (
             <Button type="submit" name="decision" value="rejected" variant="danger" disabled={pending}>

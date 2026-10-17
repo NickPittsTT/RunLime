@@ -6,7 +6,7 @@ export function friendlyError(error: { message?: string; code?: string } | null 
   if (/18 and over/i.test(msg)) return 'RunLime accounts are for adults aged 18 and over.';
   if (/requires MFA/i.test(msg)) return 'Please confirm your authenticator code first.';
   if (/already have an application/i.test(msg)) return 'You already have an application waiting for review.';
-  if (/reason is required/i.test(msg)) return 'Please give a reason (at least 5 characters).';
+  if (/reason is required|Tell runners why/i.test(msg)) return 'Please give a reason of at least 5 characters.';
   if (/Token has expired|invalid/i.test(msg) && /otp|token/i.test(msg)) return 'That code is wrong or has expired. Request a new one.';
   // Validation messages raised by our own database functions are written for people: show them as they are.
   if ((error.code === '22023' || error.code === 'P0002' || error.code === '23514') && msg && msg.length < 200 && !/violates|constraint|relation/i.test(msg)) return msg;

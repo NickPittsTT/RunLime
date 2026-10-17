@@ -81,6 +81,7 @@
 - [x] **Owner Phase 2 test (2026-10-17):** A, B and most of C passed. Failed: status changes not reaching the app
 - [x] Root cause found from staging's change history: the admin **Publish** button undid each postponement/cancellation (57 s and 7 s later). Fixed in the database (review_event) and the admin page; app status banners, refresh and offline labels added; tests on every layer
 - [x] Review fixes 2–8 (list/map switch, filter summary, admin events page, Add organisation, listing flyer permission, select/clear all, account-saved preferences, fun walk) + refund-after-live setting. "Test 1" not found on staging (no event with that name or containing "test"); nothing deleted
+- [x] Re-test build: staging APK https://expo.dev/artifacts/eas/XMsbXyhkSdIU9TLQG4f8F78XaKFVjtGaHmGiM-gU58Q.apk (EAS build 2a28da77, commit `c59d427`). CI, Deploy database (migration 20261017000200) and Deploy web green on `c59d427`
 - [ ] **Owner re-test** (`docs/phase-2/RETEST.md`) and Phase 2 approval
 - [ ] Owner: refund option A (100) or B (50) for cancellations after the listing has been live (setting; default 100)
 

@@ -1,6 +1,6 @@
 # Phase 2 re-test (items 1–8)
 
-About 20 minutes. Install the new staging APK over the old one (link in PROGRESS.md and in my message). Use the real PSCU listing; put it back to normal at the end.
+About 20 minutes. Install the new staging APK over the old one: https://expo.dev/artifacts/eas/XMsbXyhkSdIU9TLQG4f8F78XaKFVjtGaHmGiM-gU58Q.apk (EAS build 2a28da77, commit `c59d427`; same signing key, so Google sign-in still works). Use the real PSCU listing; put it back to normal at the end.
 
 ## What went wrong last time (item 1)
 The app was right: the race really was back to "published". Staging's change history shows the race was postponed and put back to published 57 seconds later, then cancelled and put back 7 seconds later. The cause was the admin **Publish** button, which was still shown on postponed and cancelled races and set them straight back to published. Publish now only appears for races that aren't live yet, and the database refuses it on postponed or cancelled races.

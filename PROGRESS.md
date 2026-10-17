@@ -78,7 +78,11 @@
 - [x] Staging APK with the Phase 2 app (EAS build 8d7c4e0d, commit `a062a57`): https://expo.dev/artifacts/eas/FPu2CbE7olEam07BXsIEFCKFPayn05KoGi7kUUhUHp0.apk
 - [x] CI bug fixed: web "Download my data" ignored a tap made before the page was ready (failed runs 82 and 95). Button now disabled until ready; 24/24 repeated runs pass
 - [x] **Compliance additions (owner, 2026-10-17):** Refund Policy (`/legal/refunds`, setting `payments.refund_processing_days` = 10); Privacy Policy cookies section + corrected provider list (Gmail, OpenFreeMap; planned services marked); visible map credit with links on every web and app map; third-party services register (`docs/operations/THIRD-PARTY-SERVICES.md`); rules in CLAUDE.md: Premium cancel as easy as subscribing with no confirm-shaming (Phase 7), unsubscribe link on all marketing email, strictly necessary cookies only, register before any new service. Attorney flags added (cookie banner; refund on organiser cancellation; consumer-rights wording)
-- [ ] **Owner review of Phase 2** (test script sections A–C)
+- [x] **Owner Phase 2 test (2026-10-17):** A, B and most of C passed. Failed: status changes not reaching the app
+- [x] Root cause found from staging's change history: the admin **Publish** button undid each postponement/cancellation (57 s and 7 s later). Fixed in the database (review_event) and the admin page; app status banners, refresh and offline labels added; tests on every layer
+- [x] Review fixes 2–8 (list/map switch, filter summary, admin events page, Add organisation, listing flyer permission, select/clear all, account-saved preferences, fun walk) + refund-after-live setting. "Test 1" not found on staging (no event with that name or containing "test"); nothing deleted
+- [ ] **Owner re-test** (`docs/phase-2/RETEST.md`) and Phase 2 approval
+- [ ] Owner: refund option A (100) or B (50) for cancellations after the listing has been live (setting; default 100)
 
 ## Phase 1 approval items (owner, 2026-10-11)
 - [x] a. CI fully green on GitHub, including web E2E (see the latest run in the Phase 1 review)

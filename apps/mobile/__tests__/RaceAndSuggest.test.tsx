@@ -174,7 +174,7 @@ describe('onboarding (M8/M9)', () => {
     fireEvent.press(screen.getByRole('checkbox', { name: '5K' }));
     fireEvent.press(screen.getByRole('button', { name: 'Show races' }));
     await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('/'));
-    expect(JSON.parse((await AsyncStorage.getItem('runlime.preferences.v1'))!)).toEqual({ onboarded: true, regionIds: ['pos'], distanceKm: [5] });
+    expect(JSON.parse((await AsyncStorage.getItem('runlime.preferences.v1.user-1'))!)).toEqual({ onboarded: true, regionIds: ['pos'], distanceKm: [5] });
     // Saved to the account, not just the phone.
     expect(mockUpsert).toHaveBeenCalledWith(
       expect.objectContaining({ user_id: 'user-1', region_ids: ['pos'], distance_km: [5], onboarded_at: expect.any(String) }),
@@ -200,6 +200,19 @@ describe('onboarding (M8/M9)', () => {
     render(<OnboardingScreen />);
     fireEvent.press(screen.getByRole('button', { name: 'Skip' }));
     await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('/'));
-    expect(JSON.parse((await AsyncStorage.getItem('runlime.preferences.v1'))!)).toEqual({ onboarded: true, regionIds: [], distanceKm: [] });
+    expect(JSON.parse((await AsyncStorage.getItem('runlime.preferences.v1.user-1'))!)).toEqual({ onboarded: true, regionIds: [], distanceKm: [] });
+  });
+});
+
+describe('preferences on a shared phone', () => {
+  it("are stored per account on the device: another account's copy is never used or uploaded", async () => {
+    jest.clearAllMocks();
+    await AsyncStorage.clear();
+    backend(null);
+    await AsyncStorage.setItem('runlime.preferences.v1.someone-else', JSON.stringify({ onboarded: true, regionIds: ['pos'], distanceKm: [5] }));
+    const { loadPreferences } = jest.requireActual('../src/lib/preferences') as typeof import('../src/lib/preferences');
+    const p = await loadPreferences();
+    expect(p).toEqual({ onboarded: false, regionIds: [], distanceKm: [] });
+    expect(mockUpsert).not.toHaveBeenCalled();
   });
 });

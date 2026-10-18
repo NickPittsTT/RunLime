@@ -1,6 +1,6 @@
 # RunLime — Progress
 
-**Last updated:** 2026-10-18 (Phase 2 approved by the owner; Phase 3 in progress)
+**Last updated:** 2026-10-18 (Phase 2 approved by the owner; Phase 3 built, waiting for the owner's phone test)
 
 ## Phases
 
@@ -9,7 +9,7 @@
 | 0 | Questions, architecture, data model, screens, brand, costs | Approved by owner (rev 2) | 100% |
 | 1 | Setup, environments, auth + 18+ age gate, roles, RLS, seed, legal drafts | Approved by owner (2026-10-11) | 100% |
 | 2 | Events: organiser portal, admin approval, onboarding, calendar, event page, public web | **Approved by the owner (17 Oct 2026)** after phone checks C1–C5 | 100% |
-| 3 | RSVP, followers, clubs (leaders, approvals, requests, turnout), runner level, profile photos, notifications/broadcasts, attendance dashboard | **Scope approved by the owner (2026-10-18)**; in progress, slice by slice (`docs/phase-3/PLAN.md`) | 0% |
+| 3 | RSVP, followers, clubs (leaders, approvals, requests, turnout), runner level, profile photos, notifications/broadcasts, attendance dashboard | **Scope approved by the owner (2026-10-18)**; all 6 slices built, deployed to staging; **waiting for the owner's phone test and approval** | 95% |
 | 4 | GPS check-in | Not started | 0% |
 | 5 | Run tracker, history, totals | Not started | 0% |
 | 6 | Community times, activity + club leaderboards, verified runners, sharing, reporting/blocking, finisher card → then the real-race pilot | Not started | 0% |
@@ -99,12 +99,13 @@ Owner decisions: push = Expo Push + Firebase Cloud Messaging (inbox first, then 
 - [x] Slice 0: item 7, saved welcome preferences survive uninstall/reinstall (test; CI #114 on `23279f6`)
 - [x] Slice 1: runner level + profile photos (location data stripped, report, admin removal queue, audit) — CI #115 on `9a67519`; deployed (web #32, database #55)
 - [x] Slice 2: RSVPs (adults/children counts) + My races — CI #116 on `227ae53`; deployed (web #33, database #56); APK EAS build d9d2ae89
-- [x] Slice 3: followers (private by default, requests, block, report; passport + races attending) — CI #117 on `99c242d`; deploying
-- [ ] Slice 4: clubs (leader approval, new-club requests, primary club, turnout below 5 hidden) → APK
-- [ ] Slice 5: organiser attendance page
-- [ ] Slice 6: notifications (inbox, then push; postponed-to, cancelled, day-before, organiser messages with limit) → APK
-- [ ] Privacy Policy + Moderation Policy drafts updated; attorney flags
-- [ ] `docs/phase-3/RETEST.md` phone checks per slice
+- [x] Slice 3: followers (private by default, requests, block, report; passport + races attending) — CI #117 on `99c242d`; deployed (database #57)
+- [x] Slice 4: clubs (leader approval, new-club requests, primary club, turnout below 5 hidden) — CI #118 on `b65c60d`; deployed (web #34, database #58); APK EAS build 07af4e39
+- [x] Slice 5: organiser attendance page — CI #119 on `95c8b5d`; deployed (web #35)
+- [x] Slice 6: notifications (inbox, then push; postponed-to, cancelled, day-before, organiser messages with limit) — CI #120 on `e18d12a`; deployed (web #36, database #59); APK EAS build d880d4b5. Push stays off until the owner's Firebase setup (`docs/phase-3/FIREBASE-SETUP.md`)
+- [x] Privacy Policy (draft4) + Moderation Policy (draft2) + Terms (draft5) updated; attorney flags in each
+- [x] `docs/phase-3/RETEST.md` phone checks per slice
+- [ ] **Owner phone test and Phase 3 approval** (only the owner approves)
 
 ## Phase 1 approval items (owner, 2026-10-11)
 - [x] a. CI fully green on GitHub, including web E2E (see the latest run in the Phase 1 review)

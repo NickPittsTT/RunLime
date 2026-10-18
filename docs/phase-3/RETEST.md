@@ -43,7 +43,8 @@ Use two phones, or your account plus a second test account on another phone. Bot
 3.6 From B, **Report profile** on A: the report appears in Admin → Reports on the website. Dismiss it.
 3.7 Edit profile → switch A to **Public**: B can follow instantly (no request) and see the passport. Switch back to Private.
 
-## Slice 4: clubs (APK link added when built; it also contains slice 3)
+## Slice 4: clubs
+**APK (slice 4, EAS build 07af4e39, commit `b65c60d`):** https://expo.dev/artifacts/eas/6pnh2ERiKXp3jtLw3KnoyjNkVK8cZuG535We0R1x4Y4.apk — contains slices 3 and 4. You can skip it and use the slice 6 APK below, which contains everything.
 4.1 Menu → **Clubs**. Under **Find a club**, any clubs you added in Admin are listed with member counts.
 4.2 **Can't find your club? Ask us to add it** → name "Re-test Runners", Send: "Thanks. We'll review your club request."
 4.3 Website: Admin → Clubs → **New-club requests**: "Re-test Runners · asked by <you>". Keep **Make the requester its first leader** ticked, **Approve**: "Club created."
@@ -61,7 +62,8 @@ Use two phones, or your account plus a second test account on another phone. Bot
 5.4 Organiser portal (if you have an organiser account): the race list shows "· N going"; the race page has the same Attendance section.
 5.5 Open the page on your phone's browser: nothing is cut off and there's no sideways scrolling.
 
-## Slice 6: notifications (inbox first, then phone notifications) — APK link added when built
+## Slice 6: notifications (inbox first, then phone notifications)
+**APK (slice 6, EAS build d880d4b5, commit `e18d12a`):** https://expo.dev/artifacts/eas/g5DglIwRvhl6hWaBYitvt3mTmj7G1QnBNq932JVkh3E.apk — contains every Phase 3 slice. Phone notifications only start after the Firebase setup and a build made after it.
 Inbox (works without Firebase):
 6.1 The bell (top right) shows a red number when you have unread notifications. Tap it: **Notifications** lists them, newest first; unread ones have a green dot.
 6.2 Second account: follow your account (Private): your bell shows "<name> asked to follow you". Tap it: Followers → Requests opens. Approve: the second account gets "<you> approved your follow request".

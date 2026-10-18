@@ -48,7 +48,7 @@ RunLime accounts are only for adults aged **18 and over**. When you first open t
 - **Other RunLime users:** your display name or nickname, profile photo and runner level, and any community time you choose to share. On public accounts, also your race passport and the races you are attending.
 - **Your approved followers** (private accounts): your race passport (races attended, total km) and the races you are attending.
 - **Club leaders:** that you asked to join their club, and your display name and photo. Club turnout shows only counts of opted-in members, and is hidden below a minimum number.
-- **Organisers:** totals and trends for their own events (including the total number of children, never their names or ages), plus nicknames of attendees who opted in. They never see your email, date of birth or contact details.
+- **Organisers:** totals and trends for their own events (including the total number of children, never their names or ages) and counts of opted-in club members. They don't see who is going, and never see your email, date of birth or contact details.
 - **Our administrators:** only what they need to run and moderate the service. They can't read your emergency contact. Every administrator action is recorded in an audit log.
 - Your runs, routes, times and history are **private** unless you share a result.
 

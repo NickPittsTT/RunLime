@@ -66,18 +66,19 @@ async function logs(title, query) {
   const end = new Date();
   const start = new Date(end.getTime() - 24 * 3600_000);
   const qs = new URLSearchParams({ sql: query, iso_timestamp_start: start.toISOString(), iso_timestamp_end: end.toISOString() });
-  const res = await fetch(`https://api.supabase.com/v1/projects/${ref}/analytics/endpoints/logs.all?${qs}`, { headers: { authorization: `Bearer ${mgmt}` } });
+  const res = await fetch(`https://api.supabase.com/v1/projects/${ref}/analytics/endpoints/logs?${qs}`, { headers: { authorization: `Bearer ${mgmt}` } });
   const body = await res.json().catch(() => null);
   if (!res.ok || body?.error) return console.log('  logs query failed:', res.status, JSON.stringify(body?.error ?? body).slice(0, 300));
   const rows = body?.result ?? [];
   if (!rows.length) return console.log('  (none in the last 24 h)');
   for (const r of rows) console.log(' ', new Date(Number(r.timestamp) / 1000).toISOString(), maskAll(JSON.stringify({ ...r, timestamp: undefined })).slice(0, 300));
 }
-await logs('2f. Edge Function calls to push-dispatch (last 24 h)', `select timestamp, response.status_code as status from function_edge_logs
-  cross join unnest(metadata) as m cross join unnest(m.response) as response cross join unnest(m.request) as request
-  where request.url like '%push-dispatch%' order by timestamp desc limit 30`);
-await logs('2g. push-dispatch console output (last 24 h)', `select timestamp, event_message from function_logs
-  where event_message like '%push-dispatch%' order by timestamp desc limit 30`);
+await logs('2f. App calls to register/unregister a phone (API gateway, last 24 h)', `select timestamp, request.method as method, request.path as path, response.status_code as status
+  from edge_logs cross join unnest(metadata) as m cross join unnest(m.request) as request cross join unnest(m.response) as response
+  where request.path like '%push_token%' order by timestamp desc limit 50`);
+await logs('2g. Calls to the push-dispatch function (last 24 h)', `select timestamp, response.status_code as status
+  from function_edge_logs cross join unnest(metadata) as m cross join unnest(m.response) as response cross join unnest(m.request) as request
+  where request.url like '%push-dispatch%' order by timestamp desc limit 20`);
 
 // 3/4. Expo: credentials for the package, then an optional direct test push
 const APP_ID = 'tt.runlime.app.dev';

@@ -32,6 +32,13 @@ test('profile photo: location data is stripped; a reported photo is removed from
   const { ctx, page } = await signInAdmin(browser, { ...devices['Pixel 7'] });
   await page.goto('/admin/reports');
   await expect(page.getByRole('heading', { name: 'Reports' })).toBeVisible();
+  // Admin alerts: the menu shows open reports (red while a child-safety report is open) …
+  await expect(page.getByTestId('open-reports')).toBeVisible();
+  await expect(page.getByTestId('open-reports')).toHaveClass(/bg-danger/);
+  // … and every admin got a bell notification at once (no names in it).
+  const { data: alerts } = await admin().from('notifications').select('title, data').eq('kind', 'report_received').eq('data->>report_id', safety.data as string);
+  expect(alerts!.length).toBeGreaterThan(0);
+  expect(alerts![0]!.title).toBe('Urgent report: a child may be at risk');
   await expect(page.getByTestId('report').first()).toContainText('A child may be at risk');
   const item = page.getByTestId('report').filter({ hasText: name });
   await expect(item.getByRole('img', { name: `Reported profile photo of ${name}` })).toBeVisible();

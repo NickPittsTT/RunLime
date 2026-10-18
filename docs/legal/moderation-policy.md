@@ -35,7 +35,7 @@ Runners can post a display name, a nickname, a profile photo, a runner level and
 - The person you report is never told who reported them.
 
 ## What we do
-1. Every report goes to a moderation queue that RunLime administrators review. We aim to review every report **within 48 hours**. **Child-safety reports are always handled first**: they go to the top of the queue, ahead of every other report, and content that may put a child at risk is removed as soon as an administrator confirms it.
+1. Every report goes to a moderation queue that RunLime administrators review, and every administrator is alerted at once in the app (and on their phone). Reports that a child may be at risk are also emailed to our support address immediately; other reports are emailed in a daily summary. We aim to review every report **within 48 hours**. **Child-safety reports are always handled first**: they go to the top of the queue, ahead of every other report, and content that may put a child at risk is removed as soon as an administrator confirms it.
 2. Child sexual abuse material: we remove it, keep the records the law requires, and report it to the Trinidad and Tobago Police Service and to the US National Center for Missing & Exploited Children (CyberTipline). We never share such material except with the authorities as required.
 3. Possible actions: no action, removal of content (for example a photo), removal of a club leader's role, a warning, temporary suspension, or permanent account closure. Serious or repeated breaches lead to closure.
 4. If content may break the law, we preserve the relevant records and report to the authorities where required.

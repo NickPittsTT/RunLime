@@ -85,6 +85,7 @@ describe('profile photo', () => {
     mockManipulate.mockResolvedValue({ uri: 'file:///small.jpg' });
     mockCall.mockResolvedValue({ ok: true, json: async () => ({ ok: true }) });
     render(<EditProfileScreen />);
+    expect(screen.getByText('RunLime only sees the photo you choose.')).toBeTruthy();
     fireEvent.press(screen.getByRole('button', { name: 'Add a photo' }));
     expect(await screen.findByText('Photo saved.')).toBeTruthy();
     expect(mockPick).toHaveBeenCalledWith(expect.objectContaining({ mediaTypes: ['images'], allowsEditing: true, aspect: [1, 1], exif: false }));
@@ -158,6 +159,16 @@ describe('reporting (Play UGC + Child Safety Standards)', () => {
       p_target_ref: null,
       p_details: 'An adult in a running group asked for photos of children',
     });
+  });
+  it('the "too short" message clears while typing, and the hint counts characters (owner retest 2026-10-18)', async () => {
+    render(<ReportScreen />);
+    fireEvent.press(screen.getByRole('radio', { name: 'Bullying or harassment' }));
+    fireEvent.changeText(screen.getByLabelText('Tell us what happened'), 'short');
+    fireEvent.press(screen.getByRole('button', { name: 'Send report' }));
+    expect(await screen.findByText('Please describe the concern in at least 10 characters.')).toBeTruthy();
+    fireEvent.changeText(screen.getByLabelText('Tell us what happened'), 'This is just. Test');
+    expect(screen.queryByText('Please describe the concern in at least 10 characters.')).toBeNull();
+    expect(screen.getByText(/At least 10 characters \(18 so far\)/)).toBeTruthy();
   });
   it('reporting a photo sends the person; server messages are shown', async () => {
     mockParams = { kind: 'profile_photo', userId: '0b4d3c2a-1111-4222-8333-444455556666', name: 'Sam' };

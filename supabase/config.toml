@@ -429,3 +429,7 @@ enabled = true
 # Phase 3 push: called by pg_cron (public.dispatch_push) with a shared secret, not by signed-in users.
 [functions.push-dispatch]
 verify_jwt = false
+
+# Phase 3 fixes: report alert emails, called by pg_cron (public.dispatch_admin_alerts) with a shared secret.
+[functions.admin-alerts]
+verify_jwt = false

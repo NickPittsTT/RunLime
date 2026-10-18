@@ -11,7 +11,8 @@ test('clubs: runner asks for a new club → admin approves on a phone (requester
   await adminPage.goto('/admin/clubs');
   const req = adminPage.getByTestId('club-request').filter({ hasText: clubName });
   await expect(req).toContainText('asked by Club Lead');
-  await expect(req.getByRole('checkbox', { name: 'Make the requester its first leader' })).toBeChecked();
+  await expect(req.getByTestId('proposed-leader')).toContainText('Proposed leader: Club Lead (the requester)');
+  await expect(req.getByRole('checkbox', { name: "Make Club Lead its first leader (they're notified)" })).toBeChecked();
   await req.getByRole('button', { name: 'Approve' }).click();
   await expect(adminPage.getByText('Club created.')).toBeVisible();
   await ctx.close();
@@ -19,6 +20,8 @@ test('clubs: runner asks for a new club → admin approves on a phone (requester
   const { data: club } = await db.from('clubs').select('id').eq('name', clubName).single();
   const { data: leadRow } = await db.from('club_members').select('role, status').eq('club_id', club!.id).eq('user_id', lead.id).single();
   expect(leadRow).toEqual({ role: 'leader', status: 'approved' });
+  const { data: told } = await lead.client.from('notifications').select('title, body').eq('kind', 'club_leader_assigned');
+  expect(told).toEqual([{ title: `You now lead ${clubName}.`, body: "You'll approve join requests." }]);
 
   // Members ask to join; only the leader can approve.
   const members = await Promise.all([1, 2].map((i) => signedInUser(`Club Member ${i}`)));

@@ -77,6 +77,12 @@ export function notificationTarget(n: AppNotification): { pathname: string; para
   return null;
 }
 
+/** Report alerts for admins open the admin console on the website (the app has no admin screens). */
+export function notificationUrl(n: Pick<AppNotification, 'kind' | 'data'>): string | null {
+  const url = (n.data as { url?: unknown }).url;
+  return n.kind === 'report_received' && typeof url === 'string' && /^https:\/\//.test(url) ? url : null;
+}
+
 export function useInbox() {
   const [items, setItems] = useState<AppNotification[] | null>(null);
   const [failed, setFailed] = useState(false);

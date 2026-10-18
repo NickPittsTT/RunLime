@@ -10,6 +10,7 @@ import { friendlyError } from '@/lib/errors';
 import { chooseAndUploadPhoto, removePhoto } from '@/lib/profilePhoto';
 import { useAreas } from '@/lib/regions';
 import { supabase } from '@/lib/supabase';
+import { useFieldErrors } from '@/lib/form';
 import { useTheme } from '@/lib/theme';
 import { useSession } from '@/state/session';
 
@@ -26,7 +27,7 @@ export default function EditProfileScreen() {
   const [clubTurnout, setClubTurnout] = useState(profile?.show_attendance_to_clubs ?? false);
   const [photoBusy, setPhotoBusy] = useState(false);
   const [photoMessage, setPhotoMessage] = useState<{ tone: 'danger' | 'success'; text: string }>();
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { errors, setErrors, edit } = useFieldErrors();
   const [formError, setFormError] = useState<string>();
   const [busy, setBusy] = useState(false);
   if (!profile) return null;
@@ -52,6 +53,8 @@ export default function EditProfileScreen() {
               setPhotoBusy(false);
             }}
           />
+          {/* Android's photo picker: no gallery permission (Google Play photo and video permissions policy). */}
+          <T variant="caption">RunLime only sees the photo you choose.</T>
           {profile.avatar_path ? (
             <Button
               label="Remove photo"
@@ -73,8 +76,8 @@ export default function EditProfileScreen() {
         or other people without their permission); anyone can report a photo.
       </T>
       {photoMessage ? <Notice tone={photoMessage.tone}>{photoMessage.text}</Notice> : null}
-      <TextField label="Display name" value={displayName} onChangeText={setDisplayName} maxLength={50} error={errors.displayName} />
-      <TextField label="Nickname (optional)" value={nickname} onChangeText={setNickname} maxLength={30} error={errors.nickname} autoCapitalize="none" />
+      <TextField label="Display name" value={displayName} onChangeText={edit('displayName', setDisplayName)} maxLength={50} error={errors.displayName} />
+      <TextField label="Nickname (optional)" value={nickname} onChangeText={edit('nickname', setNickname)} maxLength={30} error={errors.nickname} autoCapitalize="none" />
       {areas ? <AreaPicker areas={areas} value={areaId} onChange={setAreaId} /> : null}
       <View accessibilityRole="radiogroup" accessibilityLabel="Account privacy" style={{ gap: 8 }}>
         <T style={{ fontWeight: '700' }}>Account privacy</T>

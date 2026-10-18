@@ -28,14 +28,18 @@ export default async function ClubsAdmin({ searchParams }: { searchParams: Promi
       <section className="mb-8" aria-labelledby="club-requests">
         <h2 id="club-requests" className="text-xl font-bold mb-2">New-club requests</h2>
         {(requests ?? []).length === 0 && <p className="text-ink-muted">No requests waiting.</p>}
-        {((requests ?? []) as { id: string; name: string; description: string | null; area: string | null; requester: string | null }[]).map((r) => (
+        {((requests ?? []) as { id: string; name: string; description: string | null; area: string | null; requester: string | null; proposed_leader: string | null; leader_is_requester: boolean | null }[]).map((r) => (
           <div key={r.id} data-testid="club-request" className="rounded-xl border border-line p-4 mb-3">
             <div className="font-semibold">{r.name}</div>
             <div className="text-sm text-ink-muted">
               {[r.area, r.requester ? `asked by ${r.requester}` : null].filter(Boolean).join(' · ')}
             </div>
             {r.description && <p className="text-sm mt-1 mb-0">{r.description}</p>}
-            <ClubRequestReview id={r.id} />
+            <p className="text-sm mt-1 mb-0" data-testid="proposed-leader">
+              Proposed leader: <strong>{r.proposed_leader ?? 'none'}</strong>
+              {r.proposed_leader ? (r.leader_is_requester ? ' (the requester)' : ' (named by the requester; they join as a member)') : ''}
+            </p>
+            <ClubRequestReview id={r.id} leader={r.proposed_leader} />
           </div>
         ))}
       </section>

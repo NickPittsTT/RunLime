@@ -62,5 +62,6 @@ export const leaveClub = (club: string) => call('leave_club', { p_club: club });
 export const respondJoin = (club: string, user: string, accept: boolean) => call('respond_club_request', { p_club: club, p_user: user, p_accept: accept });
 export const removeMember = (club: string, user: string) => call('remove_club_member', { p_club: club, p_user: user });
 export const setPrimaryClub = (club: string | null) => call('set_primary_club', { p_club: club });
-export const requestNewClub = (name: string, description: string | null, regionId: string | null) =>
-  call('request_new_club', { p_name: name, p_description: description, p_region: regionId });
+/** leaderEmail: null when the requester will lead; otherwise the sign-in email of the person who will. */
+export const requestNewClub = (name: string, description: string | null, regionId: string | null, leaderEmail: string | null = null) =>
+  call('request_new_club', { p_name: name, p_description: description, p_region: regionId, p_leader_email: leaderEmail });

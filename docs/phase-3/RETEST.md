@@ -2,6 +2,38 @@
 
 Numbered per slice. Report pass or fail per step, with a screenshot for any failure. An APK link is added after slices 2, 4 and 6; slices 0, 1, 3 and 5 can be checked on the current APK or the website as noted.
 
+## Fix round (2026-10-18) — test only these, on the new APK
+**APK:** FIXAPK — install over the old app (same signing key). Open it once while signed in: that connects this phone for notifications.
+
+**F1. Phone notifications (was 6.9 failed)**
+F1.1 Menu → Notification settings: it says **Phone notifications: On**. ("On" now means this phone is connected to your account, not just allowed.)
+F1.2 Lock the phone. From the website (organiser or admin race page), **Message people going** on a race you're Going to. Within about a minute a notification appears on the lock screen, with a banner and sound. Tap it: the race opens.
+F1.3 Postpone that race (Change status → Postponed, with a new date): a notification "… is postponed to …" arrives. Then "Back on": one arrives too.
+F1.4 Sign out, sign in as your **second** account, then back to the first. Repeat F1.2: it still arrives. (This is what broke before.)
+F1.5 With the app open on the Home screen, send another message: a banner shows inside the app.
+
+**F2. Keyboard and form messages**
+F2.1 Profile → Report a safety concern → tap **Tell us what happened**. The box stays visible above the keyboard (the screen scrolls).
+F2.2 Type "short", tap Send report: the "at least 10 characters" message shows. Type more: the message disappears as soon as you edit, and the hint counts ("… (18 so far)").
+F2.3 Same keyboard check on: Edit profile (Display name, Nickname), Suggest a race (the last box, "Anything else"), Ask for a new club (About the club, Leader's sign-in email), Emergency contact, Delete account (Type DELETE).
+
+**F3. Photo picker**
+F3.1 Edit profile: under **Add a photo** it says "RunLime only sees the photo you choose." Tap it: Android's photo picker opens and no "allow access to photos" permission prompt appears.
+
+**F4. Admin alerts for new reports**
+F4.1 From a non-admin account, send a report with "A child may be at risk". Your **admin** account's phone gets "Urgent report: a child may be at risk" at once, and it's in the bell. Tapping it opens Admin → Reports on the website.
+F4.2 Website → Admin: the **Reports** menu item shows a red number while a child-safety report is open.
+F4.3 After you do `docs/phase-3/ADMIN-ALERTS-SETUP.md`: the test email arrives; then a new child-safety report emails runlimett@gmail.com within about a minute; other categories arrive in the 7:50 am summary the next morning.
+
+**F5. Club leadership**
+F5.1 Clubs → Ask for a new club: it asks **Who will lead this club?** Choose **Someone else** and enter your second account's sign-in email. A wrong email says it couldn't find the account.
+F5.2 Website → Admin → Clubs: the request shows **Proposed leader: <name> (named by the requester …)** and the tick reads "Make <name> its first leader". Approve.
+F5.3 The second account gets "You now lead <club>. You'll approve join requests." (bell, and phone if on).
+F5.4 On a third account (or after leaving), open the club: "<leader> approves join requests." shows above **Ask to join**, and after asking: "Your request is waiting for <leader> to approve it."
+
+**Still to confirm from slice 6** — 6.4 (third message blocked, "0 of 2 left"), 6.6 (organiser-updates toggle saves), 6.7 (Mark all as read), 6.11 (after sign-out, no phone notifications for that account on this phone).
+
+
 **Final Phase 3 APK (use this one for every step; push included):** https://expo.dev/artifacts/eas/G_euHwOUZLEUh8J3xPID2DEIkUh139fSVI6l15Qsiwk.apk — EAS build c96497e9, commit `47c7cbd` (CI #125), signing SHA-1 `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25` (same as before, so it installs over the old app), Firebase config: yes (project `runlime-a3849`). The per-slice APK links below are older builds; you don't need them.
 
 ## Slice 0: saved welcome answers survive a reinstall (Phase 2 item 7)

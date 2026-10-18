@@ -5,6 +5,7 @@ import { Pressable, View } from 'react-native';
 import { Button, Notice, Screen, T, TextField } from '@/components/ui';
 import { friendlyError } from '@/lib/errors';
 import { supabase } from '@/lib/supabase';
+import { useFieldErrors } from '@/lib/form';
 import { useTheme } from '@/lib/theme';
 
 const TITLES: Record<ReportTarget, string> = {
@@ -26,7 +27,7 @@ export default function ReportScreen() {
   const kind: ReportTarget = params.kind && params.kind in TITLES ? params.kind : 'general';
   const [category, setCategory] = useState<ReportCategory | null>(null);
   const [details, setDetails] = useState('');
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { errors, setErrors, clear, edit } = useFieldErrors();
   const [formError, setFormError] = useState<string>();
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -55,7 +56,10 @@ export default function ReportScreen() {
             key={cat.value}
             accessibilityRole="radio"
             accessibilityState={{ checked: category === cat.value }}
-            onPress={() => setCategory(cat.value)}
+            onPress={() => {
+              setCategory(cat.value);
+              clear('category');
+            }}
             style={{ minHeight: minTouchTarget, justifyContent: 'center', padding: 12, borderRadius: radius.md, borderWidth: category === cat.value ? 2 : 1, borderColor: category === cat.value ? c.leaf : c.border }}
           >
             <T style={{ fontWeight: category === cat.value ? '700' : '400' }}>{cat.label}</T>
@@ -65,9 +69,9 @@ export default function ReportScreen() {
       </View>
       <TextField
         label={kind === 'general' ? 'Tell us what happened' : 'Anything else we should know (optional)'}
-        hint={kind === 'general' ? 'At least 10 characters. Include names, races or dates if you can.' : undefined}
+        hint={kind === 'general' ? `At least 10 characters (${details.trim().length} so far). Include names, races or dates if you can.` : undefined}
         value={details}
-        onChangeText={setDetails}
+        onChangeText={edit('details', setDetails)}
         error={errors.details}
         multiline
         maxLength={1000}

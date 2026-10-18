@@ -30,7 +30,7 @@ export async function setClubArchived(formData: FormData) {
   revalidatePath('/admin/clubs');
 }
 
-/** Approve (creates the club; the requester joins, as its first leader if ticked) or reject with a reason. */
+/** Approve (creates the club; the requester joins; the proposed leader leads it if ticked) or reject with a reason. */
 export async function reviewClubRequest(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
   const supabase = await createClient();
   const approve = formData.get('decision') === 'approve';

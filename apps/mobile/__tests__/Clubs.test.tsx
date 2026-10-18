@@ -60,9 +60,10 @@ describe('clubs (M45a)', () => {
     let page: Record<string, unknown> = { ...basePage };
     rpcs({ club_page: () => page, request_join_club: () => ((page = { ...page, me: { status: 'pending', role: 'member', is_primary: false } }), 'pending') });
     render(<ClubScreen />);
+    expect(await screen.findByText('Lee Leader approves join requests.')).toBeTruthy();
     fireEvent.press(await screen.findByRole('button', { name: 'Ask to join' }));
     expect(await screen.findByText('Request sent. A club leader will approve it.')).toBeTruthy();
-    expect(screen.getByText('Your request is waiting for a club leader to approve it.')).toBeTruthy();
+    expect(screen.getByText('Your request is waiting for Lee Leader to approve it.')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Report this club' })).toBeTruthy();
   });
 
@@ -93,7 +94,21 @@ describe('clubs (M45a)', () => {
     fireEvent.changeText(screen.getByLabelText('Club name'), 'Point Fortin Pacers');
     fireEvent.press(screen.getByRole('button', { name: 'Send request' }));
     expect(await screen.findByText(/We'll review your club request/)).toBeTruthy();
-    expect(mockRpc).toHaveBeenCalledWith('request_new_club', { p_name: 'Point Fortin Pacers', p_description: null, p_region: null });
+    expect(mockRpc).toHaveBeenCalledWith('request_new_club', { p_name: 'Point Fortin Pacers', p_description: null, p_region: null, p_leader_email: null });
+  });
+
+  it('new-club request can name someone else as the leader (by sign-in email)', async () => {
+    rpcs({});
+    render(<RequestClubScreen />);
+    expect(screen.getByText('Who will lead this club?')).toBeTruthy();
+    fireEvent.changeText(screen.getByLabelText('Club name'), 'Arima Road Runners');
+    fireEvent.press(screen.getByRole('radio', { name: 'Someone else' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Send request' }));
+    expect(await screen.findByText('Enter the leader’s sign-in email, or choose Me.')).toBeTruthy();
+    fireEvent.changeText(screen.getByLabelText("Leader's sign-in email"), ' kim@example.com ');
+    fireEvent.press(screen.getByRole('button', { name: 'Send request' }));
+    expect(await screen.findByText(/the person you named becomes its first leader/)).toBeTruthy();
+    expect(mockRpc).toHaveBeenCalledWith('request_new_club', { p_name: 'Arima Road Runners', p_description: null, p_region: null, p_leader_email: 'kim@example.com' });
   });
 
   it('race page shows club turnout as counts', async () => {

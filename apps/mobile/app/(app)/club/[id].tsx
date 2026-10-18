@@ -50,6 +50,7 @@ export default function ClubScreen() {
     setBusy(false);
   };
   const me = club.me;
+  const leaderNames = club.leaders.map((l) => l.display_name).join(' or ');
 
   return (
     <Screen>
@@ -62,10 +63,13 @@ export default function ClubScreen() {
       {message ? <Notice tone={message.tone}>{message.text}</Notice> : null}
 
       {!me ? (
-        <Button label="Ask to join" busy={busy} onPress={() => void act(() => requestJoin(club.id), 'Request sent. A club leader will approve it.')} />
+        <>
+          <T variant="caption">{leaderNames ? `${leaderNames} ${club.leaders.length === 1 ? 'approves' : 'approve'} join requests.` : 'A club leader approves join requests.'}</T>
+          <Button label="Ask to join" busy={busy} onPress={() => void act(() => requestJoin(club.id), 'Request sent. A club leader will approve it.')} />
+        </>
       ) : me.status === 'pending' ? (
         <>
-          <Notice>Your request is waiting for a club leader to approve it.</Notice>
+          <Notice>{leaderNames ? `Your request is waiting for ${leaderNames} to approve it.` : 'Your request is waiting for a club leader to approve it.'}</Notice>
           <Button label="Cancel request" variant="secondary" busy={busy} onPress={() => void act(() => leaveClub(club.id), 'Request cancelled.')} />
         </>
       ) : (

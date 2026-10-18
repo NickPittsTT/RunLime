@@ -1,8 +1,25 @@
 import * as Notifications from 'expo-notifications';
 import { Stack, useRouter } from 'expo-router';
 import { useEffect } from 'react';
-import { notificationTarget, type AppNotification } from '@/lib/notifications';
+import { Linking } from 'react-native';
+import { notificationTarget, notificationUrl, type AppNotification } from '@/lib/notifications';
+import { configureForegroundNotifications, ensurePushChannel, syncPushRegistration, watchPushToken } from '@/lib/push';
+import { useSession } from '@/state/session';
 import { colors } from '@runlime/ui-tokens';
+
+configureForegroundNotifications();
+
+/** Keep this phone registered for phone notifications while someone is signed in (no prompt; only if allowed). */
+function useKeepPhoneRegistered() {
+  const { profile } = useSession();
+  const uid = profile?.id;
+  useEffect(() => {
+    void ensurePushChannel();
+    if (!uid) return;
+    void syncPushRegistration();
+    return watchPushToken();
+  }, [uid]);
+}
 
 /** N1–N4: no tab bar. Home (race calendar) has its own top bar + side menu; other screens push on top. */
 /** Tapping a phone notification opens the same screen as tapping it in the inbox. */
@@ -13,7 +30,10 @@ function useOpenTappedNotifications() {
       const content = r?.notification.request.content;
       if (!content) return;
       const data = (content.data ?? {}) as Record<string, unknown>;
-      const target = notificationTarget({ id: '', kind: String(data.kind ?? ''), title: content.title ?? '', body: content.body ?? '', data, created_at: '', read_at: null } as AppNotification);
+      const n = { id: '', kind: String(data.kind ?? ''), title: content.title ?? '', body: content.body ?? '', data, created_at: '', read_at: null } as AppNotification;
+      const url = notificationUrl(n);
+      if (url) return void Linking.openURL(url).catch(() => undefined);
+      const target = notificationTarget(n);
       if (target) router.push(target as never);
     };
     void Notifications.getLastNotificationResponseAsync().then(open, () => undefined);
@@ -24,6 +44,7 @@ function useOpenTappedNotifications() {
 
 export default function AppLayout() {
   useOpenTappedNotifications();
+  useKeepPhoneRegistered();
   return (
     <Stack screenOptions={{ headerTintColor: colors.forest, headerTitleStyle: { fontWeight: '700' } }}>
       <Stack.Screen name="index" options={{ headerShown: false, title: 'Races' }} />

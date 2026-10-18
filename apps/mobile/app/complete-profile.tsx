@@ -10,6 +10,7 @@ import { friendlyError } from '@/lib/errors';
 import { openWebPage } from '@/lib/legalLinks';
 import { useAreas } from '@/lib/regions';
 import { supabase } from '@/lib/supabase';
+import { useFieldErrors } from '@/lib/form';
 import { useTheme } from '@/lib/theme';
 import { useSession } from '@/state/session';
 
@@ -22,7 +23,7 @@ export default function CompleteProfileScreen() {
   const [nickname, setNickname] = useState('');
   const [areaId, setAreaId] = useState<string | null>(null);
   const [accepted, setAccepted] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { errors, setErrors, clear, edit } = useFieldErrors();
   const [formError, setFormError] = useState<string>();
   const [busy, setBusy] = useState(false);
   const [blocked, setBlocked] = useState(false);
@@ -114,14 +115,17 @@ export default function CompleteProfileScreen() {
       <T variant="muted">A few details and you&apos;re in.</T>
       {formError ? <Notice tone="danger">{formError}</Notice> : null}
       {areasError ? <Notice tone="danger">Could not load areas. Check your connection.</Notice> : null}
-      <TextField label="Display name" hint="Shown to people you choose to share with." value={displayName} onChangeText={setDisplayName} maxLength={50} error={errors.displayName} autoComplete="name" />
-      <TextField label="Nickname (optional)" hint="Used on community boards if you prefer not to show your name." value={nickname} onChangeText={setNickname} maxLength={30} error={errors.nickname} autoCapitalize="none" />
-      {areas ? <AreaPicker areas={areas} value={areaId} onChange={setAreaId} error={errors.homeRegionId} /> : null}
+      <TextField label="Display name" hint="Shown to people you choose to share with." value={displayName} onChangeText={edit('displayName', setDisplayName)} maxLength={50} error={errors.displayName} autoComplete="name" />
+      <TextField label="Nickname (optional)" hint="Used on community boards if you prefer not to show your name." value={nickname} onChangeText={edit('nickname', setNickname)} maxLength={30} error={errors.nickname} autoCapitalize="none" />
+      {areas ? <AreaPicker areas={areas} value={areaId} onChange={edit('homeRegionId', setAreaId)} error={errors.homeRegionId} /> : null}
       <Pressable
         accessibilityRole="checkbox"
         accessibilityState={{ checked: accepted }}
         accessibilityLabel="I accept the Terms of Use and Privacy Policy"
-        onPress={() => setAccepted((v) => !v)}
+        onPress={() => {
+          setAccepted((v) => !v);
+          clear('accept');
+        }}
         style={{ flexDirection: 'row', gap: 12, alignItems: 'center', minHeight: minTouchTarget }}
       >
         <View style={{ width: 24, height: 24, borderRadius: 4, borderWidth: 2, borderColor: c.leaf, backgroundColor: accepted ? c.leaf : 'transparent' }} />

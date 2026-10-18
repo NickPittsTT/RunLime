@@ -21,7 +21,7 @@ jest.mock('expo-router', () => ({
 const mockPushStatus = jest.fn(async () => 'off');
 const mockEnable = jest.fn();
 const mockOffered = jest.fn();
-jest.mock('@/lib/push', () => ({ pushStatus: () => mockPushStatus(), openSystemSettings: jest.fn(), enablePush: (u: string) => mockEnable(u), markPushOffered: (u: string) => mockOffered(u) }));
+jest.mock('@/lib/push', () => ({ pushStatus: () => mockPushStatus(), syncPushRegistration: () => mockPushStatus(), openSystemSettings: jest.fn(), enablePush: (u: string) => mockEnable(u), markPushOffered: (u: string) => mockOffered(u) }));
 jest.mock('@/state/session', () => ({ useSession: () => ({ profile: { id: 'u1' } }) }));
 jest.mock('@/lib/supabase', () => ({
   supabase: {
@@ -88,6 +88,16 @@ describe('notification settings', () => {
     render(<NotificationSettingsScreen />);
     fireEvent.press(await screen.findByRole('button', { name: 'Turn on phone notifications' }));
     expect(mockPush).toHaveBeenCalledWith('/notifications-explainer');
+  });
+
+  it('allowed but this phone not connected: says so and offers Try again (not "On")', async () => {
+    mockSettings = null;
+    mockPushStatus.mockResolvedValueOnce('unavailable').mockResolvedValueOnce('on');
+    render(<NotificationSettingsScreen />);
+    expect(await screen.findByText(/couldn.t be connected for phone notifications/)).toBeTruthy();
+    expect(screen.queryByText('Phone notifications: On')).toBeNull();
+    fireEvent.press(screen.getByRole('button', { name: 'Try again' }));
+    expect(await screen.findByText('Phone notifications: On')).toBeTruthy();
   });
 
   it('all on by default; turning one off saves to the account', async () => {

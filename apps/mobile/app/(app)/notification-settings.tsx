@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { Button, Notice, Screen, T } from '@/components/ui';
 import { DEFAULT_SETTINGS, NOTIFICATION_TYPES, fetchNotificationSettings, saveNotificationSettings, type NotificationSettings } from '@/lib/notifications';
-import { openSystemSettings, pushStatus, type PushStatus } from '@/lib/push';
+import { openSystemSettings, syncPushRegistration, type PushStatus } from '@/lib/push';
 import { useTheme } from '@/lib/theme';
 import { useSession } from '@/state/session';
 
@@ -16,11 +16,12 @@ export default function NotificationSettingsScreen() {
   const [message, setMessage] = useState<{ tone: 'danger' | 'success'; text: string }>();
   const router = useRouter();
   const [push, setPush] = useState<PushStatus | null>(null);
-  useFocusEffect(
-    useCallback(() => {
-      void pushStatus().then(setPush);
-    }, []),
-  );
+  // "On" means allowed AND this phone is registered to the account (registering it now if needed), not just allowed.
+  const refreshPush = useCallback(() => {
+    setPush(null);
+    void syncPushRegistration().then(setPush);
+  }, []);
+  useFocusEffect(refreshPush);
   useEffect(() => {
     void fetchNotificationSettings().then(setS, () => setS(DEFAULT_SETTINGS));
   }, []);
@@ -36,6 +37,12 @@ export default function NotificationSettingsScreen() {
       <View style={{ gap: 6, padding: 12, borderRadius: radius.md, backgroundColor: c.surface }}>
         <T style={{ fontWeight: '700' }}>Phone notifications: {push === 'on' ? 'On' : push === null ? '…' : 'Off'}</T>
         {push === 'off' ? <Button label="Turn on phone notifications" variant="secondary" onPress={() => router.push('/notifications-explainer')} /> : null}
+        {push === 'unavailable' ? (
+          <>
+            <T variant="caption">This phone couldn&apos;t be connected for phone notifications. Check your internet connection and try again.</T>
+            <Button label="Try again" variant="secondary" onPress={refreshPush} />
+          </>
+        ) : null}
         {push === 'denied' ? (
           <>
             <T variant="caption">They&apos;re turned off for RunLime in your phone&apos;s settings.</T>

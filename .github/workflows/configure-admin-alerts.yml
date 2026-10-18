@@ -1,0 +1,71 @@
+# Turns on report alert emails (Phase 3 fixes). Run once after adding the environment secret SMTP_PASSWORD (a Gmail
+# app password for the account that already sends sign-in codes), and again to rotate. Reads the Gmail account from
+# the Supabase Auth SMTP settings, gives the admin-alerts Edge Function its SMTP settings and a random dispatch
+# secret, stores the URL + secret in Vault, checks the function, and sends one test email to the support address.
+# Nothing secret is printed.
+name: Configure admin alerts
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Environment
+        type: choice
+        options: [staging, production]
+        default: staging
+
+permissions:
+  contents: read
+
+jobs:
+  configure:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target }}
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: supabase/setup-cli@v2
+        with:
+          version: latest
+      - name: Check inputs
+        run: |
+          [ -n "$SMTP_PASSWORD" ] || { echo "Add the environment secret SMTP_PASSWORD first (docs/phase-3/ADMIN-ALERTS-SETUP.md)"; exit 1; }
+          echo "::add-mask::$SMTP_PASSWORD"
+      - name: Read the sign-in email account from Supabase Auth (address masked)
+        run: |
+          cfg=$(curl -fsS "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_REF/config/auth" -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN")
+          user=$(echo "$cfg" | jq -r '.smtp_user // empty'); from=$(echo "$cfg" | jq -r '.smtp_admin_email // empty'); host=$(echo "$cfg" | jq -r '.smtp_host // empty')
+          [ -n "$user" ] && [ -n "$host" ] || { echo "Supabase Auth has no custom SMTP configured"; exit 1; }
+          echo "::add-mask::$user"; echo "::add-mask::$from"
+          echo "SMTP host: $host (functions use port 465, implicit TLS)"
+          { echo "SMTP_USER=$user"; echo "SMTP_FROM=${from:-$user}"; echo "SMTP_HOST=$host"; } >> "$GITHUB_ENV"
+          secret=$(openssl rand -hex 32); echo "::add-mask::$secret"; echo "ADMIN_ALERTS_SECRET=$secret" >> "$GITHUB_ENV"
+      - name: Give the admin-alerts function its settings
+        run: |
+          supabase secrets set --project-ref "$SUPABASE_PROJECT_REF" \
+            SMTP_HOST="$SMTP_HOST" SMTP_PORT=465 SMTP_TLS=true SMTP_USER="$SMTP_USER" SMTP_FROM="$SMTP_FROM" \
+            SMTP_PASSWORD="$SMTP_PASSWORD" ADMIN_ALERTS_SECRET="$ADMIN_ALERTS_SECRET" > /dev/null
+      - name: Store URL + secret in Vault (service role only)
+        env:
+          SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          code=$(curl -sS -o /dev/null -w '%{http_code}' -X POST "$SUPABASE_URL/rest/v1/rpc/set_admin_alerts_config" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" -H 'content-type: application/json' \
+            -d "{\"p_url\":\"$SUPABASE_URL/functions/v1/admin-alerts\",\"p_secret\":\"$ADMIN_ALERTS_SECRET\"}")
+          echo "set_admin_alerts_config HTTP $code"
+          test "$code" = 204 -o "$code" = 200
+      - name: Check the function and send a test email to the support address
+        env:
+          SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co
+        run: |
+          sleep 10
+          bad=$(curl -sS -o /dev/null -w '%{http_code}' -X POST "$SUPABASE_URL/functions/v1/admin-alerts" -H 'x-dispatch-secret: wrong')
+          out=$(curl -sS -X POST "$SUPABASE_URL/functions/v1/admin-alerts" -H "x-dispatch-secret: $ADMIN_ALERTS_SECRET" -H 'content-type: application/json' -d '{"mode":"test"}')
+          echo "wrong secret: HTTP $bad (expect 403); test email: $out (expect {\"sent\":1})"
+          test "$bad" = 403 && echo "$out" | grep -q '"sent":1'

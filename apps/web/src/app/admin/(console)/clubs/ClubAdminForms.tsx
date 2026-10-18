@@ -3,14 +3,15 @@ import { useActionState } from 'react';
 import { Button, Notice } from '@/components/ui';
 import { reviewClubRequest, setClubLeader } from './actions';
 
-export function ClubRequestReview({ id }: { id: string }) {
+export function ClubRequestReview({ id, leader }: { id: string; leader: string | null }) {
   const [state, action, pending] = useActionState(reviewClubRequest, {});
   return (
     <form action={action} className="mt-3 flex flex-wrap gap-3 items-end">
       {state.error && <Notice tone="danger">{state.error}</Notice>}
       <input type="hidden" name="id" value={id} />
       <label className="flex gap-2 items-center min-h-11">
-        <input type="checkbox" name="makeLeader" defaultChecked className="w-5 h-5" /> Make the requester its first leader
+        <input type="checkbox" name="makeLeader" defaultChecked={leader !== null} disabled={leader === null} className="w-5 h-5" />{' '}
+        {leader ? `Make ${leader} its first leader (they're notified)` : 'No leader proposed'}
       </label>
       <label className="block">
         <span className="text-sm font-semibold">Reason (needed to reject)</span>

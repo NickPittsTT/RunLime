@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Button, Notice, Screen, T, TextField } from '@/components/ui';
 import { friendlyError } from '@/lib/errors';
+import { useFieldErrors } from '@/lib/form';
 import { supabase } from '@/lib/supabase';
 
 /** M48: suggest a race we are missing. An admin checks it and may add it as a RunLime listing. */
@@ -13,7 +14,7 @@ export default function SuggestRaceScreen() {
   const [location, setLocation] = useState('');
   const [url, setUrl] = useState('');
   const [notes, setNotes] = useState('');
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { errors, setErrors, edit } = useFieldErrors();
   const [error, setError] = useState<string>();
   const [done, setDone] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -53,11 +54,11 @@ export default function SuggestRaceScreen() {
     <Screen>
       <T variant="muted">Tell us about a race that is not in the calendar. We check every suggestion before listing it.</T>
       {error ? <Notice tone="danger">{error}</Notice> : null}
-      <TextField label="Race name" value={name} onChangeText={setName} error={errors.name} maxLength={140} />
-      <TextField label="Date (optional)" hint="YYYY-MM-DD" value={date} onChangeText={setDate} error={errors.eventDate} keyboardType="numbers-and-punctuation" maxLength={10} />
-      <TextField label="Where (optional)" value={location} onChangeText={setLocation} error={errors.location} maxLength={200} />
-      <TextField label="Official link (optional)" hint="Organiser's page or social post" value={url} onChangeText={setUrl} error={errors.url} autoCapitalize="none" keyboardType="url" />
-      <TextField label="Anything else (optional)" value={notes} onChangeText={setNotes} error={errors.notes} multiline maxLength={1000} style={{ minHeight: 96, textAlignVertical: 'top' }} />
+      <TextField label="Race name" value={name} onChangeText={edit('name', setName)} error={errors.name} maxLength={140} />
+      <TextField label="Date (optional)" hint="YYYY-MM-DD" value={date} onChangeText={edit('eventDate', setDate)} error={errors.eventDate} keyboardType="numbers-and-punctuation" maxLength={10} />
+      <TextField label="Where (optional)" value={location} onChangeText={edit('location', setLocation)} error={errors.location} maxLength={200} />
+      <TextField label="Official link (optional)" hint="Organiser's page or social post" value={url} onChangeText={edit('url', setUrl)} error={errors.url} autoCapitalize="none" keyboardType="url" />
+      <TextField label="Anything else (optional)" value={notes} onChangeText={edit('notes', setNotes)} error={errors.notes} multiline maxLength={1000} style={{ minHeight: 96, textAlignVertical: 'top' }} />
       <Button label="Send suggestion" onPress={() => void submit()} busy={busy} />
     </Screen>
   );

@@ -47,7 +47,7 @@ RunLime accounts are only for adults aged **18 and over**. When you first open t
 ## 3. Who can see what
 - **Other RunLime users:** your display name or nickname, profile photo and runner level, and any community time you choose to share. On public accounts, also your race passport and the races you are attending.
 - **Your approved followers** (private accounts): your race passport (races attended, total km) and the races you are attending.
-- **Club leaders:** that you asked to join their club, and your display name and photo. Club turnout shows only counts of opted-in members, and is hidden below a minimum number.
+- **Club leaders:** that you asked to join their club, and your display name and photo. Everyone who opens a club page sees its leaders' display names. If someone names you as the leader of a new club, we use the sign-in email they type only to find your account, and tell you if you're appointed. Club turnout shows only counts of opted-in members, and is hidden below a minimum number.
 - **Organisers:** totals and trends for their own events (including the total number of children, never their names or ages) and counts of opted-in club members. They don't see who is going, and never see your email, date of birth or contact details.
 - **Our administrators:** only what they need to run and moderate the service. They can't read your emergency contact. Every administrator action is recorded in an audit log.
 - Your runs, routes, times and history are **private** unless you share a result.
@@ -56,7 +56,7 @@ RunLime accounts are only for adults aged **18 and over**. When you first open t
 We use trusted providers that process data on our behalf under contract:
 - Supabase (database, authentication, file storage). **Your data is stored in {{hosting_region}}.**
 - Cloudflare (website hosting)
-- Google (Gmail) for sign-in emails: your email address and the one-time code
+- Google (Gmail) for sign-in emails (your email address and the one-time code) and for report alerts to our own support inbox (the report category and time only, never the report text or anyone's name)
 - OpenFreeMap (map tiles). Like any website your device loads, it receives your device's IP address and the map area being shown. It receives no account details.
 - Apple and Google (sign-in, app stores, in-app purchases)
 - Expo (app builds and push notification delivery: your phone's push token and the notification text)
@@ -110,6 +110,6 @@ If we make material changes, we'll tell you in the app before they take effect. 
 ## 10. Contact
 {{operator_name}} · {{support_email}}
 
-_Draft notes for the attorney (Phase 3): (1) profile photos are visible to all signed-in users with the display name, even on Private accounts (Private hides the passport and races attending); please confirm this is adequately disclosed; (2) reporters are not identified to the reported person but reports are kept up to 2 years; (3) organisers see a children total per race, never names or ages._
+_Draft notes for the attorney (Phase 3): (1) profile photos are visible to all signed-in users with the display name, even on Private accounts (Private hides the passport and races attending); please confirm this is adequately disclosed; (2) reporters are not identified to the reported person but reports are kept up to 2 years; (3) organisers see a children total per race, never names or ages; (4) naming another person as a new club's leader looks up their account by the email typed, so the requester learns whether an account exists for that email (limited to 3 requests a week); please confirm this is acceptable._
 
 _Draft note for the attorney: RunLime identifies its operator by name and contact email only; the operator's residential address is deliberately not published here (owner decision, 15 October 2026). Please confirm that no postal address is legally required on this page._

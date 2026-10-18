@@ -2,7 +2,6 @@ import type { ReactElement, ReactNode, Ref } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
-  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -21,7 +20,9 @@ export function Screen({ children, scroll = true, refreshControl, testID }: { ch
   const body = <View style={{ padding: spacing.lg, gap: spacing.lg }}>{children}</View>;
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: c.background }} edges={['bottom', 'left', 'right']}>
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      {/* Android draws edge-to-edge (required from Android 16), so the window no longer shrinks for the keyboard:
+          pad on both platforms so the focused field stays above it (owner retest 2026-10-18, report screen). */}
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
         {scroll ? (
           <ScrollView testID={testID} keyboardShouldPersistTaps="handled" refreshControl={refreshControl}>
             {body}

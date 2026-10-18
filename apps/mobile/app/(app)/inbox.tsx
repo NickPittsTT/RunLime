@@ -1,8 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { Pressable, RefreshControl, View } from 'react-native';
+import { Linking, Pressable, RefreshControl, View } from 'react-native';
 import { Button, LinkRow, Notice, Screen, T, TextButton } from '@/components/ui';
-import { markRead, notificationTarget, useInbox, type AppNotification } from '@/lib/notifications';
+import { markRead, notificationTarget, notificationUrl, useInbox, type AppNotification } from '@/lib/notifications';
 import { useTheme } from '@/lib/theme';
 
 const ago = (iso: string) => {
@@ -26,6 +26,8 @@ export default function InboxScreen() {
       setItems((list) => (list ?? []).map((x) => (x.id === n.id ? { ...x, read_at: new Date().toISOString() } : x)));
       await markRead([n.id]);
     }
+    const url = notificationUrl(n);
+    if (url) return void Linking.openURL(url).catch(() => undefined);
     const target = notificationTarget(n);
     if (target) router.push(target as never);
   };

@@ -59,7 +59,8 @@ We use trusted providers that process data on our behalf under contract:
 - Google (Gmail) for sign-in emails: your email address and the one-time code
 - OpenFreeMap (map tiles). Like any website your device loads, it receives your device's IP address and the map area being shown. It receives no account details.
 - Apple and Google (sign-in, app stores, in-app purchases)
-- Expo (app builds and push notification delivery)
+- Expo (app builds and push notification delivery: your phone's push token and the notification text)
+- Google Firebase Cloud Messaging (delivers push notifications to Android phones: the push token and the notification text)
 - When these features are added: RevenueCat (subscription status), Sentry (crash reports) and PostHog (privacy-respecting analytics, without cookies)
 
 This means your data is transferred to and stored outside Trinidad and Tobago, mainly in the United States. Where it is, we rely on our providers' contractual safeguards.

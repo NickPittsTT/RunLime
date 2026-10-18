@@ -85,13 +85,14 @@ describe('home: race calendar', () => {
     expect(screen.getByText('Chaguaramas Fun Run')).toBeTruthy();
   });
 
-  it('Start run and the bell say coming soon', async () => {
+  it('Start run says coming soon; the bell opens the inbox', async () => {
     const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
     render(<HomeScreen />);
     await screen.findByText('Savannah 5K');
     fireEvent.press(screen.getByRole('button', { name: 'Start run' }));
+    expect(alert.mock.calls.map((c) => c[1])).toEqual(['Coming soon.']);
     fireEvent.press(screen.getByRole('button', { name: 'Notifications' }));
-    expect(alert.mock.calls.map((c) => c[1])).toEqual(['Coming soon.', 'Coming soon.']);
+    expect(mockPush).toHaveBeenCalledWith('/inbox');
   });
 
   it('side menu: profile header, built items open screens, unbuilt items say coming soon', async () => {

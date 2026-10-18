@@ -60,3 +60,18 @@ Use two phones, or your account plus a second test account on another phone. Bot
 5.3 **Club turnout** shows "Club: N going" when enough opted-in members are going (slice 4 step 4.7), otherwise a short explanation.
 5.4 Organiser portal (if you have an organiser account): the race list shows "· N going"; the race page has the same Attendance section.
 5.5 Open the page on your phone's browser: nothing is cut off and there's no sideways scrolling.
+
+## Slice 6: notifications (inbox first, then phone notifications) — APK link added when built
+Inbox (works without Firebase):
+6.1 The bell (top right) shows a red number when you have unread notifications. Tap it: **Notifications** lists them, newest first; unread ones have a green dot.
+6.2 Second account: follow your account (Private): your bell shows "<name> asked to follow you". Tap it: Followers → Requests opens. Approve: the second account gets "<you> approved your follow request".
+6.3 Say **Going** to a race. Website: postpone it to a new date with a reason. Phone: pull down on Home; the bell shows 1. The notification reads "<race> is postponed to <day, date, time>" with the reason. Tap it: the race page opens. Put the race back on: "<race> is back on: <date, time>".
+6.4 Website → that race (admin or organiser page) → **Message people going**: type "Re-test: parking opens at 5 am", **Send update**: "Sent to N people." Phone: "<race>: update from the organiser" with your text. A third message in the same 7 days is blocked ("0 of 2 left").
+6.5 Club join request (slice 4): the leader gets "<name> asked to join <club>"; after approval the member gets "You're now a member of <club>".
+6.6 Profile → **Notification settings**: turn **Updates from race organisers** off, **Save**, send another update (next week, or ask me to lower the limit): you don't get it. Turn it back on.
+6.7 **Mark all as read** clears the dots and the bell number.
+Phone notifications (after `docs/phase-3/FIREBASE-SETUP.md` and the new APK):
+6.8 After your first **Going** on a race, a screen explains notifications **before** Android's own "Allow RunLime to send you notifications?" prompt (Android 13+). Tap **Turn on notifications**, then **Allow**: "Notifications are on."
+6.9 Lock the phone. From the website, postpone the race or send an update: a phone notification arrives within about a minute. Tap it: the race opens in the app.
+6.10 Notification settings shows "Phone notifications: On". If you tapped **Don't allow** in step 6.8, it shows **Open phone settings** instead (no repeated prompts).
+6.11 Sign out: the phone stops getting your notifications.

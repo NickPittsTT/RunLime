@@ -20,6 +20,9 @@ jest.mock('expo-router', () => ({
 }));
 jest.mock('@/lib/supabase', () => ({ supabase: { rpc: (...a: unknown[]) => mockRpc(...a), from: () => mockQueryMock({ data: [], error: null }) } }));
 jest.mock('@/lib/regions', () => ({ useAreas: () => ({ areas: [] }) }));
+jest.mock('@/state/session', () => ({ useSession: () => ({ profile: { id: 'u1' } }) }));
+const mockShouldOffer = jest.fn(async () => false);
+jest.mock('@/lib/push', () => ({ shouldOfferPush: () => mockShouldOffer() }));
 jest.mock('react-native-safe-area-context', () => {
   const { View } = jest.requireActual('react-native');
   return { SafeAreaView: View, useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }) };

@@ -24,6 +24,7 @@ export default function ProfileScreen() {
       <LinkRow label="Followers & following" onPress={() => router.push('/people')} />
       <LinkRow label="Edit profile & privacy" onPress={() => router.push('/edit-profile')} />
       <LinkRow label="Your areas and distances" onPress={() => router.push({ pathname: '/onboarding', params: { edit: '1' } })} />
+      <LinkRow label="Notification settings" onPress={() => router.push('/notification-settings')} />
       <LinkRow label="Emergency contact" onPress={() => router.push('/emergency-contact')} />
       <LinkRow label="Your data" onPress={() => router.push('/your-data')} />
       <LinkRow label="Help & legal" onPress={() => router.push('/legal')} />

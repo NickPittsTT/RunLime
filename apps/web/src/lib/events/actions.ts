@@ -110,3 +110,12 @@ export async function setMediaPermissionAction(_prev: ActionResult, formData: Fo
   revalidatePath(`/admin/events/${id}`);
   return { ok: granted ? 'Permission recorded. You can add the flyer and sponsors below.' : 'Permission withdrawn.' };
 }
+
+export async function sendEventMessageAction(_prev: ActionResult, formData: FormData): Promise<ActionResult> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('send_event_message', { p_event: String(formData.get('id')), p_body: String(formData.get('body') ?? '') });
+  if (error) return { error: friendlyError(error) };
+  revalidatePath(String(formData.get('back')));
+  const n = Number(data ?? 0);
+  return { ok: n === 0 ? 'Sent. No one has said they are going yet, so no one received it.' : `Sent to ${n} ${n === 1 ? 'person' : 'people'}.` };
+}

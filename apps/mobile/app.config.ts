@@ -28,6 +28,9 @@ const config: ExpoConfig = {
   android: {
     package: bundleId.replace(/-/g, '_'),
     adaptiveIcon: { foregroundImage: './assets/adaptive-icon.png', backgroundColor: '#14532D' },
+    // Push (Phase 3): Firebase config from an EAS file environment variable. Without it the app builds and
+    // works; the in-app inbox still works, only phone notifications are unavailable.
+    ...(process.env.GOOGLE_SERVICES_JSON ? { googleServicesFile: process.env.GOOGLE_SERVICES_JSON } : {}),
     // Phase 2: foreground location for "Near me" only (asked when the user taps it; never sent or stored).
     // Background location and activity recognition arrive in Phase 5 with their own disclosures.
     blockedPermissions: [
@@ -63,6 +66,7 @@ const config: ExpoConfig = {
         isAndroidForegroundServiceEnabled: false,
       },
     ],
+    ['expo-notifications', { color: '#3F7D0F' }],
     ['expo-image-picker', { photosPermission: 'RunLime uses the photo you choose as your profile picture.', cameraPermission: false, microphonePermission: false }],
     '@maplibre/maplibre-react-native',
     ...(googleIosUrlScheme ? [['@react-native-google-signin/google-signin', { iosUrlScheme: googleIosUrlScheme }] as [string, unknown]] : []),

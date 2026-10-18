@@ -1,0 +1,52 @@
+# Turns on phone notifications for an environment (Phase 3). Run once after the owner's Firebase setup, and again
+# to rotate the secret. Generates a random dispatch secret, gives it to the push-dispatch Edge Function, and stores
+# the function URL + secret in the database Vault for the every-minute sender. No secret is printed or committed.
+name: Configure push
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Environment
+        type: choice
+        options: [staging, production]
+        default: staging
+
+jobs:
+  configure:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.target }}
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: supabase/setup-cli@v2
+        with:
+          version: latest
+      - name: Generate the dispatch secret (masked)
+        run: |
+          secret=$(openssl rand -hex 32)
+          echo "::add-mask::$secret"
+          echo "PUSH_DISPATCH_SECRET=$secret" >> "$GITHUB_ENV"
+      - name: Give it to the push-dispatch Edge Function
+        run: supabase secrets set PUSH_DISPATCH_SECRET="$PUSH_DISPATCH_SECRET" --project-ref "$SUPABASE_PROJECT_REF" > /dev/null
+      - name: Store URL + secret in Vault (service role only)
+        env:
+          SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          code=$(curl -sS -o /dev/null -w '%{http_code}' -X POST "$SUPABASE_URL/rest/v1/rpc/set_push_config" \
+            -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" -H 'content-type: application/json' \
+            -d "{\"p_url\":\"$SUPABASE_URL/functions/v1/push-dispatch\",\"p_secret\":\"$PUSH_DISPATCH_SECRET\"}")
+          echo "set_push_config HTTP $code"
+          test "$code" = 204 -o "$code" = 200
+      - name: Check the function accepts only the secret
+        env:
+          SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co
+        run: |
+          sleep 10
+          bad=$(curl -sS -o /dev/null -w '%{http_code}' -X POST "$SUPABASE_URL/functions/v1/push-dispatch" -H 'x-dispatch-secret: wrong')
+          good=$(curl -sS -o /dev/null -w '%{http_code}' -X POST "$SUPABASE_URL/functions/v1/push-dispatch" -H "x-dispatch-secret: $PUSH_DISPATCH_SECRET")
+          echo "wrong secret: HTTP $bad (expect 403); right secret: HTTP $good (expect 200)"
+          test "$bad" = 403 && test "$good" = 200

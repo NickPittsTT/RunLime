@@ -2,6 +2,8 @@ import { STATUS_LABEL, formatEventDate, formatEventTime } from '@runlime/shared/
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { AttendancePanel } from '@/components/events/AttendancePanel';
+import { MessagePanel } from '@/components/events/MessagePanel';
+import { loadMessages } from '@/lib/events/messages';
 import { EventForm } from '@/components/events/EventForm';
 import { DuplicatePanel, StatusChangePanel } from '@/components/events/EventPanels';
 import { InviteForm, MediaUploader, SponsorForm } from '@/components/events/OrganiserTools';
@@ -75,6 +77,7 @@ export default async function OrganiserEvent({ params, searchParams }: { params:
         <EventForm initial={toFormValues(e)} areas={areas} back="/organiser/events" />
         <aside>
           <StatusChangePanel id={e.id} status={e.status} timezone={e.timezone} back={`/organiser/events/${e.id}`} />
+          {['published', 'postponed'].includes(e.status) && <MessagePanel eventId={e.id} back={`/organiser/events/${e.id}`} {...(await loadMessages(supabase, e.id))} />}
           <section className="rounded-xl border border-line p-5 mb-6">
             <h2 className="text-lg font-bold mb-3">Flyer and photos</h2>
             <ul className="space-y-3 mb-4">

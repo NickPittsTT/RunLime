@@ -5,7 +5,7 @@ import { useTheme } from '@/lib/theme';
 import { T } from './ui';
 
 /** N1: menu (left), title, notifications bell (right). */
-export function TopBar({ title, onMenu, onBell }: { title: string; onMenu: () => void; onBell: () => void }) {
+export function TopBar({ title, onMenu, onBell, unread = 0 }: { title: string; onMenu: () => void; onBell: () => void; unread?: number }) {
   const { c, minTouchTarget } = useTheme();
   const insets = useSafeAreaInsets();
   const btn = { width: minTouchTarget, height: minTouchTarget, alignItems: 'center' as const, justifyContent: 'center' as const };
@@ -18,8 +18,13 @@ export function TopBar({ title, onMenu, onBell }: { title: string; onMenu: () =>
         <T variant="title" style={{ flex: 1, textAlign: 'center' }}>
           {title}
         </T>
-        <Pressable accessibilityRole="button" accessibilityLabel="Notifications" onPress={onBell} style={btn}>
-          <Ionicons name="notifications-outline" size={24} color={c.ink} />
+        <Pressable accessibilityRole="button" accessibilityLabel={unread ? `Notifications, ${unread} unread` : 'Notifications'} onPress={onBell} style={btn}>
+          <Ionicons name={unread ? 'notifications' : 'notifications-outline'} size={24} color={c.ink} />
+          {unread ? (
+            <View testID="bell-badge" style={{ position: 'absolute', top: 6, right: 4, minWidth: 18, height: 18, borderRadius: 9, backgroundColor: c.danger, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4 }}>
+              <T style={{ color: '#FFFFFF', fontSize: 11, fontWeight: '800' }}>{unread > 99 ? '99+' : unread}</T>
+            </View>
+          ) : null}
         </Pressable>
       </View>
     </View>

@@ -1,5 +1,5 @@
 {
   "extends": "../config/tsconfig.base.json",
   "compilerOptions": { "lib": ["ES2022", "DOM"], "types": [] },
-  "include": ["src", "test", "../../supabase/functions/_shared/aesgcm.ts", "../../supabase/functions/_shared/jpeg.ts"]
+  "include": ["src", "test", "../../supabase/functions/_shared/aesgcm.ts", "../../supabase/functions/_shared/jpeg.ts", "../../supabase/functions/_shared/push.ts"]
 }

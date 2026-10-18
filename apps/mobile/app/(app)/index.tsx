@@ -19,6 +19,7 @@ import { loadPreferences } from '@/lib/preferences';
 import { raceDayMarks, selectRaces } from '@/lib/raceQuery';
 import { useAreas } from '@/lib/regions';
 import { useRsvpCounts } from '@/lib/rsvp';
+import { fetchUnreadCount } from '@/lib/notifications';
 import { settingNumber, usePublicSettings } from '@/lib/settings';
 import { useTheme } from '@/lib/theme';
 import { useSession } from '@/state/session';
@@ -44,6 +45,17 @@ export default function HomeScreen() {
   const [near, setNear] = useState<{ lat: number; lng: number } | null>(null);
   const [nearMsg, setNearMsg] = useState<string>();
   const [prefsLoaded, setPrefsLoaded] = useState(false);
+  const [unread, setUnread] = useState(0);
+  // Bell badge: refreshed whenever Home is shown again and after each calendar refresh.
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      void fetchUnreadCount().then((n) => active && setUnread(n));
+      return () => {
+        active = false;
+      };
+    }, [cal.updatedAt]), // eslint-disable-line react-hooks/exhaustive-deps -- re-check after each calendar refresh
+  );
 
   // First run: onboarding (M8/M9). Its answers become the default filters.
   useFocusEffect(
@@ -122,7 +134,7 @@ export default function HomeScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.background }}>
-      <TopBar title="Races" onMenu={() => setMenuOpen(true)} onBell={soon('Notifications')} />
+      <TopBar title="Races" unread={unread} onMenu={() => setMenuOpen(true)} onBell={() => router.push('/inbox')} />
       {cal.offlineSince ? (
         <View style={{ backgroundColor: c.surface, borderBottomWidth: 1, borderColor: c.border, padding: spacing.sm }} accessibilityLiveRegion="polite">
           <T variant="caption" style={{ textAlign: 'center' }}>

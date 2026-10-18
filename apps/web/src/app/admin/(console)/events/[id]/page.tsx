@@ -7,6 +7,8 @@ import { ListingMediaPermission } from '@/components/events/ListingMediaPermissi
 import { MediaUploader, SponsorForm } from '@/components/events/OrganiserTools';
 import { StatusBanner } from '@/components/events/StatusBanner';
 import { AttendancePanel } from '@/components/events/AttendancePanel';
+import { MessagePanel } from '@/components/events/MessagePanel';
+import { loadMessages } from '@/lib/events/messages';
 import { removeMedia, removeSponsor } from '@/app/organiser/events/actions';
 import { eventMediaUrl } from '@/lib/media';
 import { Notice, PageTitle } from '@/components/ui';
@@ -65,6 +67,7 @@ export default async function AdminEvent({ params, searchParams }: { params: Pro
         <aside>
           <ReviewPanel id={e.id} status={e.status} />
           <StatusChangePanel id={e.id} status={e.status} timezone={e.timezone} back={`/admin/events/${e.id}`} />
+          {['published', 'postponed'].includes(e.status) && <MessagePanel eventId={e.id} back={`/admin/events/${e.id}`} {...(await loadMessages(supabase, e.id))} />}
           {isListing && (
             <section className="rounded-xl border border-line p-5 mb-6" aria-labelledby="listing-media">
               <h2 id="listing-media" className="text-lg font-bold mb-1">

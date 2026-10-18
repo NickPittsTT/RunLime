@@ -7,6 +7,8 @@ import { fetchMyRsvp, fetchRsvpCounts, saveRsvp } from '@/lib/rsvp';
 import { settingNumber, usePublicSettings } from '@/lib/settings';
 import { fetchFollowingGoing, type Person } from '@/lib/social';
 import { fetchClubTurnout } from '@/lib/clubs';
+import { shouldOfferPush } from '@/lib/push';
+import { useSession } from '@/state/session';
 import { useTheme } from '@/lib/theme';
 import { Stepper } from './Stepper';
 import { Button, Notice, T, TextButton } from './ui';
@@ -14,6 +16,7 @@ import { Button, Notice, T, TextButton } from './ui';
 /** M18 RSVP sheet + M19 count: Going / Maybe / Not going, with the number of adults and children in your group. */
 export function RsvpPanel({ eventId, eventStatus, startsAt }: { eventId: string; eventStatus: string; startsAt: string }) {
   const router = useRouter();
+  const { profile } = useSession();
   const { c, spacing, radius, minTouchTarget } = useTheme();
   const [friends, setFriends] = useState<Person[]>([]);
   const [clubs, setClubs] = useState<{ club_id: string; club_name: string; going: number }[]>([]);
@@ -115,6 +118,8 @@ export function RsvpPanel({ eventId, eventStatus, startsAt }: { eventId: string;
                 setSaved(parsed.data.status === 'not_going' ? { ...parsed.data, adults: 1, children: 0 } : parsed.data);
                 setCount((await fetchRsvpCounts([eventId])).get(eventId) ?? { going: 0, maybe: 0 });
                 setBusy(false);
+                // First Going/Maybe: offer phone notifications (explainer first; Android asks only after it).
+                if (parsed.data.status !== 'not_going' && profile && (await shouldOfferPush(profile.id))) router.push('/notifications-explainer');
                 setMessage({ tone: 'success', text: parsed.data.status === 'going' ? 'You\'re going. It\'s in My races.' : parsed.data.status === 'maybe' ? 'Saved as Maybe. It\'s in My races.' : 'Saved as Not going.' });
               }}
             />

@@ -16,6 +16,9 @@ jest.mock('expo-router', () => ({
   Stack: { Screen: () => null },
 }));
 jest.mock('@/lib/supabase', () => ({ supabase: { rpc: (...a: unknown[]) => mockRpc(...a), from: (t: string) => mockFrom(t) } }));
+jest.mock('@/state/session', () => ({ useSession: () => ({ profile: { id: 'u1' } }) }));
+const mockShouldOffer = jest.fn(async () => false);
+jest.mock('@/lib/push', () => ({ shouldOfferPush: () => mockShouldOffer() }));
 jest.mock('react-native-safe-area-context', () => {
   const { View } = jest.requireActual('react-native');
   return { SafeAreaView: View, useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }) };
@@ -70,6 +73,15 @@ describe('RSVP (M18/M19)', () => {
     expect(screen.queryByText('Children under 18')).toBeNull();
     fireEvent.press(screen.getByRole('button', { name: 'Update RSVP' }));
     expect(await screen.findByText('Saved as Not going.')).toBeTruthy();
+  });
+
+  it('first Going offers phone notifications (explainer screen, not the system prompt)', async () => {
+    backend();
+    mockShouldOffer.mockResolvedValueOnce(true);
+    render(<RsvpPanel eventId="r1" eventStatus="published" startsAt={future.starts_at} />);
+    fireEvent.press(await screen.findByRole('radio', { name: 'Going' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Save RSVP' }));
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith('/notifications-explainer'));
   });
 
   it('cancelled races close RSVPs', async () => {

@@ -8,11 +8,12 @@ async function expectMapRendered(page: Page) {
   // The visible map box (it clips the canvas), not the canvas itself: that was 300 px while the box was 0 px.
   await expect.poll(async () => map.evaluate((el) => (el as HTMLElement).clientHeight), { timeout: 15_000 }).toBeGreaterThan(150);
   await expect.poll(async () => map.evaluate((el) => (el as HTMLElement).clientWidth)).toBeGreaterThan(200);
-  // A tap in the middle of the map lands on the map canvas.
+  // A tap inside the map lands on the map canvas. Off-centre: maps are centred on the start pin, whose marker
+  // would otherwise be hit once it has drawn (CI run 121).
   await map.scrollIntoViewIfNeeded();
   const hit = await map.evaluate((el) => {
     const r = el.getBoundingClientRect();
-    return (document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2) as HTMLElement | null)?.className ?? '';
+    return (document.elementFromPoint(r.left + r.width / 4, r.top + r.height / 4) as HTMLElement | null)?.className ?? '';
   });
   expect(hit).toContain('maplibregl-canvas');
   await expect(page.getByTestId('map-attribution').first()).toBeVisible();

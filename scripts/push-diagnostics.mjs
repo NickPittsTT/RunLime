@@ -54,6 +54,31 @@ table(await sql(`
   select created, status_code, timed_out, left(coalesce(error_msg, ''), 120) as error_msg, left(content::text, 160) as content
     from net._http_response order by (content::text like '%"sent":0%') asc, created desc limit 12`));
 
+section('2e. Notifications in the last 48 h: how many were handed to the dispatcher (push_sent_at set)');
+table(await sql(`
+  select date_trunc('hour', n.created_at) as hour, n.kind, count(*)::int as total, count(n.push_sent_at)::int as dispatched,
+         bool_or(exists (select 1 from public.user_roles r where r.user_id = n.user_id and r.role = 'super_admin')) as incl_super_admin
+    from public.notifications n where n.created_at > now() - interval '48 hours'
+   group by 1, 2 order by 1 desc limit 40`));
+
+async function logs(title, query) {
+  section(title);
+  const end = new Date();
+  const start = new Date(end.getTime() - 24 * 3600_000);
+  const qs = new URLSearchParams({ sql: query, iso_timestamp_start: start.toISOString(), iso_timestamp_end: end.toISOString() });
+  const res = await fetch(`https://api.supabase.com/v1/projects/${ref}/analytics/endpoints/logs.all?${qs}`, { headers: { authorization: `Bearer ${mgmt}` } });
+  const body = await res.json().catch(() => null);
+  if (!res.ok || body?.error) return console.log('  logs query failed:', res.status, JSON.stringify(body?.error ?? body).slice(0, 300));
+  const rows = body?.result ?? [];
+  if (!rows.length) return console.log('  (none in the last 24 h)');
+  for (const r of rows) console.log(' ', new Date(Number(r.timestamp) / 1000).toISOString(), maskAll(JSON.stringify({ ...r, timestamp: undefined })).slice(0, 300));
+}
+await logs('2f. Edge Function calls to push-dispatch (last 24 h)', `select timestamp, response.status_code as status from function_edge_logs
+  cross join unnest(metadata) as m cross join unnest(m.response) as response cross join unnest(m.request) as request
+  where request.url like '%push-dispatch%' order by timestamp desc limit 30`);
+await logs('2g. push-dispatch console output (last 24 h)', `select timestamp, event_message from function_logs
+  where event_message like '%push-dispatch%' order by timestamp desc limit 30`);
+
 // 3/4. Expo: credentials for the package, then an optional direct test push
 const APP_ID = 'tt.runlime.app.dev';
 if (expoToken) {

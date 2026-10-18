@@ -107,7 +107,7 @@ export default function HomeScreen() {
     { key: 'my-races', label: 'My races', icon: 'flag-outline', onPress: () => router.push('/my-races') },
     { key: 'leaderboards', label: 'Leaderboards', icon: 'trophy-outline' },
     { key: 'history', label: 'Run history', icon: 'time-outline' },
-    { key: 'followers', label: 'Followers', icon: 'people-outline' },
+    { key: 'followers', label: 'Followers', icon: 'people-outline', onPress: () => router.push('/people') },
     { key: 'clubs', label: 'Clubs', icon: 'shield-outline' },
     { key: 'suggest', label: 'Suggest a race', icon: 'add-circle-outline', onPress: () => router.push('/suggest-race') },
     { key: 'edit-profile', label: 'Edit profile & privacy', icon: 'person-circle-outline', onPress: () => router.push('/edit-profile') },

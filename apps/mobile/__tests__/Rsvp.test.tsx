@@ -23,9 +23,11 @@ jest.mock('react-native-safe-area-context', () => {
 
 const future = race('r1', 5, { name: 'Savannah 5K' });
 const settings = [{ key: 'rsvp.max_adults', value: '4' }, { key: 'rsvp.max_children', value: '3' }];
-function backend({ mine = null as unknown, counts = [{ event_id: 'r1', going: 0, maybe: 0 }], myRaces = [] as unknown[] } = {}) {
+function backend({ mine = null as unknown, counts = [{ event_id: 'r1', going: 0, maybe: 0 }], myRaces = [] as unknown[], friends = [] as unknown[] } = {}) {
   mockFrom.mockImplementation((t: string) => (t === 'rsvps' ? queryMock({ data: mine, error: null }) : queryMock({ data: settings, error: null })));
-  mockRpc.mockImplementation(async (fn: string) => (fn === 'rsvp_counts' ? { data: counts, error: null } : { data: null, error: null }));
+  mockRpc.mockImplementation(async (fn: string) =>
+    fn === 'rsvp_counts' ? { data: counts, error: null } : fn === 'following_going' ? { data: friends, error: null } : { data: null, error: null },
+  );
   if (myRaces.length) {
     mockFrom.mockImplementation((t: string) => (t === 'rsvps' ? queryMock({ data: myRaces, error: null }) : queryMock({ data: settings, error: null })));
   }
@@ -85,6 +87,13 @@ describe('RSVP (M18/M19)', () => {
     fireEvent.press(await screen.findByRole('radio', { name: 'Going' }));
     fireEvent.press(screen.getByRole('button', { name: 'Save RSVP' }));
     expect(await screen.findByText('This race has already taken place')).toBeTruthy();
+  });
+
+  it('M19: shows people you follow who are going; tapping opens their profile', async () => {
+    backend({ counts: [{ event_id: 'r1', going: 5, maybe: 0 }], friends: [{ id: 'f1', display_name: 'Kim Pace', avatar_path: null }] });
+    render(<RsvpPanel eventId="r1" eventStatus="published" startsAt={future.starts_at} />);
+    fireEvent.press(await screen.findByRole('button', { name: 'Kim Pace' }));
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/person/[id]', params: { id: 'f1' } });
   });
 
   it('race cards show "N going"', () => {

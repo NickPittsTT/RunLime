@@ -1,16 +1,20 @@
 import { RSVP_CHILDREN_NOTE, RSVP_OPTIONS, goingLabel, rsvpSchema, type RsvpStatus } from '@runlime/shared/community';
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { friendlyError } from '@/lib/errors';
 import { fetchMyRsvp, fetchRsvpCounts, saveRsvp } from '@/lib/rsvp';
 import { settingNumber, usePublicSettings } from '@/lib/settings';
+import { fetchFollowingGoing, type Person } from '@/lib/social';
 import { useTheme } from '@/lib/theme';
 import { Stepper } from './Stepper';
-import { Button, Notice, T } from './ui';
+import { Button, Notice, T, TextButton } from './ui';
 
 /** M18 RSVP sheet + M19 count: Going / Maybe / Not going, with the number of adults and children in your group. */
 export function RsvpPanel({ eventId, eventStatus, startsAt }: { eventId: string; eventStatus: string; startsAt: string }) {
+  const router = useRouter();
   const { c, spacing, radius, minTouchTarget } = useTheme();
+  const [friends, setFriends] = useState<Person[]>([]);
   const settings = usePublicSettings();
   const maxAdults = settingNumber(settings, 'rsvp.max_adults', 10);
   const maxChildren = settingNumber(settings, 'rsvp.max_children', 10);
@@ -31,6 +35,7 @@ export function RsvpPanel({ eventId, eventStatus, startsAt }: { eventId: string;
       setChildren(r.children);
     });
     void fetchRsvpCounts([eventId]).then((m) => setCount(m.get(eventId) ?? { going: 0, maybe: 0 }));
+    void fetchFollowingGoing(eventId).then(setFriends);
   }, [eventId]);
 
   const [past] = useState(() => new Date(startsAt).getTime() < Date.now() - 6 * 3600_000);
@@ -44,6 +49,14 @@ export function RsvpPanel({ eventId, eventStatus, startsAt }: { eventId: string;
       <T variant="muted" testID="rsvp-count">
         {label ?? 'No one has said they are going yet.'}
       </T>
+      {friends.length > 0 ? (
+        <View testID="friends-going" style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: spacing.sm }}>
+          <T variant="caption">People you follow who are going:</T>
+          {friends.map((f) => (
+            <TextButton key={f.id} label={f.display_name} accessibilityHint="Opens their profile" onPress={() => router.push({ pathname: '/person/[id]', params: { id: f.id } })} />
+          ))}
+        </View>
+      ) : null}
       {closed ? (
         <T variant="muted">{eventStatus === 'cancelled' ? 'This race is cancelled, so RSVPs are closed.' : 'This race has taken place.'}</T>
       ) : (

@@ -21,6 +21,7 @@ export default function ProfileScreen() {
       <Row label="Home area" value={area} />
       <Row label="Account" value={profile.account_privacy === 'public' ? 'Public' : 'Private'} />
       <Row label="Runner level" value={runnerLevelLabel(profile.runner_level) ?? 'Not set'} />
+      <LinkRow label="Followers & following" onPress={() => router.push('/people')} />
       <LinkRow label="Edit profile & privacy" onPress={() => router.push('/edit-profile')} />
       <LinkRow label="Your areas and distances" onPress={() => router.push({ pathname: '/onboarding', params: { edit: '1' } })} />
       <LinkRow label="Emergency contact" onPress={() => router.push('/emergency-contact')} />

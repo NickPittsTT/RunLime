@@ -32,3 +32,13 @@ Install the slice 2 APK over the old one. Then also do the slice 1 phone steps a
 2.6 Change to **Maybe**, **Update RSVP**: "Saved as Maybe." The count shows "1 maybe". Change to **Not going**: the steppers disappear; after saving, the race leaves My races.
 2.7 Website: open the same race's public page (`/e/<race>`): "2 going" style line appears when someone is going (a test RSVP from step 2.3 if you set it back to Going).
 2.8 Cancelled race (only if you have one to test with): the RSVP buttons are replaced by "This race is cancelled, so RSVPs are closed."
+
+## Slice 3: followers, block, report (needs a second account; use the slice 4 APK)
+Use two phones, or your account plus a second test account on another phone. Both accounts are Private unless you change them.
+3.1 Account B: menu → **Followers** → **Find people**, type at least 2 letters of A's name, open A's profile. It says "This account is private…" and shows **Ask to follow**. Tap it: "Request sent…", button shows **Requested**.
+3.2 Account A: menu → **Followers** → **Requests (1)** → **Approve**: "… now follows you."
+3.3 Account B: reopen A's profile: **Race passport** (0 races, 0 km for now) and **Going to** with any race A said Going to. On that race's page B sees "People you follow who are going: A".
+3.4 Account A: Followers tab → **Remove** B. B no longer sees the passport.
+3.5 Account A: open B's profile (from search) → **Block** → confirm. B disappears from A's search. On B's phone, A can't be found or followed. A: Followers → **Blocked** → **Unblock** restores it.
+3.6 From B, **Report profile** on A: the report appears in Admin → Reports on the website. Dismiss it.
+3.7 Edit profile → switch A to **Public**: B can follow instantly (no request) and see the passport. Switch back to Private.

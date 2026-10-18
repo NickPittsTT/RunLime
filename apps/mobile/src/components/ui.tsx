@@ -178,10 +178,10 @@ export function Chip({ label, selected, onPress, accessibilityHint }: { label: s
 }
 
 /** Two-or-more option switch (e.g. List | Map). */
-export function Segmented<V extends string>({ options, value, onChange, label }: { options: { value: V; label: string }[]; value: V; onChange: (v: V) => void; label: string }) {
+export function Segmented<V extends string>({ options, value, onChange, label, stretch }: { options: { value: V; label: string }[]; value: V; onChange: (v: V) => void; label: string; stretch?: boolean }) {
   const { c, radius } = useTheme();
   return (
-    <View accessibilityRole="tablist" accessibilityLabel={label} style={{ flexDirection: 'row', borderWidth: 1, borderColor: c.leaf, borderRadius: radius.pill, overflow: 'hidden', alignSelf: 'flex-start' }}>
+    <View accessibilityRole="tablist" accessibilityLabel={label} style={{ flexDirection: 'row', borderWidth: 1, borderColor: c.leaf, borderRadius: radius.pill, overflow: 'hidden', alignSelf: stretch ? 'stretch' : 'flex-start' }}>
       {options.map((o) => {
         const selected = o.value === value;
         return (
@@ -191,9 +191,11 @@ export function Segmented<V extends string>({ options, value, onChange, label }:
             accessibilityState={{ selected }}
             accessibilityLabel={o.label}
             onPress={() => onChange(o.value)}
-            style={{ minHeight: 40, minWidth: 72, paddingHorizontal: 16, justifyContent: 'center', alignItems: 'center', backgroundColor: selected ? c.leaf : c.background }}
+            style={{ minHeight: 44, minWidth: 72, paddingHorizontal: stretch ? 6 : 16, flex: stretch ? 1 : undefined, justifyContent: 'center', alignItems: 'center', backgroundColor: selected ? c.leaf : c.background }}
           >
-            <Text style={{ color: selected ? '#FFFFFF' : c.leaf, fontWeight: '800' }}>{o.label}</Text>
+            <Text numberOfLines={1} adjustsFontSizeToFit style={{ color: selected ? '#FFFFFF' : c.leaf, fontWeight: '800' }}>
+              {o.label}
+            </Text>
           </Pressable>
         );
       })}

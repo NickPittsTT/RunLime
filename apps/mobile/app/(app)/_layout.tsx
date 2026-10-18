@@ -18,6 +18,8 @@ export default function AppLayout() {
       <Stack.Screen name="delete-account" options={{ title: 'Delete account' }} />
       <Stack.Screen name="report" options={{ title: 'Report' }} />
       <Stack.Screen name="my-races" options={{ title: 'My races' }} />
+      <Stack.Screen name="people" options={{ title: 'Followers' }} />
+      <Stack.Screen name="person/[id]" options={{ title: 'Profile' }} />
     </Stack>
   );
 }

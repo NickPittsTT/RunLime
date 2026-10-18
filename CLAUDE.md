@@ -53,6 +53,7 @@ Living record of conventions and decisions. Update at the end of every phase.
 - Admin rights require MFA: `is_admin()` checks the role **and** `auth.jwt()->>'aal' = 'aal2'`.
 - `super_admin` is granted only by `scripts/bootstrap-super-admin.ts`.
 - Audit log: actors and person-subjects are stored as aliases (`audit_actor_aliases`, cascade-deleted with the account). Only allowlisted columns go into before/after. No IPs. Append-only.
+- Audit reasons: a function that must explain a change sets `runlime.audit_reason` (transaction-local) and `audit.capture` stores it in `audit.log.reason`. Operator corrections on hosted data run through service-role-only functions (e.g. `ops_correct_event_start`) and only with the owner's permission for that specific change.
 - Emergency contact: AES-256-GCM in the `emergency-contact` Edge Function; the key lives in function secrets. Do NOT use pgsodium (Supabase: pending deprecation).
 - `SECURITY DEFINER` functions always `set search_path = ''` and use schema-qualified names.
 - Every new table: `enable row level security` + at least one pgTAP test in `supabase/tests/`.

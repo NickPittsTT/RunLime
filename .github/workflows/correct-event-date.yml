@@ -1,0 +1,43 @@
+# Correct ONE published event's date on staging, with the reason in the audit log (ops_correct_event_start).
+# Manual only; use only with the owner's permission for that specific change. Keeps the status (status changes go
+# through "Change status"), clears any postponement, notifies nobody. Then checks the public API and website.
+name: Correct event date
+
+on:
+  workflow_dispatch:
+    inputs:
+      event_id:
+        description: Event ID (from Staging diagnostics → event-history)
+        required: true
+      starts_at:
+        description: New start, ISO with offset (e.g. 2026-10-31T06:00:00-04:00)
+        required: true
+      reason:
+        description: Reason (10–300 characters, stored in the audit log)
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  correct:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Correct and verify
+        env:
+          SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          WEB_URL: ${{ vars.STAGING_WEB_URL }}
+          EVENT_ID: ${{ inputs.event_id }}
+          STARTS_AT: ${{ inputs.starts_at }}
+          REASON: ${{ inputs.reason }}
+        run: node scripts/correct-event-date.mjs "$EVENT_ID" "$STARTS_AT" "$REASON"

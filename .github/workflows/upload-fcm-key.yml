@@ -1,6 +1,7 @@
 # Uploads the Firebase service account key (staging environment secret FCM_SERVICE_ACCOUNT_JSON) to Expo as the
 # FCM V1 key for tt.runlime.app.dev, then checks it is attached and that build signing is unchanged.
-# Manual only. Touches only the FCM V1 slot: no keystore or build credentials are created, read or changed.
+# Manual only. Touches only the FCM V1 slot: no keystore or build credentials are created, read or changed (if the
+# app has no Android credentials record, one is created holding only the FCM V1 key; staging builds don't use it).
 # Prints nothing from the key except its Firebase project ID (logs are public). Delete the secret afterwards.
 name: Upload FCM key
 
@@ -21,8 +22,11 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version-file: .nvmrc
+          # No dependencies (plain Node script), so no pnpm: stop setup-node v5 auto-enabling the pnpm cache.
+          package-manager-cache: false
       - name: Upload to Expo and verify
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           FCM_SERVICE_ACCOUNT_JSON: ${{ secrets.FCM_SERVICE_ACCOUNT_JSON }}
+          EXPECTED_FIREBASE_PROJECT: runlime-a3849
         run: node scripts/upload-fcm-key.mjs

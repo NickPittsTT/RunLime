@@ -21,6 +21,8 @@ Nothing to install, no keystore involved. The key goes into a GitHub secret for 
 
 **Does this affect Google sign-in? No.** The key is attached only to the FCM V1 slot of Expo's credentials for `tt.runlime.app.dev`. The app signing key (whose SHA-1 the Google sign-in Android client is tied to) isn't created, read or changed, and the workflow checks that after the upload.
 
+**Don't use "Add application identifier" on expo.dev.** That wizard asks for an upload keystore, which staging doesn't use: staging APKs are built `withoutCredentials` and signed with the React Native debug keystore (SHA-1 `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25`), which isn't stored on Expo. When Expo has no Android credentials for the app, the workflow creates a record holding **only** the FCM V1 key (no keystore, no build credentials) through Expo's API. Staging builds never read that record, so signing and Google sign-in stay exactly as they are.
+
 **C1. Download the key from Firebase**
 8. In Firebase: gear icon ⚙ → **Project settings** → **Service accounts** tab → **Generate new private key** → **Generate key**. A JSON file downloads. **This file is a secret.** Don't email it, don't paste it into chat.
 
@@ -35,10 +37,10 @@ Nothing to install, no keystore involved. The key goes into a GitHub secret for 
 **C3. Run the upload**
 12. GitHub → **Actions** → **Upload FCM key** (left list) → **Run workflow** → branch **main** → **Run workflow**.
 13. When it finishes (about 1 minute), open the run → **upload** → **Upload to Expo and verify**. A green tick and these lines mean it worked:
-    - `Firebase project ID: …` — check that it matches **Project settings → General → Project ID** in Firebase.
+    - `Firebase project ID: runlime-a3849`. The workflow refuses a key from any other project, and changes nothing if so.
     - `uploaded` (or `This key is already attached` if you run it twice)
     - `FCM V1 key attached to tt.runlime.app.dev (Firebase project …)`
-    - `Build signing unchanged (default keystore SHA-1 5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25)`. This is the same SHA-1 as your Google sign-in Android client, so sign-in is unaffected.
+    - `Build signing unchanged: no signing keys on Expo (staging APKs keep the debug keystore, SHA-1 5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25)`. This is the same SHA-1 as your Google sign-in Android client, so sign-in is unaffected.
 
     A red cross shows one line starting with `failed:` and what to fix. Nothing from the key is ever printed (the logs are public). Tell me the `failed:` line if it isn't clear.
 

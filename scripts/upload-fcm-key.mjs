@@ -1,6 +1,7 @@
 // Upload the Firebase service account key to Expo as the FCM V1 key for one Android application identifier.
 // Runs ONLY in GitHub Actions ("Upload FCM key"). Uses the same Expo GraphQL calls as `eas credentials`, but only the
-// FCM V1 slot: it never creates, reads the secrets of, or changes a keystore or build credentials.
+// FCM V1 slot: it never creates, reads the secrets of, or changes a keystore or build credentials. If the app has
+// no Android credentials record yet, it creates one holding only the FCM V1 key.
 // Prints nothing from the key except its Firebase project ID (Actions logs are public).
 //
 //   EXPO_TOKEN=… FCM_SERVICE_ACCOUNT_JSON=… node scripts/upload-fcm-key.mjs
@@ -97,17 +98,15 @@ const defaultSha1 = (creds) =>
   (creds.androidAppBuildCredentialsList ?? []).find((b) => b.isDefault)?.androidKeystore?.sha1CertificateFingerprint ?? 'none';
 
 console.log(`Firebase project ID: ${key.project_id}`);
+const expected = process.env.EXPECTED_FIREBASE_PROJECT;
+if (expected && key.project_id !== expected) fail(`the key is for Firebase project ${key.project_id}, expected ${expected}; nothing was changed`);
 
 const before = await state('reading Expo credentials');
-if (!before.creds) {
-  // Creating the credentials record is what `eas build` does with the keystore; leave that to the build.
-  fail(`${APP_ID} has no Android credentials on Expo yet; nothing was changed`);
-}
-const signingBefore = signing(before.creds);
-if (signingBefore === '[]') fail(`${APP_ID} has no build credentials on Expo; nothing was changed`);
+// No record yet is normal for staging: its APKs are built withoutCredentials (debug keystore, outside Expo).
+const signingBefore = before.creds ? signing(before.creds) : '[]';
 
 let keyId;
-const current = before.creds.googleServiceAccountKeyForFcmV1;
+const current = before.creds?.googleServiceAccountKeyForFcmV1;
 if (current && current.projectIdentifier === key.project_id && current.privateKeyIdentifier === key.private_key_id) {
   keyId = current.id;
   console.log('This key is already attached; nothing to upload.');
@@ -121,13 +120,25 @@ if (current && current.projectIdentifier === key.project_id && current.privateKe
   );
   keyId = created?.googleServiceAccountKey?.createGoogleServiceAccountKey?.id;
   if (!keyId) fail('uploading the key: Expo did not return a key ID');
-  await gql(
-    'attaching the key for FCM V1',
-    `mutation Attach($credsId: ID!, $keyId: ID!) {
-      androidAppCredentials { setGoogleServiceAccountKeyForFcmV1(id: $credsId, googleServiceAccountKeyId: $keyId) { id } }
-    }`,
-    { credsId: before.creds.id, keyId },
-  );
+  if (before.creds) {
+    await gql(
+      'attaching the key for FCM V1',
+      `mutation Attach($credsId: ID!, $keyId: ID!) {
+        androidAppCredentials { setGoogleServiceAccountKeyForFcmV1(id: $credsId, googleServiceAccountKeyId: $keyId) { id } }
+      }`,
+      { credsId: before.creds.id, keyId },
+    );
+  } else {
+    // A credentials record holding ONLY the FCM V1 key: no keystore, no build credentials (the same call eas-cli
+    // makes with an empty input before it adds anything).
+    await gql(
+      'creating the FCM V1 credentials record',
+      `mutation CreateCreds($input: AndroidAppCredentialsInput!, $appId: ID!, $pkg: String!) {
+        androidAppCredentials { createAndroidAppCredentials(androidAppCredentialsInput: $input, appId: $appId, applicationIdentifier: $pkg) { id } }
+      }`,
+      { input: { googleServiceAccountKeyForFcmV1Id: keyId }, appId: before.app.id, pkg: APP_ID },
+    );
+  }
   console.log('uploaded');
 }
 
@@ -139,4 +150,8 @@ if (!attached || attached.id !== keyId || attached.projectIdentifier !== key.pro
 }
 console.log(`FCM V1 key attached to ${APP_ID} (Firebase project ${attached.projectIdentifier})`);
 if (signing(after.creds) !== signingBefore) fail('build signing credentials changed — stop and tell Claude');
-console.log(`Build signing unchanged (default keystore SHA-1 ${defaultSha1(after.creds)})`);
+console.log(
+  signingBefore === '[]'
+    ? 'Build signing unchanged: no signing keys on Expo (staging APKs keep the debug keystore, SHA-1 5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25)'
+    : `Build signing unchanged (default keystore SHA-1 ${defaultSha1(after.creds)})`,
+);

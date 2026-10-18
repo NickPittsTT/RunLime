@@ -90,7 +90,7 @@
 - [x] Earlier fixes confirmed deployed: reason box + website map (`c5604be`, CI run #110 https://github.com/NickPittsTT/RunLime/actions/runs/39072081100, Deploy web run 39072404213)
 - [x] Final build: EAS build 5d8970b0, https://expo.dev/artifacts/eas/j3POv-qs8USo_a0i1yR-7ChnPAuGXaYxaJ4m2nsGNOA.apk; Deploy web run 31 and Deploy database run 54 green on `9495f05`
 - [x] **Phase 2 approved by the owner (17 Oct 2026)** after phone checks C1–C5 passed on that APK (new date shown, original struck through, banner and calendar correct, "Back on" restores the original date). Item 7 (saved preferences after reinstall) moves to the start of Phase 3 (slice 0)
-- [ ] **Owner:** re-enter the PSCU race date as 31 Oct 2026, 6:00 AM in the admin form (staging still shows 18 Nov 2:34 pm from the earlier test). Claude does not change it
+- [x] PSCU race date restored to 31 Oct 2026, 6:00 AM (owner's one-time permission, 2026-10-18): "Correct event date" workflow, reason recorded in the audit log; see the Phase 3 checklist
 - [x] Owner: refund option A (100% after the listing has been live) kept
 
 ## Phase 3 checklist (current; scope approved 2026-10-18)
@@ -105,7 +105,37 @@ Owner decisions: push = Expo Push + Firebase Cloud Messaging (inbox first, then 
 - [x] Slice 6: notifications (inbox, then push; postponed-to, cancelled, day-before, organiser messages with limit) — CI #120 on `e18d12a`; deployed (web #36, database #59); APK EAS build d880d4b5. Push stays off until the owner's Firebase setup (`docs/phase-3/FIREBASE-SETUP.md`)
 - [x] Privacy Policy (draft4) + Moderation Policy (draft2) + Terms (draft5) updated; attorney flags in each
 - [x] `docs/phase-3/RETEST.md` phone checks per slice
-- [ ] **Owner phone test and Phase 3 approval** (only the owner approves)
+- [ ] Firebase push: owner set up Firebase project `runlime-a3849` (Spark, Analytics off), Android app `tt.runlime.app.dev`, `GOOGLE_SERVICES_JSON` in Expo (preview), `FCM_SERVICE_ACCOUNT_JSON` staging secret. First "Upload FCM key" run failed in setup (pnpm cache) before the upload; fixed, and the workflow now creates an FCM-only Expo credentials record (no keystore). Next: owner re-runs it, deletes the secret, runs Configure push, says "Firebase done" → final APK
+- [ ] **Owner phone test and Phase 3 approval** (only the owner approves). Owner plan: test Phase 3 **once**, on the final APK with push included, using `docs/phase-3/RETEST.md`
+- [ ] **Owner decision before approving:** are profile photos visible on Private accounts? (Currently yes, to signed-in users, with the display name; attorney note in the Privacy Policy draft)
+- Repo stays **public** until the build is done (owner, intentional)
+- Audit entries can now carry a reason (`audit.log.reason`, set by functions through `runlime.audit_reason`). First user: `ops_correct_event_start` (service role only, "Correct event date" workflow), used once for the PSCU date with the owner's permission
+
+## Phase 4 notes (owner requirements, 2026-10-18; do NOT build before Phase 4)
+**Pin safeguards**
+- Satellite layer on the create-event map.
+- Warning when the pin is more than 1 km (setting) from the geocoded venue.
+- Admin "Pin checked" tick required before approval.
+- Record failed check-in attempts: location rounded to 3 decimal places, accuracy, time, event; deleted after 30 days (setting); add to the Privacy Policy.
+- "I'm here but can't check in" button → admin queue.
+- After a pin or radius change, automatically re-test that event's failed attempts; passes become check-ins marked "approved after correction", audit-logged.
+- Admin manual approve with a reason.
+- Optional finish pin.
+- After the pilot: cluster alert when 3+ failed attempts come from the same area.
+
+**Address lookup**
+- Venue/address search that drops the pin: Nominatim, with a Search button (no type-ahead), OSM attribution, max 1 request/second. **Recheck Nominatim's current usage policy at Phase 4 start** and add it to the third-party services register + Privacy Policy before use.
+- Match precision shown: exact place / street only / town only; town only forces manual placement.
+- "Pin is on the start line" tick required to publish.
+- "Use my current location" button.
+- Saved venues reuse confirmed pins.
+
+**Settings to decide at Phase 4 start**
+- Check-in radius (300 vs 500 m); check-in time window; the window follows a postponed race's new date; location permission while the app is open only.
+
+## Phase 8 notes
+- **Signing:** staging is signed with the public React Native debug keystore. Production needs its own private signing key, a **new Google sign-in Android client** (production package + production / Play App Signing SHA-1) and a production Firebase app + FCM key. Tracked in `docs/legal/STORE-REQUIREMENTS.md` (Google Play #18).
+- Custom domain reminder before Phase 8 (owner, 2026-10-15).
 
 ## Phase 1 approval items (owner, 2026-10-11)
 - [x] a. CI fully green on GitHub, including web E2E (see the latest run in the Phase 1 review)

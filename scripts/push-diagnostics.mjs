@@ -61,24 +61,32 @@ table(await sql(`
     from public.notifications n where n.created_at > now() - interval '48 hours'
    group by 1, 2 order by 1 desc limit 40`));
 
-async function logs(title, query) {
-  section(title);
+// Supabase logs (ClickHouse SQL, one "logs" table). Messages can contain IP addresses, so only the time, method,
+// status and RPC/function name are printed.
+async function logRows(query) {
   const end = new Date();
   const start = new Date(end.getTime() - 24 * 3600_000);
   const qs = new URLSearchParams({ sql: query, iso_timestamp_start: start.toISOString(), iso_timestamp_end: end.toISOString() });
   const res = await fetch(`https://api.supabase.com/v1/projects/${ref}/analytics/endpoints/logs?${qs}`, { headers: { authorization: `Bearer ${mgmt}` } });
   const body = await res.json().catch(() => null);
-  if (!res.ok || body?.error) return console.log('  logs query failed:', res.status, JSON.stringify(body?.error ?? body).slice(0, 300));
-  const rows = body?.result ?? [];
-  if (!rows.length) return console.log('  (none in the last 24 h)');
-  for (const r of rows) console.log(' ', new Date(Number(r.timestamp) / 1000).toISOString(), maskAll(JSON.stringify({ ...r, timestamp: undefined })).slice(0, 300));
+  if (!res.ok || body?.error) return { error: `${res.status} ${JSON.stringify(body?.error ?? body).slice(0, 300)}` };
+  return { rows: body?.result ?? body?.data ?? [] };
 }
-await logs('2f. App calls to register/unregister a phone (API gateway, last 24 h)', `select timestamp, request.method as method, request.path as path, response.status_code as status
-  from edge_logs cross join unnest(metadata) as m cross join unnest(m.request) as request cross join unnest(m.response) as response
-  where request.path like '%push_token%' order by timestamp desc limit 50`);
-await logs('2g. Calls to the push-dispatch function (last 24 h)', `select timestamp, response.status_code as status
-  from function_edge_logs cross join unnest(metadata) as m cross join unnest(m.response) as response cross join unnest(m.request) as request
-  where request.url like '%push-dispatch%' order by timestamp desc limit 20`);
+function printCalls(r, pattern) {
+  if (r.error) return console.log('  logs query failed:', r.error);
+  if (!r.rows.length) return console.log('  (none in the last 24 h)');
+  for (const row of r.rows) {
+    const msg = String(row.event_message ?? '');
+    const method = msg.match(/\b(GET|POST|PATCH|DELETE|PUT|OPTIONS)\b/)?.[1] ?? '?';
+    const status = msg.match(/\|\s*(\d{3})\s*\|/)?.[1] ?? msg.match(/\b([1-5]\d\d)\b/)?.[1] ?? '?';
+    const name = msg.match(pattern)?.[0] ?? '?';
+    console.log(`  ${row.timestamp}  ${method} ${name} -> ${status}`);
+  }
+}
+section('2f. App calls to register/unregister a phone (API gateway, last 24 h)');
+printCalls(await logRows(`select timestamp, event_message from logs where source_name = 'edge_logs' and event_message like '%push_token%' order by timestamp desc limit 50`), /(un)?register_push_token/);
+section('2g. Calls to the push-dispatch function (last 24 h)');
+printCalls(await logRows(`select timestamp, event_message from logs where source_name = 'function_edge_logs' and event_message like '%push-dispatch%' order by timestamp desc limit 20`), /push-dispatch/);
 
 // 3/4. Expo: credentials for the package, then an optional direct test push
 const APP_ID = 'tt.runlime.app.dev';

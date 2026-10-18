@@ -46,3 +46,32 @@ export type ReportInput = z.infer<typeof reportSchema>;
 export function avatarUrl(supabaseUrl: string, path: string | null | undefined): string | null {
   return path ? `${supabaseUrl}/storage/v1/object/public/avatars/${path}` : null;
 }
+
+// ---------------------------------------------------------------------------
+// RSVPs (slice 2). Children are a number only (18+ rule): never names or ages.
+// ---------------------------------------------------------------------------
+export const RSVP_OPTIONS = [
+  { value: 'going', label: 'Going' },
+  { value: 'maybe', label: 'Maybe' },
+  { value: 'not_going', label: 'Not going' },
+] as const;
+export type RsvpStatus = (typeof RSVP_OPTIONS)[number]['value'];
+export const RSVP_CHILDREN_NOTE = 'Children under 18 must be with an adult. We only keep the number, never names or ages.';
+
+export function goingLabel(going: number, maybe = 0): string | null {
+  const parts = [going > 0 ? `${going} going` : null, maybe > 0 ? `${maybe} maybe` : null].filter(Boolean);
+  return parts.length ? parts.join(' · ') : null;
+}
+
+export const rsvpSchema = (maxAdults: number, maxChildren: number) =>
+  z
+    .object({
+      status: z.enum(['going', 'maybe', 'not_going']),
+      adults: z.number().int(),
+      children: z.number().int(),
+    })
+    .superRefine((r, ctx) => {
+      if (r.status === 'not_going') return;
+      if (r.adults < 1 || r.adults > maxAdults) ctx.addIssue({ code: 'custom', path: ['adults'], message: `Adults: 1 to ${maxAdults}, including you.` });
+      if (r.children < 0 || r.children > maxChildren) ctx.addIssue({ code: 'custom', path: ['children'], message: `Children: 0 to ${maxChildren}.` });
+    });

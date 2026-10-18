@@ -100,9 +100,12 @@ describe('home: race calendar', () => {
     fireEvent.press(screen.getByRole('button', { name: 'Open menu' }));
     expect(screen.getByText('AL')).toBeTruthy();
     expect(screen.getByText('Speedy')).toBeTruthy();
-    for (const label of ['My races', 'Leaderboards', 'Run history', 'Followers', 'Clubs']) {
+    for (const label of ['Leaderboards', 'Run history', 'Followers', 'Clubs']) {
       expect(screen.getByRole('button', { name: `${label}, coming soon` })).toBeTruthy();
     }
+    fireEvent.press(screen.getByRole('button', { name: 'My races' }));
+    expect(mockPush).toHaveBeenCalledWith('/my-races');
+    fireEvent.press(screen.getByRole('button', { name: 'Open menu' }));
     fireEvent.press(screen.getByRole('button', { name: 'Emergency contact' }));
     expect(mockPush).toHaveBeenCalledWith('/emergency-contact');
     fireEvent.press(screen.getByRole('button', { name: 'Open menu' }));

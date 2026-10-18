@@ -21,3 +21,14 @@ The photo picker is new native code, so the phone steps need the **slice 2 APK**
 1.6 Phone: Edit profile → **Remove photo**: "Photo removed." Initials show again.
 1.7 Optional (needs a second account): from the second account, report the first account's photo (available once profiles are visible to others in slices 2–3). Admin → Reports → **Remove photo**: the photo disappears from the first account's profile.
 Not on the phone yet: a Report button on other people's photos appears in slice 2 (who's going) and slice 3 (follower profiles).
+
+## Slice 2: RSVPs and My races (new APK: link added when built)
+Install the slice 2 APK over the old one. Then also do the slice 1 phone steps above.
+2.1 Open any upcoming race. Under **Are you going?** it says "No one has said they are going yet." (or a count).
+2.2 Tap **Going**. Steppers appear: **Adults in your group (including you)** starts at 1 and can't go below 1; **Children under 18**. The note says children must be with an adult and only the number is kept.
+2.3 Set 2 adults and 1 child, tap **Save RSVP**: "You're going. It's in My races." The count shows "2 going".
+2.4 Back on the calendar list (pull down): the race card shows "· 2 going". Children are never shown in the count.
+2.5 Menu → **My races**: the race is under **Coming up** with "Going · 2 adults, 1 child". Tap it to open the race.
+2.6 Change to **Maybe**, **Update RSVP**: "Saved as Maybe." The count shows "1 maybe". Change to **Not going**: the steppers disappear; after saving, the race leaves My races.
+2.7 Website: open the same race's public page (`/e/<race>`): "2 going" style line appears when someone is going (a test RSVP from step 2.3 if you set it back to Going).
+2.8 Cancelled race (only if you have one to test with): the RSVP buttons are replaced by "This race is cancelled, so RSVPs are closed."

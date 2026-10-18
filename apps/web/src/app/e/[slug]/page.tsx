@@ -1,3 +1,4 @@
+import { goingLabel } from '@runlime/shared/community';
 import { STATUS_LABEL, feeLabel, formatEventDate, formatEventTime, postponementInfo } from '@runlime/shared/events';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
@@ -39,6 +40,10 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
   const { slug } = await params;
   const [e, settings] = await Promise.all([load(slug), getPublicSettings()]);
   if (!e) notFound();
+  const supabase = await createClient();
+  const { data: counts } = await supabase.rpc('rsvp_counts', { p_events: [e.id] });
+  const c = (counts as { going: number; maybe: number }[] | null)?.[0];
+  const going = goingLabel(Number(c?.going ?? 0), Number(c?.maybe ?? 0));
   const setting = (k: string) => {
     const v = settings.find((s) => s.key === k)?.value;
     return typeof v === 'string' ? v : null;
@@ -73,6 +78,11 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
         {e.venue_name}
         {area ? `, ${area}` : ''}
       </p>
+      {going && (
+        <p className="font-semibold mb-4" data-testid="going-count">
+          {going} <span className="font-normal text-ink-muted">(RSVPs in the RunLime app)</span>
+        </p>
+      )}
       {isListing && unaffiliated && <Notice tone="info">{unaffiliated}</Notice>}
 
       <div className="flex flex-wrap gap-3 mb-6">

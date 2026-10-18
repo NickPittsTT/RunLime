@@ -21,3 +21,24 @@ describe('community rules', () => {
     expect(avatarUrl('https://x.supabase.co', null)).toBeNull();
   });
 });
+
+describe('RSVPs', () => {
+  it('options match the database enum', async () => {
+    const { RSVP_OPTIONS } = await import('../src/community');
+    expect(RSVP_OPTIONS.map((o) => o.value)).toEqual(['going', 'maybe', 'not_going']);
+  });
+  it('"N going" label', async () => {
+    const { goingLabel } = await import('../src/community');
+    expect(goingLabel(0)).toBeNull();
+    expect(goingLabel(12)).toBe('12 going');
+    expect(goingLabel(12, 3)).toBe('12 going · 3 maybe');
+  });
+  it('group limits apply to Going/Maybe only', async () => {
+    const { rsvpSchema } = await import('../src/community');
+    const s = rsvpSchema(10, 10);
+    expect(s.safeParse({ status: 'going', adults: 2, children: 3 }).success).toBe(true);
+    expect(s.safeParse({ status: 'going', adults: 0, children: 1 }).success).toBe(false);
+    expect(s.safeParse({ status: 'maybe', adults: 1, children: 11 }).success).toBe(false);
+    expect(s.safeParse({ status: 'not_going', adults: 0, children: 99 }).success).toBe(true);
+  });
+});

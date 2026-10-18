@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { goingLabel } from '@runlime/shared/community';
 import { formatEventDate, todayKey } from '@runlime/shared/events';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -17,6 +18,7 @@ import { getNearMe } from '@/lib/location';
 import { loadPreferences } from '@/lib/preferences';
 import { raceDayMarks, selectRaces } from '@/lib/raceQuery';
 import { useAreas } from '@/lib/regions';
+import { useRsvpCounts } from '@/lib/rsvp';
 import { settingNumber, usePublicSettings } from '@/lib/settings';
 import { useTheme } from '@/lib/theme';
 import { useSession } from '@/state/session';
@@ -72,6 +74,7 @@ export default function HomeScreen() {
 
   const events = cal.events ?? [];
   const races = useMemo(() => selectRaces(events, { filters, text, near: nearQ, day, today }), [events, filters, text, nearQ?.lat, nearQ?.lng, radiusKm, day, today]); // eslint-disable-line react-hooks/exhaustive-deps
+  const counts = useRsvpCounts(races.map((e) => e.id), cal.updatedAt);
   const dayMarks = useMemo(() => raceDayMarks(events, { filters, text, near: nearQ }), [events, filters, text, nearQ?.lat, nearQ?.lng, radiusKm]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -101,7 +104,7 @@ export default function HomeScreen() {
 
   const soon = (what: string) => () => Alert.alert(what, 'Coming soon.');
   const menu: MenuItem[] = [
-    { key: 'my-races', label: 'My races', icon: 'flag-outline' },
+    { key: 'my-races', label: 'My races', icon: 'flag-outline', onPress: () => router.push('/my-races') },
     { key: 'leaderboards', label: 'Leaderboards', icon: 'trophy-outline' },
     { key: 'history', label: 'Run history', icon: 'time-outline' },
     { key: 'followers', label: 'Followers', icon: 'people-outline' },
@@ -179,7 +182,7 @@ export default function HomeScreen() {
               onPinPress={(id) => router.push({ pathname: '/race/[id]', params: { id } })}
             />
           ) : null}
-          {mode === 'list' ? races.map((e) => <RaceCard key={e.id} event={e} near={near} onPress={() => router.push({ pathname: '/race/[id]', params: { id: e.id } })} />) : null}
+          {mode === 'list' ? races.map((e) => <RaceCard key={e.id} event={e} near={near} going={goingLabel(counts.get(e.id)?.going ?? 0)} onPress={() => router.push({ pathname: '/race/[id]', params: { id: e.id } })} />) : null}
           <LinkRow label="Know a race we're missing? Suggest it" onPress={() => router.push('/suggest-race')} />
         </View>
       </ScrollView>

@@ -6,6 +6,7 @@ import { DuplicatePanel, ReviewPanel, StatusChangePanel } from '@/components/eve
 import { ListingMediaPermission } from '@/components/events/ListingMediaPermission';
 import { MediaUploader, SponsorForm } from '@/components/events/OrganiserTools';
 import { StatusBanner } from '@/components/events/StatusBanner';
+import { AttendancePanel } from '@/components/events/AttendancePanel';
 import { removeMedia, removeSponsor } from '@/app/organiser/events/actions';
 import { eventMediaUrl } from '@/lib/media';
 import { Notice, PageTitle } from '@/components/ui';
@@ -58,6 +59,7 @@ export default async function AdminEvent({ params, searchParams }: { params: Pro
           </Link>
         </p>
       )}
+      {['published', 'postponed', 'cancelled'].includes(e.status) && <AttendancePanel supabase={supabase} eventId={e.id} />}
       <div className="grid lg:grid-cols-[1fr_20rem] gap-8">
         <EventForm initial={toFormValues(e)} areas={areas} back="/admin/events" />
         <aside>

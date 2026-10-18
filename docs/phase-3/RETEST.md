@@ -53,3 +53,10 @@ Use two phones, or your account plus a second test account on another phone. Bot
 4.7 Both accounts: Edit profile → tick **Count me in my clubs' race turnout** → Save. Both say **Going** to the same race. Admin → Settings → set `clubs.turnout_min` to **2**. Open the race (app and website): "Re-test Runners: 2 going". Set the setting back to **5**: the line disappears.
 4.8 Website: Admin → Clubs → open a club → **Appoint a leader (account email)** works; **Remove leader role** keeps them as a member.
 4.9 From the second account, **Report this club** → it appears in Admin → Reports.
+
+## Slice 5: organiser attendance page (website; works on a phone browser too)
+5.1 Use a race with a few RSVPs (yours from slice 2 and the second account's). Website → Admin → Events → that race. Near the top: **Attendance** with tiles **Adults going**, **Children coming** (a total only, never names or ages), **Maybe**, **Not going**.
+5.2 **Adults going over time** shows a line (one point per day with changes). Hover or tap a point: "<day>: N adults going, N children, N maybe". **Show as a table** lists the same numbers.
+5.3 **Club turnout** shows "Club: N going" when enough opted-in members are going (slice 4 step 4.7), otherwise a short explanation.
+5.4 Organiser portal (if you have an organiser account): the race list shows "· N going"; the race page has the same Attendance section.
+5.5 Open the page on your phone's browser: nothing is cut off and there's no sideways scrolling.

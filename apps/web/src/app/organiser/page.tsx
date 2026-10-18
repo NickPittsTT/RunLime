@@ -29,6 +29,9 @@ export default async function OrganiserPage() {
       : Promise.resolve({ data: [] as { id: string; name: string; starts_at: string; timezone: string; status: string; organisation_id: string }[] }),
     supabase.from('event_members').select('event_id, accepted_at, events(id, name, starts_at, timezone, status)').eq('user_id', user.id),
   ]);
+  const eventIds = (events ?? []).map((e) => e.id);
+  const { data: counts } = eventIds.length ? await supabase.rpc('rsvp_counts', { p_events: eventIds }) : { data: [] };
+  const goingOf = (id: string) => ((counts ?? []) as { event_id: string; going: number }[]).find((c) => c.event_id === id)?.going ?? 0;
   const hasPending = (orgs ?? []).some((o) => o.status === 'applied');
   const canApply = !hasPending && !(orgs ?? []).some((o) => o.status === 'verified');
 
@@ -71,6 +74,7 @@ export default async function OrganiserPage() {
                         </Link>
                         <span className="text-sm text-ink-muted">
                           {formatEventDate(e.starts_at, e.timezone)} · {STATUS_LABEL[e.status] ?? e.status}
+                          {goingOf(e.id) > 0 && ` · ${goingOf(e.id)} going`}
                         </span>
                       </li>
                     ))}

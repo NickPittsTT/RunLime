@@ -1,6 +1,7 @@
 import { STATUS_LABEL, formatEventDate, formatEventTime } from '@runlime/shared/events';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { AttendancePanel } from '@/components/events/AttendancePanel';
 import { EventForm } from '@/components/events/EventForm';
 import { DuplicatePanel, StatusChangePanel } from '@/components/events/EventPanels';
 import { InviteForm, MediaUploader, SponsorForm } from '@/components/events/OrganiserTools';
@@ -69,6 +70,7 @@ export default async function OrganiserEvent({ params, searchParams }: { params:
           <Button type="submit">Submit for approval</Button>
         </form>
       )}
+      {['published', 'postponed', 'cancelled'].includes(e.status) && <AttendancePanel supabase={supabase} eventId={e.id} />}
       <div className="grid lg:grid-cols-[1fr_22rem] gap-8">
         <EventForm initial={toFormValues(e)} areas={areas} back="/organiser/events" />
         <aside>

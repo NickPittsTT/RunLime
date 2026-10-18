@@ -108,7 +108,7 @@ export default function HomeScreen() {
     { key: 'leaderboards', label: 'Leaderboards', icon: 'trophy-outline' },
     { key: 'history', label: 'Run history', icon: 'time-outline' },
     { key: 'followers', label: 'Followers', icon: 'people-outline', onPress: () => router.push('/people') },
-    { key: 'clubs', label: 'Clubs', icon: 'shield-outline' },
+    { key: 'clubs', label: 'Clubs', icon: 'shield-outline', onPress: () => router.push('/clubs') },
     { key: 'suggest', label: 'Suggest a race', icon: 'add-circle-outline', onPress: () => router.push('/suggest-race') },
     { key: 'edit-profile', label: 'Edit profile & privacy', icon: 'person-circle-outline', onPress: () => router.push('/edit-profile') },
     { key: 'emergency', label: 'Emergency contact', icon: 'medkit-outline', onPress: () => router.push('/emergency-contact') },

@@ -42,3 +42,14 @@ Use two phones, or your account plus a second test account on another phone. Bot
 3.5 Account A: open B's profile (from search) → **Block** → confirm. B disappears from A's search. On B's phone, A can't be found or followed. A: Followers → **Blocked** → **Unblock** restores it.
 3.6 From B, **Report profile** on A: the report appears in Admin → Reports on the website. Dismiss it.
 3.7 Edit profile → switch A to **Public**: B can follow instantly (no request) and see the passport. Switch back to Private.
+
+## Slice 4: clubs (APK link added when built; it also contains slice 3)
+4.1 Menu → **Clubs**. Under **Find a club**, any clubs you added in Admin are listed with member counts.
+4.2 **Can't find your club? Ask us to add it** → name "Re-test Runners", Send: "Thanks. We'll review your club request."
+4.3 Website: Admin → Clubs → **New-club requests**: "Re-test Runners · asked by <you>". Keep **Make the requester its first leader** ticked, **Approve**: "Club created."
+4.4 Phone: Clubs shows **Re-test Runners** under **Your clubs** as "Leader". Open it: "You lead this club." Tap **Make this my primary club**: a ★ appears.
+4.5 Second account: open the club → **Ask to join**: "Request sent. A club leader will approve it."
+4.6 Your account: club page → **Requests to join (1)** → **Approve**. The second account now shows "You are a member."
+4.7 Both accounts: Edit profile → tick **Count me in my clubs' race turnout** → Save. Both say **Going** to the same race. Admin → Settings → set `clubs.turnout_min` to **2**. Open the race (app and website): "Re-test Runners: 2 going". Set the setting back to **5**: the line disappears.
+4.8 Website: Admin → Clubs → open a club → **Appoint a leader (account email)** works; **Remove leader role** keeps them as a member.
+4.9 From the second account, **Report this club** → it appears in Admin → Reports.

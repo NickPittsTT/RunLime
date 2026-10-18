@@ -6,6 +6,7 @@ import { friendlyError } from '@/lib/errors';
 import { fetchMyRsvp, fetchRsvpCounts, saveRsvp } from '@/lib/rsvp';
 import { settingNumber, usePublicSettings } from '@/lib/settings';
 import { fetchFollowingGoing, type Person } from '@/lib/social';
+import { fetchClubTurnout } from '@/lib/clubs';
 import { useTheme } from '@/lib/theme';
 import { Stepper } from './Stepper';
 import { Button, Notice, T, TextButton } from './ui';
@@ -15,6 +16,7 @@ export function RsvpPanel({ eventId, eventStatus, startsAt }: { eventId: string;
   const router = useRouter();
   const { c, spacing, radius, minTouchTarget } = useTheme();
   const [friends, setFriends] = useState<Person[]>([]);
+  const [clubs, setClubs] = useState<{ club_id: string; club_name: string; going: number }[]>([]);
   const settings = usePublicSettings();
   const maxAdults = settingNumber(settings, 'rsvp.max_adults', 10);
   const maxChildren = settingNumber(settings, 'rsvp.max_children', 10);
@@ -36,6 +38,7 @@ export function RsvpPanel({ eventId, eventStatus, startsAt }: { eventId: string;
     });
     void fetchRsvpCounts([eventId]).then((m) => setCount(m.get(eventId) ?? { going: 0, maybe: 0 }));
     void fetchFollowingGoing(eventId).then(setFriends);
+    void fetchClubTurnout(eventId).then(setClubs);
   }, [eventId]);
 
   const [past] = useState(() => new Date(startsAt).getTime() < Date.now() - 6 * 3600_000);
@@ -49,6 +52,11 @@ export function RsvpPanel({ eventId, eventStatus, startsAt }: { eventId: string;
       <T variant="muted" testID="rsvp-count">
         {label ?? 'No one has said they are going yet.'}
       </T>
+      {clubs.map((cl) => (
+        <T key={cl.club_id} testID="club-turnout" variant="muted">
+          {cl.club_name}: {cl.going} going
+        </T>
+      ))}
       {friends.length > 0 ? (
         <View testID="friends-going" style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: spacing.sm }}>
           <T variant="caption">People you follow who are going:</T>

@@ -41,7 +41,7 @@ jest.mock('react-native-safe-area-context', () => {
 });
 global.fetch = jest.fn(async () => ({ arrayBuffer: async () => new ArrayBuffer(8) })) as unknown as typeof fetch;
 
-const baseProfile = { id: 'u1', display_name: 'Ana Lopez', nickname: null, home_region_id: '6f1b0a52-6a0c-4e43-9a5e-7d0f6f4e2a11', account_privacy: 'private', runner_level: null, avatar_path: null };
+const baseProfile = { id: 'u1', display_name: 'Ana Lopez', nickname: null, home_region_id: '6f1b0a52-6a0c-4e43-9a5e-7d0f6f4e2a11', account_privacy: 'private', runner_level: null, avatar_path: null, show_attendance_to_clubs: false };
 
 beforeAll(() => {
   mockProfile = baseProfile;
@@ -63,6 +63,14 @@ describe('runner level', () => {
     fireEvent.press(screen.getByRole('radio', { name: 'Club runner' }));
     fireEvent.press(screen.getByRole('button', { name: 'Save' }));
     await waitFor(() => expect(mockUpdate).toHaveBeenCalledWith(expect.objectContaining({ runner_level: 'club_runner' })));
+  });
+  it('club turnout opt-in (off by default) is saved with the profile', async () => {
+    render(<EditProfileScreen />);
+    const box = screen.getByRole('checkbox', { name: /Count me in my clubs/ });
+    expect(box.props.accessibilityState).toMatchObject({ checked: false });
+    fireEvent.press(box);
+    fireEvent.press(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(mockUpdate).toHaveBeenCalledWith(expect.objectContaining({ show_attendance_to_clubs: true })));
   });
   it('shows on the profile', () => {
     mockProfile = { ...baseProfile, runner_level: 'competitive' };

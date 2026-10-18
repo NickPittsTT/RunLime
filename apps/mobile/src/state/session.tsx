@@ -10,6 +10,7 @@ export interface Profile {
   account_privacy: 'private' | 'public';
   runner_level: 'casual' | 'club_runner' | 'competitive' | null;
   avatar_path: string | null;
+  show_attendance_to_clubs: boolean;
 }
 
 export type SessionStatus = 'loading' | 'signedOut' | 'needsProfile' | 'ready';
@@ -41,7 +42,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     }
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, display_name, nickname, home_region_id, account_privacy, runner_level, avatar_path')
+      .select('id, display_name, nickname, home_region_id, account_privacy, runner_level, avatar_path, show_attendance_to_clubs')
       .maybeSingle();
     if (error) {
       // Offline or server error: keep the session, retry on next refresh.

@@ -23,6 +23,7 @@ export default function EditProfileScreen() {
   const [areaId, setAreaId] = useState(profile?.home_region_id ?? null);
   const [privacy, setPrivacy] = useState<'private' | 'public'>(profile?.account_privacy ?? 'private');
   const [level, setLevel] = useState<RunnerLevel | null>(profile?.runner_level ?? null);
+  const [clubTurnout, setClubTurnout] = useState(profile?.show_attendance_to_clubs ?? false);
   const [photoBusy, setPhotoBusy] = useState(false);
   const [photoMessage, setPhotoMessage] = useState<{ tone: 'danger' | 'success'; text: string }>();
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -114,6 +115,21 @@ export default function EditProfileScreen() {
         ))}
         <T variant="caption">{RUNNER_LEVEL_NOTE}</T>
       </View>
+      <Pressable
+        accessibilityRole="checkbox"
+        accessibilityState={{ checked: clubTurnout }}
+        accessibilityHint="Counts you in your clubs' race turnout. Only numbers are shown, never your name."
+        onPress={() => setClubTurnout(!clubTurnout)}
+        style={{ minHeight: minTouchTarget, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: radius.md, borderWidth: 1, borderColor: c.border }}
+      >
+        <View style={{ width: 24, height: 24, borderRadius: 4, borderWidth: 2, borderColor: c.leaf, backgroundColor: clubTurnout ? c.leaf : 'transparent', alignItems: 'center', justifyContent: 'center' }}>
+          {clubTurnout ? <T style={{ color: '#FFFFFF', fontWeight: '900' }}>✓</T> : null}
+        </View>
+        <View style={{ flex: 1 }}>
+          <T style={{ fontWeight: '700' }}>Count me in my clubs&apos; race turnout</T>
+          <T variant="caption">Race pages show &quot;Club: 12 going&quot; when at least a few members are going. Only the number is shown, never your name.</T>
+        </View>
+      </Pressable>
       <Button
         label="Save"
         busy={busy}
@@ -124,7 +140,7 @@ export default function EditProfileScreen() {
           setBusy(true);
           const { error } = await supabase
             .from('profiles')
-            .update({ display_name: parsed.data.displayName, nickname: parsed.data.nickname, home_region_id: parsed.data.homeRegionId, account_privacy: privacy, runner_level: level })
+            .update({ display_name: parsed.data.displayName, nickname: parsed.data.nickname, home_region_id: parsed.data.homeRegionId, account_privacy: privacy, runner_level: level, show_attendance_to_clubs: clubTurnout })
             .eq('id', profile.id);
           setBusy(false);
           if (error) return setFormError(error.code === '23505' ? 'That nickname is taken. Try another.' : friendlyError(error));

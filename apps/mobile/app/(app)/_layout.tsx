@@ -20,6 +20,9 @@ export default function AppLayout() {
       <Stack.Screen name="my-races" options={{ title: 'My races' }} />
       <Stack.Screen name="people" options={{ title: 'Followers' }} />
       <Stack.Screen name="person/[id]" options={{ title: 'Profile' }} />
+      <Stack.Screen name="clubs" options={{ title: 'Clubs' }} />
+      <Stack.Screen name="club/[id]" options={{ title: 'Club' }} />
+      <Stack.Screen name="request-club" options={{ title: 'Ask for a new club' }} />
     </Stack>
   );
 }

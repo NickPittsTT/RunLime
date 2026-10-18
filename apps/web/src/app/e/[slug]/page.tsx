@@ -41,7 +41,10 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
   const [e, settings] = await Promise.all([load(slug), getPublicSettings()]);
   if (!e) notFound();
   const supabase = await createClient();
-  const { data: counts } = await supabase.rpc('rsvp_counts', { p_events: [e.id] });
+  const [{ data: counts }, { data: turnout }] = await Promise.all([
+    supabase.rpc('rsvp_counts', { p_events: [e.id] }),
+    supabase.rpc('club_turnout', { p_event: e.id }),
+  ]);
   const c = (counts as { going: number; maybe: number }[] | null)?.[0];
   const going = goingLabel(Number(c?.going ?? 0), Number(c?.maybe ?? 0));
   const setting = (k: string) => {
@@ -82,6 +85,15 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
         <p className="font-semibold mb-4" data-testid="going-count">
           {going} <span className="font-normal text-ink-muted">(RSVPs in the RunLime app)</span>
         </p>
+      )}
+      {((turnout ?? []) as { club_id: string; club_name: string; going: number }[]).length > 0 && (
+        <ul className="mb-4 text-ink-muted" aria-label="Club turnout">
+          {((turnout ?? []) as { club_id: string; club_name: string; going: number }[]).map((t) => (
+            <li key={t.club_id}>
+              {t.club_name}: {t.going} going
+            </li>
+          ))}
+        </ul>
       )}
       {isListing && unaffiliated && <Notice tone="info">{unaffiliated}</Notice>}
 

@@ -100,7 +100,7 @@ describe('home: race calendar', () => {
     fireEvent.press(screen.getByRole('button', { name: 'Open menu' }));
     expect(screen.getByText('AL')).toBeTruthy();
     expect(screen.getByText('Speedy')).toBeTruthy();
-    for (const label of ['Leaderboards', 'Run history', 'Clubs']) {
+    for (const label of ['Leaderboards', 'Run history']) {
       expect(screen.getByRole('button', { name: `${label}, coming soon` })).toBeTruthy();
     }
     fireEvent.press(screen.getByRole('button', { name: 'My races' }));

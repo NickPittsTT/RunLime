@@ -15,8 +15,8 @@ insert into public.clubs (name, description) values ('Trinidad Road Runners', 'W
 select ok(:'club' is not null, 'admin with MFA creates a club');
 
 select tests.authenticate_as(:'runner');
-select lives_ok(format($$insert into public.club_members (club_id, user_id) values (%L, %L)$$, :'club', :'runner'), 'runner joins the club');
-select throws_ok(format($$insert into public.club_members (club_id, user_id) values (%L, %L)$$, :'club', :'admin'), '42501', null, 'cannot add someone else');
+select lives_ok(format($$select public.request_join_club(%L)$$, :'club'), 'runner asks to join the club (Phase 3: a leader approves)');
+select throws_ok(format($$insert into public.club_members (club_id, user_id) values (%L, %L)$$, :'club', :'admin'), '42501', null, 'cannot add anyone directly');
 select lives_ok(format($$delete from public.club_members where club_id = %L and user_id = %L$$, :'club', :'runner'), 'runner leaves');
 
 -- settings

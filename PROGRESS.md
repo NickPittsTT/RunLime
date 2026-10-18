@@ -105,7 +105,8 @@ Owner decisions: push = Expo Push + Firebase Cloud Messaging (inbox first, then 
 - [x] Slice 6: notifications (inbox, then push; postponed-to, cancelled, day-before, organiser messages with limit) — CI #120 on `e18d12a`; deployed (web #36, database #59); APK EAS build d880d4b5. Push stays off until the owner's Firebase setup (`docs/phase-3/FIREBASE-SETUP.md`)
 - [x] Privacy Policy (draft4) + Moderation Policy (draft2) + Terms (draft5) updated; attorney flags in each
 - [x] `docs/phase-3/RETEST.md` phone checks per slice
-- [ ] Firebase push: owner set up Firebase project `runlime-a3849` (Spark, Analytics off), Android app `tt.runlime.app.dev`, `GOOGLE_SERVICES_JSON` in Expo (preview), `FCM_SERVICE_ACCOUNT_JSON` staging secret. First "Upload FCM key" run failed in setup (pnpm cache) before the upload; fixed, and the workflow now creates an FCM-only Expo credentials record (no keystore). Next: owner re-runs it, deletes the secret, runs Configure push, says "Firebase done" → final APK
+- [x] Firebase push set up (2026-10-18): project `runlime-a3849` (Spark, Analytics off), Android app `tt.runlime.app.dev`, `GOOGLE_SERVICES_JSON` in Expo (preview), FCM V1 key uploaded by "Upload FCM key" (FCM-only Expo credentials record, no keystore), secret deleted, Configure push green
+- [x] **Final Phase 3 APK:** EAS build c96497e9, commit `47c7cbd` (CI #125), Firebase config in the APK confirmed (project `runlime-a3849`), signing SHA-1 unchanged: https://expo.dev/artifacts/eas/G_euHwOUZLEUh8J3xPID2DEIkUh139fSVI6l15Qsiwk.apk
 - [ ] **Owner phone test and Phase 3 approval** (only the owner approves). Owner plan: test Phase 3 **once**, on the final APK with push included, using `docs/phase-3/RETEST.md`
 - [ ] **Owner decision before approving:** are profile photos visible on Private accounts? (Currently yes, to signed-in users, with the display name; attorney note in the Privacy Policy draft)
 - Repo stays **public** until the build is done (owner, intentional)

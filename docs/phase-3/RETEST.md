@@ -2,6 +2,8 @@
 
 Numbered per slice. Report pass or fail per step, with a screenshot for any failure. An APK link is added after slices 2, 4 and 6; slices 0, 1, 3 and 5 can be checked on the current APK or the website as noted.
 
+**Final Phase 3 APK (use this one for every step; push included):** https://expo.dev/artifacts/eas/G_euHwOUZLEUh8J3xPID2DEIkUh139fSVI6l15Qsiwk.apk — EAS build c96497e9, commit `47c7cbd` (CI #125), signing SHA-1 `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25` (same as before, so it installs over the old app), Firebase config: yes (project `runlime-a3849`). The per-slice APK links below are older builds; you don't need them.
+
 ## Slice 0: saved welcome answers survive a reinstall (Phase 2 item 7)
 Use the current staging APK (EAS build 5d8970b0) or any later one.
 0.1 Open the app signed in. Note the "Showing: …" filter line under the calendar (your saved areas and distances). If there is no such line, your account has no saved welcome answers (the screens were skipped): say so in your report and skip this slice; an "Edit my areas and distances" item comes with the Settings work.
@@ -63,7 +65,7 @@ Use two phones, or your account plus a second test account on another phone. Bot
 5.5 Open the page on your phone's browser: nothing is cut off and there's no sideways scrolling.
 
 ## Slice 6: notifications (inbox first, then phone notifications)
-**APK (slice 6, EAS build d880d4b5, commit `e18d12a`):** https://expo.dev/artifacts/eas/g5DglIwRvhl6hWaBYitvt3mTmj7G1QnBNq932JVkh3E.apk — contains every Phase 3 slice. Phone notifications only start after the Firebase setup and a build made after it.
+**APK (slice 6, EAS build d880d4b5, commit `e18d12a`):** https://expo.dev/artifacts/eas/g5DglIwRvhl6hWaBYitvt3mTmj7G1QnBNq932JVkh3E.apk — contains every Phase 3 slice. Phone notifications work in the final APK above (Firebase set up 2026-10-18).
 Inbox (works without Firebase):
 6.1 The bell (top right) shows a red number when you have unread notifications. Tap it: **Notifications** lists them, newest first; unread ones have a green dot.
 6.2 Second account: follow your account (Private): your bell shows "<name> asked to follow you". Tap it: Followers → Requests opens. Approve: the second account gets "<you> approved your follow request".
@@ -72,7 +74,7 @@ Inbox (works without Firebase):
 6.5 Club join request (slice 4): the leader gets "<name> asked to join <club>"; after approval the member gets "You're now a member of <club>".
 6.6 Profile → **Notification settings**: turn **Updates from race organisers** off, **Save**, send another update (next week, or ask me to lower the limit): you don't get it. Turn it back on.
 6.7 **Mark all as read** clears the dots and the bell number.
-Phone notifications (after `docs/phase-3/FIREBASE-SETUP.md` and the new APK):
+Phone notifications (final APK):
 6.8 After your first **Going** on a race, a screen explains notifications **before** Android's own "Allow RunLime to send you notifications?" prompt (Android 13+). Tap **Turn on notifications**, then **Allow**: "Notifications are on."
 6.9 Lock the phone. From the website, postpone the race or send an update: a phone notification arrives within about a minute. Tap it: the race opens in the app.
 6.10 Notification settings shows "Phone notifications: On". If you tapped **Don't allow** in step 6.8, it shows **Open phone settings** instead (no repeated prompts).

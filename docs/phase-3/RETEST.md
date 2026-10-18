@@ -22,8 +22,8 @@ The photo picker is new native code, so the phone steps need the **slice 2 APK**
 1.7 Optional (needs a second account): from the second account, report the first account's photo (available once profiles are visible to others in slices 2–3). Admin → Reports → **Remove photo**: the photo disappears from the first account's profile.
 Not on the phone yet: a Report button on other people's photos appears in slice 2 (who's going) and slice 3 (follower profiles).
 
-## Slice 2: RSVPs and My races (new APK: link added when built)
-Install the slice 2 APK over the old one. Then also do the slice 1 phone steps above.
+## Slice 2: RSVPs and My races
+**APK (slice 2, EAS build d9d2ae89, commit `227ae53`):** https://expo.dev/artifacts/eas/oNDfdNw_bV3L-P4wRfzBqlbl-6WlhVVTU7hyv1daRiQ.apk — install it over the old one (same signing key). Then also do the slice 1 phone steps above.
 2.1 Open any upcoming race. Under **Are you going?** it says "No one has said they are going yet." (or a count).
 2.2 Tap **Going**. Steppers appear: **Adults in your group (including you)** starts at 1 and can't go below 1; **Children under 18**. The note says children must be with an adult and only the number is kept.
 2.3 Set 2 adults and 1 child, tap **Save RSVP**: "You're going. It's in My races." The count shows "2 going".

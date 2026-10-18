@@ -95,11 +95,11 @@
 
 ## Phase 3 checklist (current; scope approved 2026-10-18)
 Owner decisions: push = Expo Push + Firebase Cloud Messaging (inbox first, then push); organiser messages 2 per race per week (setting); club turnout hidden below 5 (setting); RSVP Going / Maybe / Not going. One slice at a time, CI green before the next; APK after slices 2, 4 and 6. Only the owner approves the phase.
-- [ ] Google Play policy recheck (UGC, profile photos, social, notifications), with sources
-- [ ] Slice 0: item 7, saved welcome preferences survive uninstall/reinstall
-- [ ] Slice 1: runner level + profile photos (location data stripped, report, admin removal queue, audit)
-- [ ] Slice 2: RSVPs (adults/children counts) + My races → APK
-- [ ] Slice 3: followers (private by default, requests, block, report; passport + races attending)
+- [x] Google Play policy recheck (UGC, profile photos, social, notifications), with sources: `docs/phase-3/POLICY-CHECK.md`
+- [x] Slice 0: item 7, saved welcome preferences survive uninstall/reinstall (test; CI #114 on `23279f6`)
+- [x] Slice 1: runner level + profile photos (location data stripped, report, admin removal queue, audit) — CI #115 on `9a67519`; deployed (web #32, database #55)
+- [x] Slice 2: RSVPs (adults/children counts) + My races — CI #116 on `227ae53`; deployed (web #33, database #56); APK EAS build d9d2ae89
+- [x] Slice 3: followers (private by default, requests, block, report; passport + races attending) — CI #117 on `99c242d`; deploying
 - [ ] Slice 4: clubs (leader approval, new-club requests, primary club, turnout below 5 hidden) → APK
 - [ ] Slice 5: organiser attendance page
 - [ ] Slice 6: notifications (inbox, then push; postponed-to, cancelled, day-before, organiser messages with limit) → APK

@@ -40,6 +40,11 @@ jobs:
             raw=$("$signer" verify --print-certs /tmp/app.apk | grep -m1 'certificate SHA-1 digest' | sed 's/.*digest: *//')
             sha1=$(echo "$raw" | tr 'a-f' 'A-F' | sed 's/../&:/g; s/:$//')
             printf '### Android build %s: FINISHED\n\n- APK (open on your phone): %s\n- Signing SHA-1: `%s`\n' "$BUILD_ID" "$url" "$sha1" | tee -a "$GITHUB_STEP_SUMMARY"
+            # Push readiness: google-services.json becomes string resources; print only the (public) project ID.
+            aapt2=$(ls -d "$ANDROID_HOME"/build-tools/*/aapt2 2>/dev/null | sort -V | tail -1)
+            project=$("$aapt2" dump resources /tmp/app.apk 2>/dev/null | grep -A1 'string/project_id' | grep -o '"[^"]*"' | tr -d '"' | head -1)
+            if [ -n "$project" ]; then firebase="yes (project $project)"; else firebase="no (phone notifications off in this build)"; fi
+            printf -- '- Firebase config in the APK: %s\n' "$firebase" | tee -a "$GITHUB_STEP_SUMMARY"
           fi
           node - <<'JS'
           const b = require('/tmp/build.json');

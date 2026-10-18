@@ -4,7 +4,7 @@ Numbered per slice. Report pass or fail per step, with a screenshot for any fail
 
 ## Slice 0: saved welcome answers survive a reinstall (Phase 2 item 7)
 Use the current staging APK (EAS build 5d8970b0) or any later one.
-0.1 Open the app signed in. Note the "Showing: …" filter line under the calendar (your saved areas and distances). If there is none, open menu → Edit preferences (or sign out, sign in, finish the welcome screens choosing at least one area and one distance).
+0.1 Open the app signed in. Note the "Showing: …" filter line under the calendar (your saved areas and distances). If there is no such line, your account has no saved welcome answers (the screens were skipped): say so in your report and skip this slice; an "Edit my areas and distances" item comes with the Settings work.
 0.2 Uninstall RunLime (long-press the icon → Uninstall).
 0.3 Install the APK again from the same link, pass the date-of-birth screen and sign in with the same account.
 0.4 Expected: the welcome screens do **not** appear; Home opens with the same "Showing: <areas, distances>" line.

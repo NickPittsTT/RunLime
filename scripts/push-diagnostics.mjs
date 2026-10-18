@@ -66,7 +66,7 @@ table(await sql(`
 async function logRows(query) {
   const end = new Date();
   const start = new Date(end.getTime() - 24 * 3600_000);
-  const qs = new URLSearchParams({ sql: query, iso_timestamp_start: start.toISOString(), iso_timestamp_end: end.toISOString() });
+  const qs = new URLSearchParams({ sql: query, iso_timestamp_start: start.toISOString().replace(/\.\d+Z$/, 'Z'), iso_timestamp_end: end.toISOString().replace(/\.\d+Z$/, 'Z') });
   const res = await fetch(`https://api.supabase.com/v1/projects/${ref}/analytics/endpoints/logs?${qs}`, { headers: { authorization: `Bearer ${mgmt}` } });
   const body = await res.json().catch(() => null);
   if (!res.ok || body?.error) return { error: `${res.status} ${JSON.stringify(body?.error ?? body).slice(0, 300)}` };
@@ -84,9 +84,9 @@ function printCalls(r, pattern) {
   }
 }
 section('2f. App calls to register/unregister a phone (API gateway, last 24 h)');
-printCalls(await logRows(`select timestamp, event_message from logs where source_name = 'edge_logs' and event_message like '%push_token%' order by timestamp desc limit 50`), /(un)?register_push_token/);
+printCalls(await logRows(`select timestamp, event_message from logs where source_name = 'edge_logs' and position(event_message, 'push_token') > 0 order by timestamp desc limit 50`), /(un)?register_push_token/);
 section('2g. Calls to the push-dispatch function (last 24 h)');
-printCalls(await logRows(`select timestamp, event_message from logs where source_name = 'function_edge_logs' and event_message like '%push-dispatch%' order by timestamp desc limit 20`), /push-dispatch/);
+printCalls(await logRows(`select timestamp, event_message from logs where source_name = 'function_edge_logs' and position(event_message, 'push-dispatch') > 0 order by timestamp desc limit 20`), /push-dispatch/);
 
 // 3/4. Expo: credentials for the package, then an optional direct test push
 const APP_ID = 'tt.runlime.app.dev';

@@ -2,8 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import type { ComponentProps } from 'react';
 import { Modal, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors } from '@runlime/ui-tokens';
 import { useTheme } from '@/lib/theme';
+import { Avatar } from './Avatar';
 import { T } from './ui';
 
 export interface MenuItem {
@@ -15,12 +15,7 @@ export interface MenuItem {
   danger?: boolean;
 }
 
-export function initials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  const first = parts[0]?.[0] ?? '';
-  const last = parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? '') : '';
-  return (first + last).toUpperCase() || '?';
-}
+export { initials } from './Avatar';
 
 /** N2: side menu. Header (avatar, name, nickname, quick stat) opens the full profile. */
 export function SideMenu({
@@ -28,6 +23,7 @@ export function SideMenu({
   onClose,
   name,
   nickname,
+  avatarPath,
   stat,
   onProfile,
   items,
@@ -36,6 +32,7 @@ export function SideMenu({
   onClose: () => void;
   name: string;
   nickname: string | null;
+  avatarPath?: string | null;
   stat: string;
   onProfile: () => void;
   items: MenuItem[];
@@ -55,9 +52,7 @@ export function SideMenu({
             onPress={onProfile}
             style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md, padding: spacing.lg, backgroundColor: c.surface, borderBottomWidth: 1, borderColor: c.border }}
           >
-            <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: colors.lime, alignItems: 'center', justifyContent: 'center' }}>
-              <T style={{ color: colors.ink, fontWeight: '800', fontSize: 20 }}>{initials(name)}</T>
-            </View>
+            <Avatar name={name} path={avatarPath} />
             <View style={{ flex: 1 }}>
               <T style={{ fontWeight: '800' }} numberOfLines={1}>
                 {name}

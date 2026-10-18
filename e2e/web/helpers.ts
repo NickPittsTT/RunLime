@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { expect, type Browser, type Page } from '@playwright/test';
+import { expect, type Browser, type BrowserContextOptions, type Page } from '@playwright/test';
 import { totp } from '../../scripts/lib/totp';
 
 export const SUPABASE_URL = process.env.SUPABASE_URL ?? 'http://127.0.0.1:54321';
@@ -79,10 +79,10 @@ export function currentTotp(secret: string) {
 }
 
 /** A platform admin signed in with TOTP (aal2) in a fresh browser context. */
-export async function signInAdmin(browser: Browser) {
+export async function signInAdmin(browser: Browser, contextOptions: BrowserContextOptions = {}) {
   const email = uniqueEmail('admin');
   await createUserWithProfile(email, 'Ada Admin', 'platform_admin');
-  const ctx = await browser.newContext();
+  const ctx = await browser.newContext(contextOptions);
   const page = await ctx.newPage();
   await signInWithEmail(page, email, '1985-02-02', '/admin');
   await expect(page).toHaveURL(/\/admin\/mfa/);
@@ -92,3 +92,22 @@ export async function signInAdmin(browser: Browser) {
   await expect(page.getByRole('heading', { name: 'Admin overview' })).toBeVisible();
   return { ctx, page };
 }
+
+/** A user with a password (for API-level steps such as uploading a photo), signed in with the anon key. */
+export async function signedInUser(displayName: string) {
+  const email = uniqueEmail(displayName.toLowerCase().replace(/\W+/g, '-'));
+  const password = `E2e-${Math.random().toString(36).slice(2)}-pw!`;
+  const db = admin();
+  const { data, error } = await db.auth.admin.createUser({ email, password, email_confirm: true });
+  if (error) throw error;
+  const { data: area } = await db.from('regions').select('id').eq('kind', 'area').limit(1).single();
+  await db.from('profiles').insert({ id: data.user.id, display_name: displayName, date_of_birth: '1988-03-03', home_region_id: area!.id });
+  await db.from('user_roles').insert({ user_id: data.user.id, role: 'participant' });
+  const client = createClient(SUPABASE_URL, process.env.SUPABASE_ANON_KEY!, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { data: s, error: sErr } = await client.auth.signInWithPassword({ email, password });
+  if (sErr) throw sErr;
+  return { id: data.user.id, client, token: s.session!.access_token };
+}
+
+/** A real 96x96 JPEG carrying GPS EXIF data and a comment ("home address"), as a phone photo would. */
+export const PHOTO_WITH_GPS = Buffer.from('/9j/4AAQSkZJRgABAQAAAQABAAD/4QCgRXhpZgAATU0AKgAAAAgAAgEPAAIAAAALAAAAJoglAAQAAAABAAAAMgAAAABQaG9uZU1ha2VyAAAABAABAAIAAAACTgAAAAACAAUAAAADAAAAaAADAAIAAAACVwAAAAAEAAUAAAADAAAAgAAAAAAAAAAKAAAAAQAAACcAAAABAAAFCwAAABkAAAA9AAAAAQAAAB8AAAABAAABIwAAABn//gAOaG9tZSBhZGRyZXNz/9sAQwAKBwcIBwYKCAgICwoKCw4YEA4NDQ4dFRYRGCMfJSQiHyIhJis3LyYpNCkhIjBBMTQ5Oz4+PiUuRElDPEg3PT47/9sAQwEKCwsODQ4cEBAcOygiKDs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7/8AAEQgAYABgAwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//EALUQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+v/EAB8BAAMBAQEBAQEBAQEAAAAAAAABAgMEBQYHCAkKC//EALURAAIBAgQEAwQHBQQEAAECdwABAgMRBAUhMQYSQVEHYXETIjKBCBRCkaGxwQkjM1LwFWJy0QoWJDThJfEXGBkaJicoKSo1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoKDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/aAAwDAQACEQMRAD8A26KKK+APOCiiigAooooAKKKKACiiigAooooAKKKKACiiorm5hs7dri4fZGmNzYJxk47fWmk27ICWisv/AISXR/8An7/8hv8A4Uf8JLo//P3/AOQ3/wAK2+rV/wCR/cxXRqUVl/8ACS6P/wA/f/kN/wDCj/hJdH/5+/8AyG/+FH1av/I/uYXRqUVFbXMN5brcW7743ztbBGcHHf6VLWLTTsxhRRRSAKKKKACsvxL/AMgC5/4B/wChitSsvxL/AMgC5/4B/wChit8N/Hh6r8xPY4KiiivsjMKKKKAO98Nf8gC2/wCB/wDoZrUrL8Nf8gC2/wCB/wDoZrUr43E/x5+r/M0WwUUUVgMKKKKACsvxL/yALn/gH/oYrUrL8S/8gC5/4B/6GK3w38eHqvzE9jgqKKK+yMwooooA73w1/wAgC2/4H/6Ga1Ky/DX/ACALb/gf/oZrUr43E/x5+r/M0WwUUUVgMKKKKACorm2hvLdre4TfG+Ny5Izg57fSpaKabTugMv8A4RrR/wDn0/8AIj/40f8ACNaP/wA+n/kR/wDGtSitvrNf+d/exWRl/wDCNaP/AM+n/kR/8aP+Ea0f/n0/8iP/AI1qUUfWa/8AO/vYWRFbW0Nnbrb26bI0ztXJOMnPf61LRRWLbbuxhRRRSAKKKKACiiigAooooAKKKKACiiigAooooA//2Q==', 'base64');

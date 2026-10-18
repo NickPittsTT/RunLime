@@ -216,6 +216,7 @@ export default function HomeScreen() {
         onClose={() => setMenuOpen(false)}
         name={profile?.display_name ?? ''}
         nickname={profile?.nickname ?? null}
+        avatarPath={profile?.avatar_path ?? null}
         stat="0 races · 0 km"
         onProfile={() => {
           setMenuOpen(false);

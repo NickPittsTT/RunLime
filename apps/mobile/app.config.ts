@@ -35,6 +35,12 @@ const config: ExpoConfig = {
       'android.permission.RECORD_AUDIO',
       'android.permission.READ_EXTERNAL_STORAGE',
       'android.permission.WRITE_EXTERNAL_STORAGE',
+      // Phase 3 profile photos use Android's system photo picker, which needs no permission (Play photo/video
+      // permissions policy): no camera, no media-library access.
+      'android.permission.CAMERA',
+      'android.permission.READ_MEDIA_IMAGES',
+      'android.permission.READ_MEDIA_VIDEO',
+      'android.permission.READ_MEDIA_VISUAL_USER_SELECTED',
       // The dev menu overlay needs this in development builds only.
       ...(APP_ENV === 'development' ? [] : ['android.permission.SYSTEM_ALERT_WINDOW']),
     ],
@@ -57,6 +63,7 @@ const config: ExpoConfig = {
         isAndroidForegroundServiceEnabled: false,
       },
     ],
+    ['expo-image-picker', { photosPermission: 'RunLime uses the photo you choose as your profile picture.', cameraPermission: false, microphonePermission: false }],
     '@maplibre/maplibre-react-native',
     ...(googleIosUrlScheme ? [['@react-native-google-signin/google-signin', { iosUrlScheme: googleIosUrlScheme }] as [string, unknown]] : []),
   ],

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Button, Notice, Screen, T, TextField } from '@/components/ui';
+import { removePhoto } from '@/lib/profilePhoto';
 import { supabase } from '@/lib/supabase';
 import { useSession } from '@/state/session';
 
@@ -27,6 +28,8 @@ export default function DeleteAccountScreen() {
         onPress={async () => {
           setBusy(true);
           setError(undefined);
+          // The photo file is deleted first (files are not removed by the database).
+          await removePhoto();
           const { error: err } = await supabase.rpc('delete_my_account');
           setBusy(false);
           if (err) return setError('We could not delete your account. Please try again or contact support.');

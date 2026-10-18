@@ -8,6 +8,8 @@ export interface Profile {
   nickname: string | null;
   home_region_id: string;
   account_privacy: 'private' | 'public';
+  runner_level: 'casual' | 'club_runner' | 'competitive' | null;
+  avatar_path: string | null;
 }
 
 export type SessionStatus = 'loading' | 'signedOut' | 'needsProfile' | 'ready';
@@ -39,7 +41,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     }
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, display_name, nickname, home_region_id, account_privacy')
+      .select('id, display_name, nickname, home_region_id, account_privacy, runner_level, avatar_path')
       .maybeSingle();
     if (error) {
       // Offline or server error: keep the session, retry on next refresh.

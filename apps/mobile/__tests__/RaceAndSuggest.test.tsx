@@ -19,6 +19,10 @@ jest.mock('expo-router', () => ({
   Stack: { Screen: () => null },
 }));
 jest.mock('expo-web-browser', () => ({ openBrowserAsync: jest.fn() }));
+const mockRefreshProfile = jest.fn(async () => undefined);
+jest.mock('@/state/session', () => ({
+  useSession: () => ({ profile: { id: 'user-1', display_name: 'Ana', runner_level: null }, refreshProfile: mockRefreshProfile }),
+}));
 const mockUpsert = jest.fn(async () => ({ data: null, error: null }));
 jest.mock('@/lib/supabase', () => ({
   supabase: {
@@ -203,6 +207,20 @@ describe('onboarding (M8/M9)', () => {
       expect.objectContaining({ user_id: 'user-1', region_ids: ['pos'], distance_km: [5], onboarded_at: expect.any(String) }),
       { onConflict: 'user_id' },
     );
+  });
+
+  it('M9a: the optional runner level is saved to the profile', async () => {
+    const update = jest.fn(() => ({ eq: async () => ({ error: null }) }));
+    const base = mockFrom.getMockImplementation()!;
+    mockFrom.mockImplementation((t: string) => (t === 'profiles' ? { update } : base(t)));
+    render(<OnboardingScreen />);
+    for (let i = 0; i < 3; i++) fireEvent.press(screen.getByRole('button', { name: 'Next' }));
+    expect(await screen.findByText('Just for your profile. It never changes how runs or times are checked.')).toBeTruthy();
+    fireEvent.press(screen.getByRole('checkbox', { name: 'Competitive' }));
+    fireEvent.press(screen.getByRole('button', { name: 'Show races' }));
+    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('/'));
+    expect(update).toHaveBeenCalledWith({ runner_level: 'competitive' });
+    expect(mockRefreshProfile).toHaveBeenCalled();
   });
 
   it('Select all / Clear all for areas and distances; Fun walk / under 5K is offered', async () => {

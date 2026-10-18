@@ -14,6 +14,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <Link href="/admin/events">Events</Link>
         <Link href="/admin/suggestions">Suggestions</Link>
         <Link href="/admin/clubs">Clubs</Link>
+        <Link href="/admin/reports">Reports</Link>
         <Link href="/admin/settings">Settings</Link>
         <span className="ml-auto text-sm text-ink-muted">{isSuperAdmin ? 'Super admin' : 'Platform admin'} · MFA verified</span>
       </nav>

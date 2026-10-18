@@ -10,7 +10,8 @@
     "./rules": "./src/rules/index.ts",
     "./schemas": "./src/schemas/index.ts",
     "./legal": "./src/legal/index.ts",
-    "./events": "./src/events/index.ts"
+    "./events": "./src/events/index.ts",
+    "./community": "./src/community/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

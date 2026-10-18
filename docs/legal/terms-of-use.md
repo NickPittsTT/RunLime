@@ -1,11 +1,11 @@
 ---
 slug: terms
 title: Terms of Use
-version: 2026-10-17-draft4
+version: 2026-10-18-draft5
 ---
 # RunLime Terms of Use
 
-**Last updated:** 15 October 2026 (draft)
+**Last updated:** 18 October 2026 (draft)
 
 These terms are an agreement between you and RunLime, operated by {{operator_name}} ("RunLime", "we"). By creating an account you accept them, along with our [Privacy Policy](/legal/privacy), [Moderation Policy](/legal/moderation), [Child Safety Policy](/legal/child-safety) and [Health Disclaimer](/legal/health).
 
@@ -21,13 +21,15 @@ These terms are an agreement between you and RunLime, operated by {{operator_nam
 - Your participation in any event is between you and the organiser. Follow the organiser's rules, the law and any marshal instructions.
 
 ## 3. Your content
-- You keep ownership of what you post (nickname, shared times, reports). You give us a non-exclusive, royalty-free licence to host and display it in RunLime for as long as it's live.
+- You keep ownership of what you post (nickname, profile photo, shared times, reports). You give us a non-exclusive, royalty-free licence to host and display it in RunLime for as long as it's live.
 - Community times are self-recorded and unverified (see the [Community Times notice](/legal/community-times)). No prizes, rewards or rankings are tied to them.
-- You must not post anything unlawful, false, harassing, hateful, sexual, or that exploits or endangers children. You must not impersonate anyone, spam, or try to break or misuse the service. See the [Moderation Policy](/legal/moderation).
+- You must not post anything unlawful, false, harassing, hateful, sexual, or that exploits or endangers children. This includes profile photos, which must follow the photo rules in the [Moderation Policy](/legal/moderation) (for example, no photos where a child is the main subject). You must not impersonate anyone, spam, or try to break or misuse the service.
 - We may remove content and warn, suspend or close accounts that break these terms.
 
-## 4. Followers and safety
-You can make your account Private (followers need your approval) or Public. You can remove followers and block anyone at any time. Report anything that worries you from inside the app.
+## 4. Followers, clubs, notifications and safety
+You can make your account Private (followers need your approval) or Public. You can remove followers and block anyone at any time. Report anything that worries you from inside the app, including with "Report a safety concern".
+
+Club leaders approve who joins their club and must do so fairly. Club turnout shows counts only. Organisers may send short updates about a race to people going to it, within the limit RunLime sets; they must not use them for advertising. You choose which notifications you get, and can turn them off at any time.
 
 ## 5. Premium subscription
 - RunLime Premium is an optional auto-renewing subscription, bought through the Apple App Store or Google Play.

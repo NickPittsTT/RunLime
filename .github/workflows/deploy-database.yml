@@ -80,7 +80,7 @@ jobs:
         if: steps.check.outputs.ready == 'true'
       - run: supabase db push
         if: steps.check.outputs.ready == 'true'
-      - run: supabase functions deploy emergency-contact export-user-data emergency-contact-keys --project-ref "$SUPABASE_PROJECT_REF"
+      - run: supabase functions deploy emergency-contact export-user-data emergency-contact-keys profile-photo --project-ref "$SUPABASE_PROJECT_REF"
         if: steps.check.outputs.ready == 'true'
       - name: Sync legal documents (published)
         if: steps.check.outputs.ready == 'true'

@@ -1,10 +1,13 @@
+import { RUNNER_LEVELS, RUNNER_LEVEL_NOTE, type RunnerLevel } from '@runlime/shared/community';
 import { profileUpdateSchema } from '@runlime/shared/schemas';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { AreaPicker } from '@/components/AreaPicker';
+import { Avatar } from '@/components/Avatar';
 import { Button, Notice, Screen, T, TextField } from '@/components/ui';
 import { friendlyError } from '@/lib/errors';
+import { chooseAndUploadPhoto, removePhoto } from '@/lib/profilePhoto';
 import { useAreas } from '@/lib/regions';
 import { supabase } from '@/lib/supabase';
 import { useTheme } from '@/lib/theme';
@@ -19,6 +22,9 @@ export default function EditProfileScreen() {
   const [nickname, setNickname] = useState(profile?.nickname ?? '');
   const [areaId, setAreaId] = useState(profile?.home_region_id ?? null);
   const [privacy, setPrivacy] = useState<'private' | 'public'>(profile?.account_privacy ?? 'private');
+  const [level, setLevel] = useState<RunnerLevel | null>(profile?.runner_level ?? null);
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const [photoMessage, setPhotoMessage] = useState<{ tone: 'danger' | 'success'; text: string }>();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string>();
   const [busy, setBusy] = useState(false);
@@ -27,6 +33,45 @@ export default function EditProfileScreen() {
   return (
     <Screen>
       {formError ? <Notice tone="danger">{formError}</Notice> : null}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+        <Avatar name={displayName || profile.display_name} path={profile.avatar_path} size={80} />
+        <View style={{ flex: 1, gap: 8 }}>
+          <Button
+            label={profile.avatar_path ? 'Change photo' : 'Add a photo'}
+            variant="secondary"
+            busy={photoBusy}
+            onPress={async () => {
+              setPhotoBusy(true);
+              setPhotoMessage(undefined);
+              const r = await chooseAndUploadPhoto().catch(() => ({ ok: false as const, message: 'We could not save your photo. Please try again.' }));
+              if (r.ok) {
+                await refreshProfile();
+                setPhotoMessage({ tone: 'success', text: 'Photo saved.' });
+              } else if (r.message) setPhotoMessage({ tone: 'danger', text: r.message });
+              setPhotoBusy(false);
+            }}
+          />
+          {profile.avatar_path ? (
+            <Button
+              label="Remove photo"
+              variant="secondary"
+              disabled={photoBusy}
+              onPress={async () => {
+                setPhotoBusy(true);
+                const ok = await removePhoto();
+                if (ok) await refreshProfile();
+                setPhotoMessage(ok ? { tone: 'success', text: 'Photo removed.' } : { tone: 'danger', text: 'We could not remove your photo. Please try again.' });
+                setPhotoBusy(false);
+              }}
+            />
+          ) : null}
+        </View>
+      </View>
+      <T variant="caption">
+        Your photo appears with your display name. Location and other hidden details are removed from it. Photos must follow our rules (no nudity, hate,
+        or other people without their permission); anyone can report a photo.
+      </T>
+      {photoMessage ? <Notice tone={photoMessage.tone}>{photoMessage.text}</Notice> : null}
       <TextField label="Display name" value={displayName} onChangeText={setDisplayName} maxLength={50} error={errors.displayName} />
       <TextField label="Nickname (optional)" value={nickname} onChangeText={setNickname} maxLength={30} error={errors.nickname} autoCapitalize="none" />
       {areas ? <AreaPicker areas={areas} value={areaId} onChange={setAreaId} /> : null}
@@ -52,6 +97,23 @@ export default function EditProfileScreen() {
         ))}
         <T variant="caption">Your runs, routes, times and history are always private unless you share a result.</T>
       </View>
+      <View accessibilityRole="radiogroup" accessibilityLabel="Runner level (optional)" style={{ gap: 8 }}>
+        <T style={{ fontWeight: '700' }}>Runner level (optional)</T>
+        {([{ value: null, label: 'Not set', help: 'Leave it blank if you prefer.' }, ...RUNNER_LEVELS] as const).map((l) => (
+          <Pressable
+            key={l.value ?? 'none'}
+            accessibilityRole="radio"
+            accessibilityState={{ checked: level === l.value }}
+            accessibilityHint={l.help}
+            onPress={() => setLevel(l.value)}
+            style={{ minHeight: minTouchTarget, padding: 12, borderRadius: radius.md, borderWidth: level === l.value ? 2 : 1, borderColor: level === l.value ? c.leaf : c.border }}
+          >
+            <T style={{ fontWeight: '700' }}>{l.label}</T>
+            <T variant="caption">{l.help}</T>
+          </Pressable>
+        ))}
+        <T variant="caption">{RUNNER_LEVEL_NOTE}</T>
+      </View>
       <Button
         label="Save"
         busy={busy}
@@ -62,7 +124,7 @@ export default function EditProfileScreen() {
           setBusy(true);
           const { error } = await supabase
             .from('profiles')
-            .update({ display_name: parsed.data.displayName, nickname: parsed.data.nickname, home_region_id: parsed.data.homeRegionId, account_privacy: privacy })
+            .update({ display_name: parsed.data.displayName, nickname: parsed.data.nickname, home_region_id: parsed.data.homeRegionId, account_privacy: privacy, runner_level: level })
             .eq('id', profile.id);
           setBusy(false);
           if (error) return setFormError(error.code === '23505' ? 'That nickname is taken. Try another.' : friendlyError(error));

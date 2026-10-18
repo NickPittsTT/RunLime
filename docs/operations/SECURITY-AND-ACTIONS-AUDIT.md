@@ -48,3 +48,13 @@ The CI "checks" job now runs gitleaks over the **whole history** on every run (p
 **Expected after the changes:** CI ~6–7 min per push to the phase branch (~2 min when only the app changed), deploys only when relevant, builds ~1 min to start + ~2 min to fetch. At an active pace of ~4 pushes a day, about **900–1,000 minutes/month**, under the 2,000 limit with room for build-heavy weeks. Pushing in batches keeps it lower.
 
 **Before switching to private:** nothing else in the workflows depends on the repo being public. Expo, Supabase and Cloudflare keep working (they use stored tokens). Check usage any time in GitHub → Settings → Billing and plans → Usage.
+
+## 5. Status check (2026-10-18)
+
+| Item | Status | How checked |
+|---|---|---|
+| Repository visibility | **Public** (API: `"private": false, "visibility": "public"` at 2026-10-18) | GitHub REST API from the build environment |
+| Secret scanning / push protection | Could not be read (the build environment's GitHub access blocks the security-settings endpoints). On public repos both are free; on **private repos owned by a personal account on GitHub Free they are not available** (GitHub Secret Protection needs Team/Enterprise, about US$19 per committer per month) | GitHub docs via search: https://docs.github.com/en/code-security/secret-scanning/introduction/about-secret-scanning |
+| Private vulnerability reporting | Off | API |
+| Safety net | **gitleaks in CI stays** (whole history, every CI run). It is the secret check once the repo is private | `.github/workflows/ci.yml` |
+| Actions minutes, October (11–18 Oct) | **908 minutes** if the repo had been private (0 billed: public repos are free). CI 638 (113 runs), Android builds 177 (8), deploys 69, tools 24. Since the minute-saving changes (17 Oct 21:49 UTC): 22 minutes for one full fix cycle | Job timings from the Actions API, each job rounded up to the minute |

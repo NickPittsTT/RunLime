@@ -1,6 +1,6 @@
 # RunLime — Progress
 
-**Last updated:** 2026-10-18 (Phase 2 approved; Phase 3 plan waiting for approval)
+**Last updated:** 2026-10-18 (Phase 2 approved by the owner; Phase 3 in progress)
 
 ## Phases
 
@@ -8,8 +8,8 @@
 |---|---|---|---|
 | 0 | Questions, architecture, data model, screens, brand, costs | Approved by owner (rev 2) | 100% |
 | 1 | Setup, environments, auth + 18+ age gate, roles, RLS, seed, legal drafts | Approved by owner (2026-10-11) | 100% |
-| 2 | Events: organiser portal, admin approval, onboarding, calendar, event page, public web | **Approved by owner (2026-10-18)** | 100% |
-| 3 | RSVP, followers, clubs (leaders, approvals, requests, turnout), runner level, profile photos, notifications/broadcasts, attendance dashboard | Plan drafted (`docs/phase-3/PLAN.md`); **not started, waiting for owner approval** | 0% |
+| 2 | Events: organiser portal, admin approval, onboarding, calendar, event page, public web | **Approved by the owner (17 Oct 2026)** after phone checks C1–C5 | 100% |
+| 3 | RSVP, followers, clubs (leaders, approvals, requests, turnout), runner level, profile photos, notifications/broadcasts, attendance dashboard | **Scope approved by the owner (2026-10-18)**; in progress, slice by slice (`docs/phase-3/PLAN.md`) | 0% |
 | 4 | GPS check-in | Not started | 0% |
 | 5 | Run tracker, history, totals | Not started | 0% |
 | 6 | Community times, activity + club leaderboards, verified runners, sharing, reporting/blocking, finisher card → then the real-race pilot | Not started | 0% |
@@ -88,9 +88,23 @@
 - [x] **Owner final re-test (2026-10-18):** everything passed except postponing to a new date (the new date wasn't shown)
 - [x] Root cause from staging's history: the new date overwrote the race's date and the original was discarded, so nothing could say "Postponed to". Fixed: `events.original_starts_at` keeps the original; app list cards, race page and month view show "Postponed to <date, time>" with the original struck through; "Back on" restores the original date. pgTAP 015, Jest, Playwright end-to-end. CI run #113 green on `9495f05`: https://github.com/NickPittsTT/RunLime/actions/runs/39077821831
 - [x] Earlier fixes confirmed deployed: reason box + website map (`c5604be`, CI run #110 https://github.com/NickPittsTT/RunLime/actions/runs/39072081100, Deploy web run 39072404213)
-- [x] **Phase 2 approved by the owner (2026-10-18)**, on CI passing for the postponement fix. Owner's phone re-check of RETEST.md section C still to report (APK: EAS build 5d8970b0, https://expo.dev/artifacts/eas/j3POv-qs8USo_a0i1yR-7ChnPAuGXaYxaJ4m2nsGNOA.apk; Deploy web run 31 and Deploy database run 54 green on `9495f05`); item 7 (preferences after reinstall) deferred by the owner
-- [ ] PSCU listing on staging still shows 18 Nov 2:34 pm from the earlier test: owner to set its real date
+- [x] Final build: EAS build 5d8970b0, https://expo.dev/artifacts/eas/j3POv-qs8USo_a0i1yR-7ChnPAuGXaYxaJ4m2nsGNOA.apk; Deploy web run 31 and Deploy database run 54 green on `9495f05`
+- [x] **Phase 2 approved by the owner (17 Oct 2026)** after phone checks C1–C5 passed on that APK (new date shown, original struck through, banner and calendar correct, "Back on" restores the original date). Item 7 (saved preferences after reinstall) moves to the start of Phase 3 (slice 0)
+- [ ] **Owner:** re-enter the PSCU race date as 31 Oct 2026, 6:00 AM in the admin form (staging still shows 18 Nov 2:34 pm from the earlier test). Claude does not change it
 - [x] Owner: refund option A (100% after the listing has been live) kept
+
+## Phase 3 checklist (current; scope approved 2026-10-18)
+Owner decisions: push = Expo Push + Firebase Cloud Messaging (inbox first, then push); organiser messages 2 per race per week (setting); club turnout hidden below 5 (setting); RSVP Going / Maybe / Not going. One slice at a time, CI green before the next; APK after slices 2, 4 and 6. Only the owner approves the phase.
+- [ ] Google Play policy recheck (UGC, profile photos, social, notifications), with sources
+- [ ] Slice 0: item 7, saved welcome preferences survive uninstall/reinstall
+- [ ] Slice 1: runner level + profile photos (location data stripped, report, admin removal queue, audit)
+- [ ] Slice 2: RSVPs (adults/children counts) + My races → APK
+- [ ] Slice 3: followers (private by default, requests, block, report; passport + races attending)
+- [ ] Slice 4: clubs (leader approval, new-club requests, primary club, turnout below 5 hidden) → APK
+- [ ] Slice 5: organiser attendance page
+- [ ] Slice 6: notifications (inbox, then push; postponed-to, cancelled, day-before, organiser messages with limit) → APK
+- [ ] Privacy Policy + Moderation Policy drafts updated; attorney flags
+- [ ] `docs/phase-3/RETEST.md` phone checks per slice
 
 ## Phase 1 approval items (owner, 2026-10-11)
 - [x] a. CI fully green on GitHub, including web E2E (see the latest run in the Phase 1 review)

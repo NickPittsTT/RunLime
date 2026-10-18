@@ -3,7 +3,7 @@
 Numbered per slice. Report pass or fail per step, with a screenshot for any failure. An APK link is added after slices 2, 4 and 6; slices 0, 1, 3 and 5 can be checked on the current APK or the website as noted.
 
 ## Fix round (2026-10-18) — test only these, on the new APK
-**APK:** FIXAPK — install over the old app (same signing key). Open it once while signed in: that connects this phone for notifications.
+**APK:** https://expo.dev/artifacts/eas/UjmOq-8OOhMBJ65bbJO5LyQ0j5rTd1xQ0O9CMf7ANv8.apk (EAS build a90e523c, commit `11be7a2`, CI #132, Firebase config confirmed) — install over the old app (same signing key). Open it once while signed in: that connects this phone for notifications.
 
 **F1. Phone notifications (was 6.9 failed)**
 F1.1 Menu → Notification settings: it says **Phone notifications: On**. ("On" now means this phone is connected to your account, not just allowed.)

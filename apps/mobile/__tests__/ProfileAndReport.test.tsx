@@ -98,6 +98,8 @@ describe('profile photo', () => {
     fireEvent.press(screen.getByRole('button', { name: 'Add a photo' }));
     await waitFor(() => expect(mockPick).toHaveBeenCalled());
     expect(mockCall).not.toHaveBeenCalled();
+    // The button is disabled while the first (cancelled) pick finishes; pressing earlier is ignored (CI run 124).
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Add a photo' })).not.toBeDisabled());
     mockPick.mockResolvedValue({ canceled: false, assets: [{ uri: 'file:///tiny.jpg' }] });
     mockManipulate.mockResolvedValue({ uri: 'file:///tiny-small.jpg' });
     mockCall.mockResolvedValue({ ok: false, json: async () => ({ error: 'bad_size' }) });

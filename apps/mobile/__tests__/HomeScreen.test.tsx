@@ -122,6 +122,21 @@ describe('home: race calendar', () => {
     await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('/onboarding'));
   });
 
+  it('item 7: after uninstall/reinstall (nothing on the phone) the welcome answers come back from the account', async () => {
+    await AsyncStorage.clear(); // a fresh install has no device copy
+    mockFrom.mockImplementation((table: string) => {
+      if (table === 'events') return queryMock({ data: EVENTS, error: null });
+      if (table === 'user_preferences')
+        return queryMock({ data: { region_ids: ['pos'], distance_km: [5], onboarded_at: '2026-10-15T12:00:00Z' }, error: null });
+      if (table === 'regions') return queryMock({ data: [{ id: 'pos', name: 'Port of Spain' }], error: null });
+      return queryMock({ data: [], error: null });
+    });
+    render(<HomeScreen />);
+    // The saved areas and distances are the calendar filters again, and the welcome screens are skipped.
+    expect(await screen.findByText(/Showing: Port of Spain, 5K/)).toBeTruthy();
+    expect(mockReplace).not.toHaveBeenCalledWith('/onboarding');
+  });
+
   it('offline: shows the saved calendar with a banner', async () => {
     await AsyncStorage.setItem(CALENDAR_CACHE_KEY, JSON.stringify({ savedAt: new Date().toISOString(), events: [race('c', 3, { name: 'Saved Race' })] }));
     backend(null, true);

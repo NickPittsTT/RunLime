@@ -8,7 +8,7 @@ Free tools only. Anything that costs money is marked **(cost)**.
 | # | Item | When | Status (evidence) |
 |---|---|---|---|
 | 1 | RLS/grant/policy baseline test + Supabase Security Advisor in CI | Now | **Built.** `supabase/tests/024_security_baseline.test.sql` (12 checks, mutation-tested); splinter step in `ci.yml`; hosted advisor after every DB deploy (`scripts/hosted-advisor.mjs`) |
-| 2 | Secret scan of the built web bundle and APK | Now | **Built.** `scripts/scan-build-secrets.mjs` in `ci.yml`, `deploy-web.yml` (before deploy), `mobile-build-logs.yml` (every APK) |
+| 2 | Secret scan of the built web bundle and APK | Now | **Built.** `scripts/scan-build-secrets.mjs` in `ci.yml`, `deploy-web.yml` (before deploy), `mobile-build-logs.yml` (every APK). Real staging APK a90e523c scanned clean (1,453 files; staging service-role key, DB password and Expo token checked by value) after fixing two false-positive rules found on its first scan |
 | 3 | Dependabot + `pnpm audit` (high/critical fails) + patch policy | Now | **Built** (§5). Alerts/security updates need one owner click (§9) |
 | 4 | This plan: controls, risks, MASVS/ASVS | Now | **Written** |
 | 5 | Incident response | Now | **Written:** `docs/operations/INCIDENT-RESPONSE.md` |
@@ -180,6 +180,7 @@ On GitHub Free, **environments and environment secrets are ignored in private re
 Revisit this plan at every phase gate and after any incident (`INCIDENT-RESPONSE.md`). Update the risk register when a feature adds new data (Phase 4: location attempts; Phase 5: run tracks).
 
 ## 9. Owner actions
+0. **Urgent: the `SUPABASE_ACCESS_TOKEN` GitHub secret no longer works** ("Invalid access token" on 2026-10-24). Until it's replaced, database deploys stop before applying migrations, so **the hardening migration is not on staging yet**, and the hosted advisor can't run. Fix: supabase.com → Account → **Access tokens** → generate a new token (name "RunLime GitHub", choose an expiry you'll remember) → GitHub → Settings → Environments → staging → update `SUPABASE_ACCESS_TOKEN` → tell Claude, who re-runs Deploy database.
 1. **Turn on Dependabot alerts and security updates:** GitHub → RunLime → Settings → Advanced Security (or "Code security") → **Dependency graph: On**, **Dependabot alerts: Enable**, **Dependabot security updates: Enable**. (GitHub refused these API calls from this session.)
 2. Confirm 2-Step Verification and recovery codes on runlimett@gmail.com (R11).
 3. Restrict the Firebase Android API key to the package and SHA-1 in Google Cloud (R17). Steps on request.

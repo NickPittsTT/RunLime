@@ -122,6 +122,7 @@ Owner decisions: push = Expo Push + Firebase Cloud Messaging (inbox first, then 
 - [x] 3. `pnpm audit --audit-level=high` in CI; Dependabot config; patch policy (critical 72 h). Fixed CRITICAL Next.js RCE (16.3.8 → 16.4.3); two documented exceptions (Expo CLI only), review 2026-11-23. **Owner:** switch on Dependabot alerts + security updates (Settings → Advanced Security)
 - [x] 4. Security plan: control inventory with evidence, risk register (R1–R18), MASVS v2 + ASVS 4.0.3 mapping
 - [x] 5. `docs/operations/INCIDENT-RESPONSE.md`
+- [ ] **Blocked (owner):** `SUPABASE_ACCESS_TOKEN` secret rejected by Supabase (2026-10-24) → Deploy database #63 stopped before migrations; hardening migration not on staging yet. Web deploy #38 shipped Next 16.4.3 (smoke test passed); only its CORS re-apply step failed (same cause)
 - [ ] 6–7 Before pilot (owner decisions): backups (§7.1), repo private in the documented order (§7.2)
 - [ ] 8–9 Before public launch: Turnstile, rate limits, CSP, WAF (needs custom domain); production project + guards (§7.3–7.4)
 

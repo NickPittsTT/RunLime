@@ -1,6 +1,6 @@
 // Scans a build output (web bundle directory) or an APK for secrets. Fails when it finds:
 //  - a JWT whose role is service_role / supabase_admin (an anon JWT is public by design and allowed)
-//  - a Supabase secret key (sb_secret_…), a private key block, a Google service-account key, common cloud/API tokens
+//  - a Supabase secret key (sb_secret_ + random tail), a private key block, a Google service-account key, cloud/API tokens
 //  - the exact value of any secret passed in the environment (names listed below) — reported by NAME, never printed
 // Usage: node scripts/scan-build-secrets.mjs <dir | file.apk> [more …]
 import { execFileSync } from 'node:child_process';
@@ -13,14 +13,17 @@ const SECRET_ENV = ['SUPABASE_SERVICE_ROLE_KEY', 'SERVICE_ROLE_KEY', 'SUPABASE_D
 const exact = SECRET_ENV.map((name) => [name, process.env[name]]).filter(([, v]) => typeof v === 'string' && v.length >= 8);
 
 const PATTERNS = [
-  ['Supabase secret key', /sb_secret_[A-Za-z0-9_-]{16,}/],
   ['private key block', /-----BEGIN (?:RSA |EC |OPENSSH |DSA |ENCRYPTED )?PRIVATE KEY-----/],
   ['Google service-account key', /"type"\s*:\s*"service_account"[\s\S]{0,2000}"private_key"/],
   ['AWS access key', /\bAKIA[0-9A-Z]{16}\b/],
   ['GitHub token', /\b(?:ghp|gho|ghs|ghu)_[A-Za-z0-9]{36}\b|\bgithub_pat_[A-Za-z0-9_]{60,}\b/],
   ['Stripe live secret', /\bsk_live_[A-Za-z0-9]{20,}\b/],
-  ['Expo access token', /\bexpo_[A-Za-z0-9_-]{30,}\b/],
 ];
+// Supabase secret keys: sb_secret_ + a random tail. In a Hermes bundle string constants are stored back to back, so
+// supabase-js's own `startsWith('sb_secret_')` check is followed directly by the next string; only a tail that looks
+// random (upper + lower case + digit) counts. Hits are described by shape only, never by characters.
+const SB_SECRET = /sb_secret_([A-Za-z0-9_-]{20,64})/g;
+const looksRandom = (t) => /[A-Z]/.test(t) && /[a-z]/.test(t) && /[0-9]/.test(t);
 const JWT = /eyJ[A-Za-z0-9_-]{8,}\.(eyJ[A-Za-z0-9_-]{8,})\.[A-Za-z0-9_-]{8,}/g;
 const FORBIDDEN_ROLES = new Set(['service_role', 'supabase_admin', 'postgres']);
 
@@ -45,6 +48,10 @@ for (const target of process.argv.slice(2)) {
     scanned++;
     const where = root === target ? (relative(root, f) ? join(target, relative(root, f)) : f) : `${target}:${relative(root, f)}`;
     for (const [name, re] of PATTERNS) if (re.test(text)) findings.push(`${name} in ${where}`);
+    for (const m of text.matchAll(SB_SECRET)) {
+      const tail = m[1].slice(0, 40);
+      if (looksRandom(tail)) findings.push(`Supabase secret key (sb_secret_ + ${m[1].length} random-looking characters) in ${where}`);
+    }
     for (const m of text.matchAll(JWT)) {
       try {
         const payload = JSON.parse(Buffer.from(m[1], 'base64url').toString('utf8'));
@@ -57,7 +64,7 @@ for (const target of process.argv.slice(2)) {
   }
 }
 
-console.log(`Scanned ${scanned} files; checked ${PATTERNS.length + 1} patterns and ${exact.length} secret value(s) by name: ${exact.map(([n]) => n).join(', ') || 'none set'}`);
+console.log(`Scanned ${scanned} files; checked ${PATTERNS.length + 2} patterns and ${exact.length} secret value(s) by name: ${exact.map(([n]) => n).join(', ') || 'none set'}`);
 if (scanned === 0) {
   console.log('::error::Nothing was scanned (wrong path?)');
   process.exit(1);

@@ -88,3 +88,6 @@ jobs:
         env:
           SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Security Advisor on the hosted project — fails on any ERROR (after the deploy, so a failure is an alert)
+        if: steps.check.outputs.ready == 'true'
+        run: node scripts/hosted-advisor.mjs

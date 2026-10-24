@@ -1,6 +1,7 @@
 # Read-only diagnostics against staging (no secrets printed). Run from Actions → "Staging diagnostics".
 #  - api-cache-headers: response headers the app receives for a public calendar query (caching investigation)
 #  - event-history: events matching a name, with status and change history (also finds near-duplicate names)
+#  - security-advisor: Supabase Security Advisor on staging (Management API); fails on ERROR
 #  - push: phone-notification delivery (tokens masked, sent status, cron runs, function responses, Expo credentials);
 #    send_test also sends one test notification to each registered phone and prints the Expo ticket + receipt
 name: Staging diagnostics
@@ -11,7 +12,7 @@ on:
       check:
         description: What to check
         type: choice
-        options: [api-cache-headers, event-history, push]
+        options: [api-cache-headers, event-history, push, security-advisor]
         default: api-cache-headers
       name:
         description: Event name fragment (event-history only)
@@ -27,7 +28,13 @@ jobs:
     environment: staging
     steps:
       - uses: actions/checkout@v5
-        if: inputs.check == 'event-history' || inputs.check == 'push'
+        if: inputs.check == 'event-history' || inputs.check == 'push' || inputs.check == 'security-advisor'
+      - name: Security Advisor (hosted)
+        if: inputs.check == 'security-advisor'
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+        run: node scripts/hosted-advisor.mjs
       - name: Push delivery diagnostics
         if: inputs.check == 'push'
         env:

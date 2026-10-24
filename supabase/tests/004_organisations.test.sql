@@ -23,9 +23,9 @@ select throws_ok(format($$select public.review_organisation(%L, 'verified')$$, :
 select tests.authenticate_as(:'admin', 'aal2');
 select throws_ok(format($$select public.review_organisation(%L, 'rejected', '')$$, :'org'), '22023', null, 'rejection needs a reason');
 select lives_ok(format($$select public.review_organisation(%L, 'verified')$$, :'org'), 'admin with MFA verifies');
-select ok(public.has_role('organiser', :'owner'), 'owner now has the organiser role');
+select ok(tests.user_has_role('organiser', :'owner'), 'owner now has the organiser role');
 select lives_ok(format($$select public.review_organisation(%L, 'suspended', 'Repeated spam broadcasts')$$, :'org'), 'admin suspends');
-select ok(not public.has_role('organiser', :'owner'), 'suspension removes the organiser role');
+select ok(not tests.user_has_role('organiser', :'owner'), 'suspension removes the organiser role');
 
 -- rate limit: counts successful applications per day (setting). Failed calls roll back and store nothing.
 select tests.clear_authentication();

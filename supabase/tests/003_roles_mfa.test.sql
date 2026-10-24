@@ -22,9 +22,9 @@ select tests.authenticate_as(:'super', 'aal1');
 select throws_ok(format($$select public.set_platform_admin(%L, true)$$, :'runner'), '42501', null, 'super admin without MFA cannot grant');
 select tests.authenticate_as(:'super', 'aal2');
 select lives_ok(format($$select public.set_platform_admin(%L, true)$$, :'runner'), 'super admin with MFA can grant');
-select ok(public.has_role('platform_admin', :'runner'), 'runner is now a platform admin');
+select ok(tests.user_has_role('platform_admin', :'runner'), 'runner is now a platform admin');
 select lives_ok(format($$select public.set_platform_admin(%L, false)$$, :'runner'), 'super admin can revoke');
-select ok(not public.has_role('platform_admin', :'runner'), 'role revoked');
+select ok(not tests.user_has_role('platform_admin', :'runner'), 'role revoked');
 select throws_ok(format($$select public.set_platform_admin(%L, false)$$, :'super'), '42501', null, 'super admin cannot change own role');
 
 select * from finish();

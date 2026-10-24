@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { describe, expect, it } from 'vitest';
 import { decryptString, encryptString, importKey, parseKeyVersion } from '../../../supabase/functions/_shared/aesgcm';
 

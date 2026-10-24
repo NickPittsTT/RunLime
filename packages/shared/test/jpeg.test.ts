@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { describe, expect, it } from 'vitest';
 import { hasJpegMetadata, stripJpegMetadata } from '../../../supabase/functions/_shared/jpeg';
 

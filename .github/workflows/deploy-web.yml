@@ -84,6 +84,13 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
           NEXT_PUBLIC_SITE_URL: ${{ vars.STAGING_WEB_URL }}
 
+      - name: Secret scan of the built site (before deploying; matches staging secrets by value, never prints them)
+        if: steps.check.outputs.ready == 'true'
+        run: node scripts/scan-build-secrets.mjs apps/web/.open-next
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
       - name: Free-plan size check (Workers Free allows 3 MiB compressed)
         if: steps.check.outputs.ready == 'true'
         working-directory: apps/web

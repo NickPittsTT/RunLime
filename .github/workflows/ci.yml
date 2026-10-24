@@ -51,6 +51,8 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Dependency audit (fails on high/critical; exceptions in package.json pnpm.auditConfig, reasons in SECURITY-PLAN.md)
+        run: pnpm audit --audit-level=high
       - run: pnpm turbo run typecheck lint test
 
   e2e-web:
@@ -73,8 +75,16 @@ jobs:
         run: |
           printf 'EMERGENCY_CONTACT_KEY_VERSION=1\nEMERGENCY_CONTACT_KEY_V1=%s\nALLOWED_ORIGINS=http://localhost:3000\n' "$(openssl rand -base64 32)" > supabase/functions/.env
       - run: supabase start -x realtime,imgproxy,postgres-meta,supavisor,vector,logflare,studio
-      - name: Database tests (pgTAP)
+      - name: Database tests (pgTAP; includes 024 security baseline — RLS, grants, policies, functions)
         run: supabase test db
+      - name: Security Advisor (Supabase splinter, pinned commit + checksum) — fails on any ERROR
+        run: |
+          set -euo pipefail
+          curl -sSL -o /tmp/splinter.sql https://raw.githubusercontent.com/supabase/splinter/fccca4b1c4d8b48b8ccd69bd6b30e84adcb92975/splinter.sql
+          echo "d8d558baad3e03832e521c527907fa50a9a172fabd899dd0f5c2504a5a0e9349  /tmp/splinter.sql" | sha256sum -c -
+          docker cp /tmp/splinter.sql supabase_db_runlime:/tmp/splinter.sql
+          docker exec supabase_db_runlime psql -U postgres -X -q -t -A -F $'\x1f' -R $'\x1e' -1 -f /tmp/splinter.sql > /tmp/advisor.out
+          node scripts/security-advisor.mjs /tmp/advisor.out
       - name: Export local Supabase keys
         run: |
           supabase status -o env | grep -E '^(ANON_KEY|SERVICE_ROLE_KEY|API_URL)=' | sed 's/"//g' >> "$GITHUB_ENV"
@@ -86,6 +96,8 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ env.ANON_KEY }}
           NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      - name: Secret scan of the built site (service-role JWTs, secret keys, private keys; the local service key by value)
+        run: node scripts/scan-build-secrets.mjs apps/web/.open-next
       - name: Free-plan size check (Workers Free allows 3 MiB compressed)
         working-directory: apps/web
         run: node ../../scripts/check-worker-size.mjs

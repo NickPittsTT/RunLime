@@ -1,0 +1,27 @@
+# Dependabot (free). Security updates (alerts + fix PRs) are switched on in Settings → Advanced Security; this file
+# adds a small weekly batch of routine updates. Grouped to keep pull requests (and CI minutes) low.
+# Patch policy: docs/operations/SECURITY-PLAN.md § Patch policy.
+version: 2
+updates:
+  - package-ecosystem: npm          # pnpm workspace (pnpm-lock.yaml)
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:00"
+      timezone: America/Port_of_Spain
+    open-pull-requests-limit: 3
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      # Majors are planned work (framework upgrades), not automatic PRs.
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]

@@ -12,8 +12,12 @@ on:
 jobs:
   logs:
     runs-on: ubuntu-latest
+    # staging: so the APK secret scan can match the staging secrets by value (never printed)
+    environment: staging
     env:
       EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v5
@@ -45,6 +49,10 @@ jobs:
             project=$("$aapt2" dump resources /tmp/app.apk 2>/dev/null | grep -A1 'string/project_id' | grep -o '"[^"]*"' | tr -d '"' | head -1)
             if [ -n "$project" ]; then firebase="yes (project $project)"; else firebase="no (phone notifications off in this build)"; fi
             printf -- '- Firebase config in the APK: %s\n' "$firebase" | tee -a "$GITHUB_STEP_SUMMARY"
+            # Secret scan of the APK (service-role JWTs, secret/private keys, staging secrets and EXPO_TOKEN by value).
+            if node ../../scripts/scan-build-secrets.mjs /tmp/app.apk; then scan="none found"; else scan="FOUND (see the log; do not install)"; fi
+            printf -- '- Secrets in the APK: %s\n' "$scan" | tee -a "$GITHUB_STEP_SUMMARY"
+            [ "$scan" = "none found" ] || exit 1
           fi
           node - <<'JS'
           const b = require('/tmp/build.json');

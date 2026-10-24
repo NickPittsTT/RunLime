@@ -19,7 +19,7 @@ select throws_ok(format($$select public.update_organisation(%L, 'bad-email', '86
 select lives_ok(format($$select public.update_organisation(%L, 'hello@arima.tt', '868-555-0199', 'https://arima.example', 'Weekly long runs and the Arima Velodrome fun run, since 2010.')$$, :'org'),
   'members edit organisation details');
 select lives_ok(format($$select public.add_organisation_member(%L, %L)$$, :'org', :'mate_email'), 'owner adds a manager by email');
-select ok(public.has_role('organiser', :'mate'), 'a manager of a verified organisation becomes an organiser');
+select ok(tests.user_has_role('organiser', :'mate'), 'a manager of a verified organisation becomes an organiser');
 
 select is((select count(*)::int from public.organisation_team(:'org')), 2, 'members see the team with display names');
 select tests.clear_authentication();
@@ -34,7 +34,7 @@ select throws_ok(format($$select public.remove_organisation_member(%L, %L)$$, :'
 select tests.authenticate_as(:'owner');
 select throws_ok(format($$select public.remove_organisation_member(%L, %L)$$, :'org', :'owner'), '22023', null, 'the last owner cannot be removed');
 select public.remove_organisation_member(:'org', :'mate');
-select ok(not public.has_role('organiser', :'mate'), 'removing the manager removes the organiser role');
+select ok(not tests.user_has_role('organiser', :'mate'), 'removing the manager removes the organiser role');
 
 select * from finish();
 rollback;

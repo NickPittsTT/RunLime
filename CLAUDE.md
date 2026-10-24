@@ -57,6 +57,8 @@ Living record of conventions and decisions. Update at the end of every phase.
 - Emergency contact: AES-256-GCM in the `emergency-contact` Edge Function; the key lives in function secrets. Do NOT use pgsodium (Supabase: pending deprecation).
 - `SECURITY DEFINER` functions always `set search_path = ''` and use schema-qualified names.
 - Every new table: `enable row level security` + at least one pgTAP test in `supabase/tests/`.
+- New tables/functions start with no anon/authenticated access (default privileges, 2026-10-24): grant exactly what is needed. `supabase/tests/024_security_baseline.test.sql` pins anon/authenticated privileges and the anon-callable definer functions; changing it is a deliberate decision. Supabase Security Advisor (splinter) runs in CI and fails on ERROR.
+- Nothing secret in shipped code: CI scans the web build and every APK (`scripts/scan-build-secrets.mjs`). Dependencies: `pnpm audit` high/critical fails CI; patch policy (critical 72 h) and exceptions in `docs/operations/SECURITY-PLAN.md`. Incidents: `docs/operations/INCIDENT-RESPONSE.md`.
 
 ## Decisions log
 | Date | Decision | Status |

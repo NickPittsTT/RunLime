@@ -116,6 +116,15 @@ Owner decisions: push = Expo Push + Firebase Cloud Messaging (inbox first, then 
 - Repo stays **public** until the build is done (owner, intentional)
 - Audit entries can now carry a reason (`audit.log.reason`, set by functions through `runlime.audit_reason`). First user: `ops_correct_event_start` (service role only, "Correct event date" workflow), used once for the PSCU date with the owner's permission
 
+## Security hardening (owner request, 2026-10-24) — `docs/operations/SECURITY-PLAN.md`
+- [x] 1. RLS/grant/policy baseline (pgTAP 024, 12 checks, mutation-tested) + Supabase Security Advisor (splinter) in CI, fails on ERROR; hosted advisor after DB deploys. Fixed: SECURITY DEFINER view, over-broad default grants (incl. TRUNCATE), trigger functions callable via /rpc, `has_role` revealing admins, `setting_int` exposing private settings. CI #133
+- [x] 2. Secret scan of the built web bundle (CI + before each staging deploy) and every APK (Mobile build logs); tested with planted secrets
+- [x] 3. `pnpm audit --audit-level=high` in CI; Dependabot config; patch policy (critical 72 h). Fixed CRITICAL Next.js RCE (16.3.8 → 16.4.3); two documented exceptions (Expo CLI only), review 2026-11-23. **Owner:** switch on Dependabot alerts + security updates (Settings → Advanced Security)
+- [x] 4. Security plan: control inventory with evidence, risk register (R1–R18), MASVS v2 + ASVS 4.0.3 mapping
+- [x] 5. `docs/operations/INCIDENT-RESPONSE.md`
+- [ ] 6–7 Before pilot (owner decisions): backups (§7.1), repo private in the documented order (§7.2)
+- [ ] 8–9 Before public launch: Turnstile, rate limits, CSP, WAF (needs custom domain); production project + guards (§7.3–7.4)
+
 ## Phase 4 notes (owner requirements, 2026-10-18; do NOT build before Phase 4)
 **Pin safeguards**
 - Satellite layer on the create-event map.

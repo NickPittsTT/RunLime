@@ -1,0 +1,80 @@
+# Android UI check on an emulator (owner retest R2, 2026-10-31): installs an EAS APK, signs in with a throwaway
+# staging account, types a long report with the keyboard open and checks that the report box and "Send report"
+# can sit fully above the keyboard. Screenshots are uploaded as an artifact. Staging only; prints no secrets.
+name: Android UI check
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_id:
+        description: EAS build ID; empty = latest Android build
+        required: false
+
+concurrency:
+  group: android-ui-check
+  cancel-in-progress: false
+
+jobs:
+  emulator:
+    runs-on: ubuntu-24.04
+    environment: staging
+    timeout-minutes: 45
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Download the APK
+        working-directory: apps/mobile
+        env:
+          BUILD_ID: ${{ inputs.build_id }}
+        run: |
+          set -euo pipefail
+          if [ -z "${BUILD_ID}" ]; then
+            BUILD_ID=$(npx --yes eas-cli@24.12.1 build:list --platform android --limit 1 --json --non-interactive | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>process.stdout.write(JSON.parse(s)[0].id))")
+          fi
+          npx --yes eas-cli@24.12.1 build:view "$BUILD_ID" --json > /tmp/build.json
+          url=$(node -e "const b=require('/tmp/build.json');process.stdout.write((b.artifacts&&b.artifacts.buildUrl)||'')")
+          [ -n "$url" ] || { echo "build $BUILD_ID has no APK (not finished?)"; exit 1; }
+          curl -fsSL "$url" -o /tmp/app.apk
+          echo "### Android UI check: EAS build $BUILD_ID" >> "$GITHUB_STEP_SUMMARY"
+      - name: Throwaway staging account (one-time code, no email sent)
+        run: node scripts/ui-check-account.mjs create
+      - name: Install Maestro (pinned)
+        run: |
+          curl -fsSL "https://get.maestro.mobile.dev" | MAESTRO_VERSION=1.40.0 bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Emulator (Android 14, Pixel 6) — type with the keyboard open, check what it covers
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          script: bash scripts/android-ui-check.sh
+      - name: Result
+        if: always()
+        run: |
+          { echo '```'; cat /tmp/ui/result.txt 2>/dev/null || echo "no result (the flow stopped earlier; see the log)"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: android-ui-check-screenshots
+          path: /tmp/ui/*.png
+          retention-days: 14
+      - name: Remove the throwaway account
+        if: always()
+        run: node scripts/ui-check-account.mjs delete

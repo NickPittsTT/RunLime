@@ -1,0 +1,42 @@
+# Android UI check (owner retest R2): sign in (one-time code from the staging admin API, no email sent), open
+# Report a safety concern, type a long report and leave the keyboard open.
+appId: tt.runlime.app.dev
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: dob-day
+    timeout: 60000
+- tapOn:
+    id: dob-day
+- inputText: "15"
+- tapOn:
+    id: dob-month
+- inputText: "06"
+- tapOn:
+    id: dob-year
+- inputText: "1990"
+- hideKeyboard
+- tapOn: Continue
+- extendedWaitUntil:
+    visible: Email me a code
+    timeout: 20000
+- openLink: runlime://code?email=${UI_EMAIL}
+- extendedWaitUntil:
+    visible: 6-digit code
+    timeout: 20000
+- tapOn: 6-digit code
+- inputText: ${UI_OTP}
+- hideKeyboard
+- tapOn: Sign in
+- extendedWaitUntil:
+    visible: Start run
+    timeout: 60000
+- openLink: runlime://report?kind=general
+- extendedWaitUntil:
+    visible: Tell us what happened
+    timeout: 20000
+- tapOn: Tell us what happened
+- inputText: "Automated keyboard check. This report is long enough to wrap over several lines so the box grows while typing, the way a real report does. It keeps going for a few more lines to make sure the bottom of the box stays above the keyboard as it grows. Please ignore this text."
+- takeScreenshot: 01-typing-keyboard-open

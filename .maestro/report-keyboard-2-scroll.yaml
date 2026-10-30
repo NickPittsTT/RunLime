@@ -1,0 +1,12 @@
+# Android UI check (owner retest R2), part 2: with the keyboard still open, scroll to "Send report".
+appId: tt.runlime.app.dev
+---
+- scrollUntilVisible:
+    element:
+      text: Send report
+    direction: DOWN
+    timeout: 15000
+- swipe:
+    direction: UP
+    duration: 600
+- takeScreenshot: 02-send-report-keyboard-open

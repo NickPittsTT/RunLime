@@ -1,9 +1,9 @@
-import { createContext, useCallback, useContext, useEffect, useRef, type ReactElement, type ReactNode, type Ref } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactElement, type ReactNode, type Ref } from 'react';
 import {
   ActivityIndicator,
   Dimensions,
   Keyboard,
-  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -30,6 +30,17 @@ export function revealOffset(field: { y: number; height: number }, view: { offse
   return null;
 }
 
+/**
+ * How much of a screen the keyboard covers, in the same (window) coordinates on both platforms: the screen's bottom
+ * edge measured with measureInWindow, minus the keyboard's top edge. React Native's KeyboardAvoidingView uses the
+ * view's layout frame instead, which is relative to its parent; under the navigation header that frame starts at 0,
+ * so on Android (edge-to-edge, where the window no longer resizes) it padded too little by the header height and
+ * the bottom of the screen stayed under the keyboard (owner retest R2, 2026-10-31).
+ */
+export function keyboardOverlap(screen: { y: number; height: number }, keyboardTop: number): number {
+  return Math.max(0, Math.round(screen.y + screen.height - keyboardTop));
+}
+
 type Reveal = (node: View | TextInput | null) => void;
 export const RevealContext = createContext<Reveal | null>(null);
 
@@ -38,6 +49,8 @@ export function Screen({ children, scroll = true, refreshControl, testID }: { ch
   const scrollRef = useRef<ScrollView>(null);
   const contentRef = useRef<View>(null);
   const view = useRef({ offset: 0, height: 0 });
+  const frameRef = useRef<View>(null);
+  const [keyboard, setKeyboard] = useState(0);
   // Keep the focused field fully above the keyboard: on focus, once the keyboard has opened (the view shrinks), and
   // whenever a multi-line box grows (owner retest B2: the report box's lower lines hid behind the keyboard).
   const reveal = useCallback<Reveal>((node) => {
@@ -54,10 +67,22 @@ export function Screen({ children, scroll = true, refreshControl, testID }: { ch
       );
     }, 150);
   }, []);
+  // Leave room for the keyboard: the screen keeps its full size and its content area stops at the keyboard's top, so
+  // every field and the button under it can be scrolled into view while typing.
   useEffect(() => {
-    if (!scroll) return;
-    const sub = Keyboard.addListener('keyboardDidShow', () => reveal(TextInput.State.currentlyFocusedInput() as TextInput | null));
-    return () => sub.remove();
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    const show = Keyboard.addListener(showEvent, (e) => {
+      frameRef.current?.measureInWindow((_x, y, _w, height) => {
+        setKeyboard(keyboardOverlap({ y, height }, e.endCoordinates.screenY));
+        if (scroll) reveal(TextInput.State.currentlyFocusedInput() as TextInput | null);
+      });
+    });
+    const hide = Keyboard.addListener(hideEvent, () => setKeyboard(0));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
   }, [scroll, reveal]);
   const body = (
     <View ref={contentRef} collapsable={false} style={{ padding: spacing.lg, gap: spacing.lg }}>
@@ -67,8 +92,8 @@ export function Screen({ children, scroll = true, refreshControl, testID }: { ch
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: c.background }} edges={['bottom', 'left', 'right']}>
       {/* Android draws edge-to-edge (required from Android 16), so the window no longer shrinks for the keyboard:
-          pad on both platforms so the focused field stays above it (owner retest 2026-10-18, report screen). */}
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+          the content stops at the keyboard's top on both platforms (keyboardOverlap). */}
+      <View ref={frameRef} collapsable={false} testID="screen-frame" style={{ flex: 1, paddingBottom: keyboard }}>
         {scroll ? (
           <RevealContext.Provider value={reveal}>
             <ScrollView
@@ -86,7 +111,7 @@ export function Screen({ children, scroll = true, refreshControl, testID }: { ch
         ) : (
           body
         )}
-      </KeyboardAvoidingView>
+      </View>
     </SafeAreaView>
   );
 }

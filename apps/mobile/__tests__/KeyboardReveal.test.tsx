@@ -1,5 +1,6 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
-import { RevealContext, TextField, revealOffset } from '@/components/ui';
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { Keyboard, StyleSheet } from 'react-native';
+import { RevealContext, Screen, TextField, keyboardOverlap, revealOffset } from '@/components/ui';
 
 describe('fields stay visible above the keyboard (owner retest B2)', () => {
   const view = { offset: 0, height: 400 }; // visible part of the screen once the keyboard is open
@@ -39,5 +40,38 @@ describe('fields stay visible above the keyboard (owner retest B2)', () => {
     render(<TextField label="Notes" multiline value="" onChangeText={() => undefined} />);
     const style = Object.assign({}, ...(screen.getByLabelText('Notes').props.style as object[]).flat().filter(Boolean));
     expect(style.maxHeight).toBeGreaterThan(100);
+  });
+});
+
+describe('Android keyboard: the screen content stops at the keyboard (owner retest R2, round 3)', () => {
+  it('the overlap uses window coordinates: a screen under an 80 dp header loses its lower 300 dp to the keyboard', () => {
+    // Screen frame in the window: starts below the header at 80, 700 tall → bottom edge at 780. Keyboard top at 480.
+    expect(keyboardOverlap({ y: 80, height: 700 }, 480)).toBe(300);
+    // What KeyboardAvoidingView computed with its parent-relative frame (y = 0): 80 dp short, the bug on the phone.
+    expect(keyboardOverlap({ y: 0, height: 700 }, 480)).toBe(220);
+    expect(keyboardOverlap({ y: 80, height: 700 }, 900)).toBe(0);
+  });
+
+  it('when the keyboard opens, the screen pads by the measured overlap; when it closes, the padding goes', () => {
+    const listeners: Record<string, (e: { endCoordinates: { screenY: number; height: number } }) => void> = {};
+    const spy = jest.spyOn(Keyboard, 'addListener').mockImplementation(((event: string, cb: (e: never) => void) => {
+      listeners[event] = cb as never;
+      return { remove: () => undefined } as never;
+    }) as never);
+    render(
+      <Screen>
+        <TextField label="Tell us what happened" multiline value="" onChangeText={() => undefined} />
+      </Screen>,
+    );
+    // The native View is a mocked component in Jest: give its measureInWindow the frame a phone would report.
+    type Node = { parent: Node | null; instance: { measureInWindow?: unknown } | null };
+    let node = screen.getByTestId('screen-frame') as unknown as Node | null;
+    while (node && !node.instance?.measureInWindow) node = node.parent;
+    node!.instance!.measureInWindow = (cb: (x: number, y: number, w: number, h: number) => void) => cb(0, 80, 400, 700);
+    act(() => (listeners.keyboardDidShow ?? listeners.keyboardWillShow)?.({ endCoordinates: { screenY: 480, height: 320 } }));
+    expect(StyleSheet.flatten(screen.getByTestId('screen-frame').props.style).paddingBottom).toBe(300);
+    act(() => (listeners.keyboardDidHide ?? listeners.keyboardWillHide)?.({ endCoordinates: { screenY: 900, height: 0 } }));
+    expect(StyleSheet.flatten(screen.getByTestId('screen-frame').props.style).paddingBottom).toBe(0);
+    spy.mockRestore();
   });
 });

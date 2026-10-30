@@ -83,6 +83,37 @@ function printCalls(r, pattern) {
     console.log(`  ${row.timestamp}  ${method} ${name} -> ${status}`);
   }
 }
+// Account labels: a short stable label per user id (A, B, C …) so timelines can be compared without ids or emails.
+const labels = new Map();
+const who = (id) => (id ? (labels.get(id) ?? (labels.set(id, String.fromCharCode(65 + labels.size)), labels.get(id))) : '-');
+section('2h. Sign-in / sign-out events, last 7 days (Supabase Auth audit log; accounts as letters, no emails)');
+{
+  const r = await sql(`
+    select created_at, payload ->> 'action' as action, payload ->> 'actor_id' as actor,
+           coalesce(payload -> 'traits' ->> 'provider', '') as provider
+      from auth.audit_log_entries
+     where created_at > now() - interval '7 days'
+       and payload ->> 'action' in ('login', 'logout', 'user_signedup', 'user_deleted', 'user_repeated_signup')
+     order by created_at`);
+  if (r.error) console.log('  query failed:', r.error);
+  else for (const e of r.rows) console.log(`  ${e.created_at}  ${String(e.action).padEnd(14)} account ${who(e.actor)} ${e.provider}`);
+}
+section('2i. Phone tokens now, by account (same letters)');
+{
+  const r = await sql(`select token, user_id::text, platform, created_at, last_seen_at from public.push_tokens order by last_seen_at`);
+  if (r.error) console.log('  query failed:', r.error);
+  else for (const t of r.rows) console.log(`  ${maskToken(t.token)}  account ${who(t.user_id)}  ${t.platform}  created ${t.created_at}  last seen ${t.last_seen_at}`);
+}
+section('2j. Notifications last 7 days by account: created / handed to the dispatcher');
+{
+  const r = await sql(`
+    select n.user_id::text, n.kind, date_trunc('hour', n.created_at) as hour, count(*)::int as total, count(n.push_sent_at)::int as dispatched
+      from public.notifications n where n.created_at > now() - interval '7 days'
+     group by 1, 2, 3 order by 3, 1`);
+  if (r.error) console.log('  query failed:', r.error);
+  else for (const n of r.rows) console.log(`  ${n.hour}  account ${who(n.user_id)}  ${String(n.kind).padEnd(20)} ${n.dispatched}/${n.total} dispatched`);
+}
+
 section('2f. App calls to register/unregister a phone (API gateway, last 24 h)');
 printCalls(await logRows(`select timestamp, event_message from logs where source_name = 'edge_logs' and position(event_message, 'push_token') > 0 order by timestamp desc limit 50`), /(un)?register_push_token/);
 section('2g. Calls to the push-dispatch function (last 24 h)');

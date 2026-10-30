@@ -182,8 +182,14 @@ On GitHub Free, **environments and environment secrets are ignored in private re
 Revisit this plan at every phase gate and after any incident (`INCIDENT-RESPONSE.md`). Update the risk register when a feature adds new data (Phase 4: location attempts; Phase 5: run tracks).
 
 ## 9. Owner actions
-0. **Urgent: the `SUPABASE_ACCESS_TOKEN` GitHub secret no longer works** ("Invalid access token" on 2026-10-24). Until it's replaced, database deploys stop before applying migrations, so **the hardening migration is not on staging yet**, and the hosted advisor can't run. Fix: supabase.com → Account → **Access tokens** → generate a new token (name "RunLime GitHub", choose an expiry you'll remember) → GitHub → Settings → Environments → staging → update `SUPABASE_ACCESS_TOKEN` → tell Claude, who re-runs Deploy database.
+0. ~~Replace `SUPABASE_ACCESS_TOKEN`~~ **done 2026-10-30** (staging-only token, 90-day expiry; renew by 2027-01-21, PROGRESS "Waiting on the owner" item 8). Deploy database #64 applied the hardening migration.
 1. **Turn on Dependabot alerts and security updates:** GitHub → RunLime → Settings → Advanced Security (or "Code security") → **Dependency graph: On**, **Dependabot alerts: Enable**, **Dependabot security updates: Enable**. (GitHub refused these API calls from this session.)
 2. Confirm 2-Step Verification and recovery codes on runlimett@gmail.com (R11).
-3. Restrict the Firebase Android API key to the package and SHA-1 in Google Cloud (R17). Steps on request.
+3. Restrict the Firebase Android API key (R17), free:
+   1. console.cloud.google.com → choose project **runlime-a3849** → **APIs & Services → Credentials**.
+   2. Under **API keys**, open the key named like "Android key (auto created by Firebase)".
+   3. **Application restrictions → Android apps → Add**: package name `tt.runlime.app.dev`, SHA-1 fingerprint `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25` (the staging APK signing key; Mobile build logs prints it for every build).
+   4. **API restrictions → Restrict key**: tick **Firebase Installations API** and **FCM Registration API** (add **Firebase Cloud Messaging API** if it is listed). Leave others unticked.
+   5. **Save**, wait 5 minutes, open the app once while signed in, then send yourself a race update: it must still arrive. If it doesn't, set API restrictions back to "Don't restrict key" and tell Claude.
+   A Phase 8 production key gets the production package and signing SHA-1.
 4. Decide §7.1 (backups) and §7.2 (private repo, in that order).

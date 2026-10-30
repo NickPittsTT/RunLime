@@ -3,7 +3,7 @@
 Numbered per slice. Report pass or fail per step, with a screenshot for any failure. An APK link is added after slices 2, 4 and 6; slices 0, 1, 3 and 5 can be checked on the current APK or the website as noted.
 
 ## Retest round 3 (2026-10-30): test only these, on the new APK
-**APK:** _added when the build finishes (see docs/reports/LATEST.md)_. Install it over the old app (same signing key). Every step says where to do it: **[App]** = the phone app, **[Website]** = the website (a phone browser is fine).
+**APK:** https://expo.dev/artifacts/eas/riM5Nd_cBRJI0XDt5urUP9UAP7ylqfmvHrdKwjoFShA.apk (EAS build c14d742a, commit `51d0154`; same app code as CI #138 on `c9d46e8`; no secrets found). Install it over the old app (same signing key). Every step says where to do it: **[App]** = the phone app, **[Website]** = the website (a phone browser is fine).
 
 **Message limit (read first):** race updates from organisers are limited to **3 per race in any 7 days**, or **10 in the 7 days before the race** (the postponed date if postponed). **Admins are not limited.** Automatic postponed / cancelled / back-on notices never count. If a notification test needs more messages, send them as an admin, or use postpone → back on instead of messages.
 

@@ -114,6 +114,25 @@ section('2j. Notifications last 7 days by account: created / handed to the dispa
   else for (const n of r.rows) console.log(`  ${n.hour}  account ${who(n.user_id)}  ${String(n.kind).padEnd(20)} ${n.dispatched}/${n.total} dispatched`);
 }
 
+section('2k. Sign-in sessions last 7 days (auth.refresh_tokens: one row per token refresh; accounts as letters)');
+{
+  const r = await sql(`
+    select session_id::text, user_id::text, min(created_at) as first, max(updated_at) as last, bool_or(revoked) as revoked, count(*)::int as refreshes
+      from auth.refresh_tokens where created_at > now() - interval '7 days'
+     group by 1, 2 order by 3`);
+  if (r.error) console.log('  query failed:', r.error);
+  else for (const t of r.rows) console.log(`  session ${String(t.session_id).slice(0, 4)}…  account ${who(t.user_id)}  ${t.first} → ${t.last}  refreshes ${t.refreshes}  revoked ${t.revoked}`);
+}
+section('2l. unregister_push_token as deployed (definition + who may call it)');
+table(await sql(`select pg_get_functiondef('public.unregister_push_token'::regproc) ~ 'auth.uid' as checks_caller,
+  has_function_privilege('authenticated', 'public.unregister_push_token(text)', 'execute') as authenticated_can_call`));
+section('2m. Logs table columns (names only)');
+{
+  const r = await logRows('describe table logs');
+  if (r.error) console.log('  ', r.error);
+  else console.log('  ', r.rows.map((c) => c.name).join(', '));
+}
+
 section('2f. App calls to register/unregister a phone (API gateway, last 24 h)');
 printCalls(await logRows(`select timestamp, event_message from logs where source_name = 'edge_logs' and position(event_message, 'push_token') > 0 order by timestamp desc limit 50`), /(un)?register_push_token/);
 section('2g. Calls to the push-dispatch function (last 24 h)');

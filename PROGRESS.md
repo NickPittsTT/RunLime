@@ -94,7 +94,7 @@
 - [x] Owner: refund option A (100% after the listing has been live) kept
 
 ## Phase 3 checklist (current; scope approved 2026-10-18)
-Owner decisions: push = Expo Push + Firebase Cloud Messaging (inbox first, then push); organiser messages 2 per race per week (setting); club turnout hidden below 5 (setting); RSVP Going / Maybe / Not going. One slice at a time, CI green before the next; APK after slices 2, 4 and 6. Only the owner approves the phase.
+Owner decisions: push = Expo Push + Firebase Cloud Messaging (inbox first, then push); organiser messages 3 per race per 7 days and 10 in race week, admins exempt (settings; owner 2026-10-30, was 2); club turnout hidden below 5 (setting); RSVP Going / Maybe / Not going. One slice at a time, CI green before the next; APK after slices 2, 4 and 6. Only the owner approves the phase.
 - [x] Google Play policy recheck (UGC, profile photos, social, notifications), with sources: `docs/phase-3/POLICY-CHECK.md`
 - [x] Slice 0: item 7, saved welcome preferences survive uninstall/reinstall (test; CI #114 on `23279f6`)
 - [x] Slice 1: runner level + profile photos (location data stripped, report, admin removal queue, audit) — CI #115 on `9a67519`; deployed (web #32, database #55)
@@ -111,8 +111,10 @@ Owner decisions: push = Expo Push + Firebase Cloud Messaging (inbox first, then 
 - [x] Cause found (staging data, not guesswork): no push token was stored when any notification was created (26 notifications in 48 h, 0 handed to the dispatcher). The app registered a token only from the explainer; sign-out removed it and nothing re-registered it (the follower/club slices switch accounts). Also fixed: normal FCM priority (Doze), channel created only on that path, no foreground handler, ticket errors ignored, receipts never checked
 - [x] Fix round: phone re-registers whenever signed in + allowed (start, sign-in, token change); honest "On"; high-importance `race-updates` channel created at start; FCM high priority; foreground banners; ticket errors logged and receipts checked 15 min later (`push_receipts`); keyboard padding on every screen + errors clear while typing (live count on reports); photo picker line; admin report alerts (bell + phone at once; email: child safety immediately, others daily 07:50 — `docs/phase-3/ADMIN-ALERTS-SETUP.md`, needs the owner's Gmail app password as a GitHub secret); club leadership (who will lead, proposed leader on approval, leader notified, leader names on the club page). Read-only "Staging diagnostics → push" check added
 - [x] Fix-round APK: EAS build a90e523c (commit `11be7a2`, CI #132; deployed web #37, database #62): https://expo.dev/artifacts/eas/UjmOq-8OOhMBJ65bbJO5LyQ0j5rTd1xQ0O9CMf7ANv8.apk
-- [ ] **Owner phone test and Phase 3 approval** (only the owner approves). Owner plan: test Phase 3 **once**, on the final APK with push included, using `docs/phase-3/RETEST.md`
-- [ ] **Owner decision before approving:** are profile photos visible on Private accounts? (Currently yes, to signed-in users, with the display name; attorney note in the Privacy Policy draft)
+- [x] Owner retest on a90e523c (2026-10-30): F1.1–F1.3, F1.5, F2 (except the report box), F3.1, F4.1–F4.3, F5.1, 6.4, 6.6, 6.7 passed; failed: F1.4, 6.11 (signed-out phone still notified), report box, "Finish setting up", organiser team, Start run overlap, Google chooser, silent notifications
+- [x] Retest round 3 fixes (2026-10-30): push tokens tied to the sign-in session (server stops sending when a sign-in ends; sign-out/deletion detach, retried offline; pgTAP 025); keyboard keeps growing boxes visible; specific sign-up errors (taken nickname); organiser Team section explains owner-only adding; Start run padding; Google chooser every time; `race-alerts` channel (sound + heads-up); runners pinned to ubuntu-24.04; message limits 3 per 7 days / 10 in race week / admins exempt (C1); Private-account photos hidden from non-followers (C2, Privacy draft5, Moderation draft3); pgTAP 026. Report: `docs/reports/LATEST.md`
+- [ ] **Owner phone test (RETEST.md "Retest round 3") and Phase 3 approval** (only the owner approves)
+- [x] Owner decision (2026-10-30): profile photos on Private accounts are **not** visible to non-followers (initials instead); admins see them in Reports
 - Repo stays **public** until the build is done (owner, intentional)
 - Audit entries can now carry a reason (`audit.log.reason`, set by functions through `runlime.audit_reason`). First user: `ops_correct_event_start` (service role only, "Correct event date" workflow), used once for the PSCU date with the owner's permission
 
@@ -122,7 +124,7 @@ Owner decisions: push = Expo Push + Firebase Cloud Messaging (inbox first, then 
 - [x] 3. `pnpm audit --audit-level=high` in CI; Dependabot config; patch policy (critical 72 h). Fixed CRITICAL Next.js RCE (16.3.8 → 16.4.3); two documented exceptions (Expo CLI only), review 2026-11-23. **Owner:** switch on Dependabot alerts + security updates (Settings → Advanced Security)
 - [x] 4. Security plan: control inventory with evidence, risk register (R1–R18), MASVS v2 + ASVS 4.0.3 mapping
 - [x] 5. `docs/operations/INCIDENT-RESPONSE.md`
-- [ ] **Blocked (owner):** `SUPABASE_ACCESS_TOKEN` secret rejected by Supabase (2026-10-24) → Deploy database #63 stopped before migrations; hardening migration not on staging yet. Web deploy #38 shipped Next 16.4.3 (smoke test passed); only its CORS re-apply step failed (same cause)
+- [x] `SUPABASE_ACCESS_TOKEN` replaced by the owner (2026-10-30; staging project only); Deploy database #64 applied the hardening migration; hosted advisor 0 ERROR; read-only staging baseline check 8/8 (Staging diagnostics → security-baseline)
 - [ ] 6–7 Before pilot (owner decisions): backups (§7.1), repo private in the documented order (§7.2)
 - [ ] 8–9 Before public launch: Turnstile, rate limits, CSP, WAF (needs custom domain); production project + guards (§7.3–7.4)
 
@@ -178,6 +180,8 @@ Owner decisions: push = Expo Push + Firebase Cloud Messaging (inbox first, then 
 6. Attorney review of `docs/legal/` before launch. Specific questions flagged in the drafts: no postal address on legal pages; no cookie banner for strictly necessary cookies (TT law and EU visitors); full refund when an organiser cancels; consumer-rights sentence in the Refund Policy.
 6a. **Final logo (owner designs it in Canva), before store submission.** Direction: a running shoe with lime wedges as a motion trail. Staging keeps the current lime-wedge icon. When the files are ready, I'll give the exact sizes and formats needed (app icon, Android adaptive icon layers, splash, store listing, web).
 7. Apple Developer account (paid) — deferred until budget allows; iOS testing and Sign in with Apple wait for it.
+8. **Renew `SUPABASE_ACCESS_TOKEN` (GitHub secret) by 2027-01-21.** The token made on 2026-10-30 has a 90-day expiry, so it stops working about **2027-01-28** (assumption: created 2026-10-30; check the exact date in Supabase → Account → Access tokens). Make the new one, replace the secret, delete the old token. Without it, database deploys and the hosted Security Advisor fail.
+9. **Phase 8:** a separate least-privilege token for production (only the scopes the deploy workflows use: database migrations, secrets, Edge Functions, read-only advisors). Claude lists the exact scopes before Phase 8.
 
 ## Decided (owner, 2026-10-11)
 - Operator: "RunLime, operated by <owner>" (individual); may transfer to RunLime Limited, so operator details stay in settings.

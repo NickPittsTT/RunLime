@@ -1,14 +1,14 @@
 ---
 slug: moderation
 title: Moderation Policy
-version: 2026-10-18-draft2
+version: 2026-10-30-draft3
 ---
 # RunLime Moderation Policy
 
 RunLime is a friendly lime for runners. This policy explains what's allowed and what we do when something isn't.
 
 ## What can be posted
-Runners can post a display name, a nickname, a profile photo, a runner level and community times, and can ask for a new club to be added. Club leaders approve who joins their club. Organisers post event information and can send short updates about a race to the people going to it (at most the number set by RunLime per race per week, currently 2). Everything must be accurate, respectful and lawful.
+Runners can post a display name, a nickname, a profile photo, a runner level and community times, and can ask for a new club to be added. Club leaders approve who joins their club. Organisers post event information and can send short updates about a race to the people going to it (at most the number set by RunLime per race: currently 3 in any 7 days, or 10 in the 7 days before the race; automatic notices that a race is postponed, cancelled or back on are not counted). Everything must be accurate, respectful and lawful.
 
 ## Profile photos
 - Use a photo of yourself, or an image that doesn't identify anyone else (for example a logo or a running shoe).

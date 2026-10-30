@@ -14,8 +14,12 @@ import { supabase } from './supabase';
  */
 const askedKey = (uid: string) => `runlime.pushAsked.v1.${uid}`;
 
-/** High importance so updates show as a banner. Android can't raise an existing channel's importance, hence a new id. */
-export const PUSH_CHANNEL_ID = 'race-updates';
+/**
+ * Sound + banner by default (owner retest B8: alerts arrived silently until "Pop on screen" and "Sound" were switched
+ * on by hand). Android keeps a channel's settings once created, so each change needs a new id; old ones are removed.
+ */
+export const PUSH_CHANNEL_ID = 'race-alerts';
+const OLD_CHANNEL_IDS = ['default', 'race-updates'];
 
 export type PushStatus = 'on' | 'off' | 'denied' | 'unavailable';
 
@@ -33,8 +37,14 @@ export async function ensurePushChannel(): Promise<void> {
     await Notifications.setNotificationChannelAsync(PUSH_CHANNEL_ID, {
       name: 'Race updates',
       description: 'Race changes, reminders, organiser updates, followers and clubs',
-      importance: Notifications.AndroidImportance.HIGH,
+      importance: Notifications.AndroidImportance.MAX,
+      sound: 'default',
+      enableVibrate: true,
+      vibrationPattern: [0, 250, 150, 250],
+      lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+      showBadge: true,
     });
+    for (const id of OLD_CHANNEL_IDS) await Notifications.deleteNotificationChannelAsync(id).catch(() => undefined);
   } catch {
     // Older Android or no notification support: nothing to set up.
   }
@@ -71,9 +81,38 @@ async function thisPhoneToken(): Promise<string> {
   return (await Notifications.getExpoPushTokenAsync(id ? { projectId: id } : undefined)).data;
 }
 
+// The token this phone last registered, so sign-out can remove it without asking Expo again (owner retest B1:
+// a failed unregister left a signed-out phone receiving the account's notifications). A failed removal is kept as
+// pending and retried (signed in or not) until the server confirms.
+const TOKEN_KEY = 'runlime.pushToken.v1';
+const PENDING_KEY = 'runlime.pushUnregisterPending.v1';
+const store = {
+  get: (k: string) => AsyncStorage.getItem(k).catch(() => null),
+  set: (k: string, v: string) => AsyncStorage.setItem(k, v).catch(() => undefined),
+  del: (k: string) => AsyncStorage.removeItem(k).catch(() => undefined),
+};
+
 async function register(token: string): Promise<boolean> {
+  // A removal still pending for this phone must reach the server before the phone is attached to anyone.
+  await retryPendingUnregister();
   const { error } = await supabase.rpc('register_push_token', { p_token: token, p_platform: Platform.OS });
+  if (!error) await store.set(TOKEN_KEY, token);
   return !error;
+}
+
+async function unregister(token: string): Promise<boolean> {
+  try {
+    const { error } = await supabase.rpc('unregister_push_token', { p_token: token });
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+/** Retry a removal that failed earlier (offline at sign-out, app closed mid-way). Safe to call any time. */
+export async function retryPendingUnregister(): Promise<void> {
+  const pending = await store.get(PENDING_KEY);
+  if (pending && (await unregister(pending))) await store.del(PENDING_KEY);
 }
 
 /**
@@ -125,13 +164,23 @@ export function watchPushToken(): () => void {
   return () => sub.remove();
 }
 
-/** Forget this phone's token (sign-out). */
+/**
+ * Sign-out / account deletion: detach this phone from the account on the server. Uses the stored token (no Expo
+ * call); falls back to asking Expo only if none is stored. If the server can't be reached, the removal stays
+ * pending and is retried. The server also stops pushing to a phone once its sign-in session ends.
+ */
 export async function disablePushForThisPhone(): Promise<void> {
-  try {
-    await supabase.rpc('unregister_push_token', { p_token: await thisPhoneToken() });
-  } catch {
-    // No token on this phone: nothing to remove.
+  let token = await store.get(TOKEN_KEY);
+  if (!token) {
+    try {
+      token = await thisPhoneToken();
+    } catch {
+      token = null; // No notifications on this phone: nothing to remove.
+    }
   }
+  if (!token) return;
+  await store.del(TOKEN_KEY);
+  if (!(await unregister(token))) await store.set(PENDING_KEY, token);
 }
 
 export const openSystemSettings = () => void Linking.openSettings();

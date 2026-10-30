@@ -9,12 +9,15 @@ export const dynamic = 'force-dynamic';
 
 export default async function OrgSettings({ params }: { params: Promise<{ org: string }> }) {
   const { org: orgId } = await params;
-  const { supabase, user } = await requireProfile(`/organiser/settings/${orgId}`);
+  const { supabase, user, roles } = await requireProfile(`/organiser/settings/${orgId}`);
   const { data: org } = await supabase.from('organisations').select('id, name, status, contact_email, contact_phone, website, about').eq('id', orgId).maybeSingle();
   if (!org) notFound();
   const { data: team } = await supabase.rpc('organisation_team', { p_org: orgId });
   const members = (team ?? []) as { user_id: string; display_name: string; role: 'owner' | 'manager' }[];
   const iAmOwner = members.some((m) => m.user_id === user.id && m.role === 'owner');
+  // Owners manage the team; RunLime admins can too (the server also requires their MFA).
+  const canManageTeam = iAmOwner || roles.includes('platform_admin') || roles.includes('super_admin');
+  const owners = members.filter((m) => m.role === 'owner').map((m) => m.display_name);
   return (
     <>
       <p className="mb-2">
@@ -33,7 +36,7 @@ export default async function OrgSettings({ params }: { params: Promise<{ org: s
                 {m.display_name}
                 {m.user_id === user.id && ' (you)'} · {m.role}
               </span>
-              {iAmOwner && m.user_id !== user.id && (
+              {canManageTeam && m.user_id !== user.id && (
                 <form action={removeMember}>
                   <input type="hidden" name="org" value={org.id} />
                   <input type="hidden" name="user" value={m.user_id} />
@@ -43,7 +46,14 @@ export default async function OrgSettings({ params }: { params: Promise<{ org: s
             </li>
           ))}
         </ul>
-        {iAmOwner && <AddMemberForm orgId={org.id} />}
+        {canManageTeam ? (
+          <AddMemberForm orgId={org.id} />
+        ) : (
+          <p className="text-sm text-ink-muted mt-3" data-testid="team-owner-only">
+            Only the organisation&apos;s owners can add people to the team{owners.length ? ` (${owners.join(', ')})` : ''}. Ask an owner to add
+            them by the email they use for RunLime.
+          </p>
+        )}
       </section>
     </>
   );

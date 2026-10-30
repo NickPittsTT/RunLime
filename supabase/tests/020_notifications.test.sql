@@ -59,14 +59,14 @@ update public.notification_settings set race_changes = true where user_id = :'an
 select tests.authenticate_as(:'admin', 'aal2');
 select public.change_event_status(:'race', 'published', '', null);
 
--- ---------- Organiser messages: limit per race per 7 days (setting) ----------
+-- ---------- Organiser messages (limits per race: 026) ----------
 select tests.authenticate_as(:'cat');
 select throws_ok(format($$select public.send_event_message(%L, 'Bring water!')$$, :'race'), '42501', null, 'runners cannot message attendees');
 select tests.authenticate_as(:'admin', 'aal2');
 select throws_ok(format($$select public.send_event_message(%L, 'Hi')$$, :'race'), '22023', null, 'message needs 5+ characters');
 select is(public.send_event_message(:'race', 'Race-pack collection moved to Friday 4–7 pm at the club.'), 2, 'sent to people going and maybe (2)');
 select lives_ok(format($$select public.send_event_message(%L, 'Parking opens at 4:30 am.')$$, :'race'), 'second message this week');
-select throws_ok(format($$select public.send_event_message(%L, 'One more thing')$$, :'race'), '22023', null, 'third message blocked (2 per race per week)');
+select lives_ok(format($$select public.send_event_message(%L, 'One more thing')$$, :'race'), 'admins are not limited (organiser limits: 026)');
 select tests.authenticate_as(:'ana');
 select is((select body from public.notifications where kind = 'organiser_message' order by created_at limit 1), 'Race-pack collection moved to Friday 4–7 pm at the club.', 'Ana got the message');
 select tests.authenticate_as(:'cat');

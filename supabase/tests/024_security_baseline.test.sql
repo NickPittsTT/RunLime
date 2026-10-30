@@ -58,8 +58,8 @@ select is(
 select is(
   (select array_agg(distinct p.proname::text order by p.proname::text) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
     where n.nspname = 'public' and p.prosecdef and has_function_privilege('anon', p.oid, 'execute')),
-  array['club_turnout', 'has_profile', 'has_role', 'is_event_co_organiser', 'is_org_member', 'rsvp_counts'],
-  'signed-out visitors can run only these privileged functions (public race-page counts; helpers used by public policies)');
+  array['club_turnout', 'has_profile', 'has_role', 'is_event_co_organiser', 'is_org_member', 'rsvp_counts', 'unregister_push_token'],
+  'signed-out visitors can run only these privileged functions (public race-page counts; helpers used by public policies; a phone removing its own push token)');
 select is(
   (select array_agg(p.oid::regprocedure::text order by p.oid::regprocedure::text) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
     where n.nspname = 'public' and p.prorettype = 'trigger'::regtype

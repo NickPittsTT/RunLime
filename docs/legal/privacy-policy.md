@@ -1,11 +1,11 @@
 ---
 slug: privacy
 title: Privacy Policy
-version: 2026-10-18-draft4
+version: 2026-10-30-draft5
 ---
 # RunLime Privacy Policy
 
-**Last updated:** 18 October 2026 (draft)
+**Last updated:** 30 October 2026 (draft)
 
 RunLime is a calendar for 5K and similar road races in Trinidad and Tobago, with tools to RSVP, check in on race day, track your own runs and follow other runners. RunLime is operated by {{operator_name}} ("RunLime", "we", "us"). Contact us at {{support_email}}.
 
@@ -21,7 +21,7 @@ RunLime accounts are only for adults aged **18 and over**. When you first open t
 | Email address, or your Google/Apple account identifier | Sign-in | To create and secure your account | Needed for the service |
 | Date of birth | Sign-up | To confirm you are 18+ | Needed for the service; it can't be changed in the app |
 | Display name, optional nickname, home area | Sign-up / profile | To show your profile and suggest nearby races | Needed for the service |
-| Profile photo (optional) | When you add one | To show with your name. We remove location and other hidden details (EXIF data) from the file before it is stored | Your choice; you can change or remove it at any time |
+| Profile photo (optional) | When you add one | To show with your name. On a Private account only you, people you have approved as followers and RunLime admins (for moderation) see it; everyone else sees your initials. On a Public account, all signed-in users see it. We remove location and other hidden details (EXIF data) from the file before it is stored | Your choice; you can change or remove it at any time |
 | Runner level (optional: Casual, Club runner or Competitive) | Sign-up / profile | Shown on your profile. It never changes how runs or times are checked | Your choice |
 | Account privacy setting (Private by default, or Public) | Settings | To control who can see your race passport and the races you are attending | Your choice |
 | Consent records (terms, privacy, location, health data, public sharing) | When you agree | To show what you agreed to and when | Legal obligation / your consent |
@@ -45,9 +45,9 @@ RunLime accounts are only for adults aged **18 and over**. When you first open t
 **What we don't do:** we don't sell your data, we don't show ads, we don't use your data for advertising, and we don't share your precise location with other users.
 
 ## 3. Who can see what
-- **Other RunLime users:** your display name or nickname, profile photo and runner level, and any community time you choose to share. On public accounts, also your race passport and the races you are attending.
+- **Other RunLime users:** your display name or nickname and runner level, and any community time you choose to share. On public accounts, also your profile photo, race passport and the races you are attending. On Private accounts, only the followers you approve see your photo, passport and races attending; others see your initials instead of your photo.
 - **Your approved followers** (private accounts): your race passport (races attended, total km) and the races you are attending.
-- **Club leaders:** that you asked to join their club, and your display name and photo. Everyone who opens a club page sees its leaders' display names. If someone names you as the leader of a new club, we use the sign-in email they type only to find your account, and tell you if you're appointed. Club turnout shows only counts of opted-in members, and is hidden below a minimum number.
+- **Club leaders:** that you asked to join their club, and your display name (your photo only if your account is Public or they are an approved follower). Everyone who opens a club page sees its leaders' display names. If someone names you as the leader of a new club, we use the sign-in email they type only to find your account, and tell you if you're appointed. Club turnout shows only counts of opted-in members, and is hidden below a minimum number.
 - **Organisers:** totals and trends for their own events (including the total number of children, never their names or ages) and counts of opted-in club members. They don't see who is going, and never see your email, date of birth or contact details.
 - **Our administrators:** only what they need to run and moderate the service. They can't read your emergency contact. Every administrator action is recorded in an audit log.
 - Your runs, routes, times and history are **private** unless you share a result.
@@ -110,6 +110,6 @@ If we make material changes, we'll tell you in the app before they take effect. 
 ## 10. Contact
 {{operator_name}} · {{support_email}}
 
-_Draft notes for the attorney (Phase 3): (1) profile photos are visible to all signed-in users with the display name, even on Private accounts (Private hides the passport and races attending); please confirm this is adequately disclosed; (2) reporters are not identified to the reported person but reports are kept up to 2 years; (3) organisers see a children total per race, never names or ages; (4) naming another person as a new club's leader looks up their account by the email typed, so the requester learns whether an account exists for that email (limited to 3 requests a week); please confirm this is acceptable._
+_Draft notes for the attorney (Phase 3): (1) [resolved 30 October 2026: photos on Private accounts are now shown only to approved followers, the person and admins] (2) reporters are not identified to the reported person but reports are kept up to 2 years; (3) organisers see a children total per race, never names or ages; (4) naming another person as a new club's leader looks up their account by the email typed, so the requester learns whether an account exists for that email (limited to 3 requests a week); please confirm this is acceptable._
 
 _Draft note for the attorney: RunLime identifies its operator by name and contact email only; the operator's residential address is deliberately not published here (owner decision, 15 October 2026). Please confirm that no postal address is legally required on this page._

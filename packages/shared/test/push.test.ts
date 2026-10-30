@@ -7,7 +7,7 @@ describe('push messages', () => {
   it('one message per notification per phone; people without phones get none', () => {
     const msgs = buildPushMessages([n('1', 'ana'), n('2', 'ben')], new Map([['ana', ['ExponentPushToken[a1]', 'ExponentPushToken[a2]']]]));
     expect(msgs.map((m) => m.to)).toEqual(['ExponentPushToken[a1]', 'ExponentPushToken[a2]']);
-    expect(msgs[0]).toMatchObject({ title: 'Savannah 5K is postponed to Sat 15 Nov 2031, 6:30 am', body: 'Heavy rain', channelId: 'race-updates', priority: 'high', data: { event_id: 'r1', kind: 'race_postponed', notification_id: '1' } });
+    expect(msgs[0]).toMatchObject({ title: 'Savannah 5K is postponed to Sat 15 Nov 2031, 6:30 am', body: 'Heavy rain', channelId: 'race-alerts', priority: 'high', data: { event_id: 'r1', kind: 'race_postponed', notification_id: '1' } });
   });
   it('truncates long text for phone banners', () => {
     const [m] = buildPushMessages([{ ...n('1', 'ana', 'x'.repeat(300)), body: 'y'.repeat(900) }], new Map([['ana', ['t']]]));

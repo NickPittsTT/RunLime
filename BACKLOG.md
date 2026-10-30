@@ -20,3 +20,5 @@ Not to be built without explicit owner approval.
 - Audio cues during runs.
 - Self-hosted PostHog for full data residency.
 - ~~Move the web app from Next.js 16.3.8 to 16.4.x~~ **Done 2026-10-24** (security hardening): Next 16.4.3 + `@opennextjs/cloudflare` 1.20.13 (supports Next ≥ 16.4.1), forced by two critical Next.js advisories (GHSA-2464-fhr4-w9xw, GHSA-673q-mjm6-r5xr). `cf:build` + the full Playwright suite pass on the Cloudflare runtime.
+
+- **Expo SDK 58 upgrade** (added 2026-10-30, security): `expo-router` 58 drops `query-string` 7 and with it the vulnerable `decode-uri-component` 0.2.2 (GHSA-qr28-fpjm-wq7f, audit exception until 2026-11-29). Plan as its own small phase step: upgrade, full Jest + device smoke test, new APK.

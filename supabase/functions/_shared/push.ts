@@ -16,7 +16,7 @@ export interface ExpoMessage {
   data: Record<string, unknown>;
   sound: 'default';
   /** Must match PUSH_CHANNEL_ID in the app (created at start; Android drops notifications for unknown channels). */
-  channelId: 'race-updates';
+  channelId: 'race-alerts';
   /** FCM high priority: delivered promptly to a locked phone (normal priority can wait for Doze maintenance windows). */
   priority: 'high';
 }
@@ -32,7 +32,7 @@ export function buildPushMessages(notifications: PendingNotification[], tokensBy
         body: n.body.slice(0, 240),
         data: { ...n.data, kind: n.kind, notification_id: n.id },
         sound: 'default',
-        channelId: 'race-updates',
+        channelId: 'race-alerts',
         priority: 'high',
       });
     }

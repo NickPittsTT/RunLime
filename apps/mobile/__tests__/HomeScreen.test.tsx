@@ -77,6 +77,14 @@ describe('home: race calendar', () => {
     expect(screen.getAllByRole('tab').map((t) => t.props.accessibilityLabel)).toEqual(['List', 'Map']);
   });
 
+  it('every race card can scroll clear of the Start run button (owner retest B5)', async () => {
+    render(<HomeScreen />);
+    await screen.findByText('Savannah 5K');
+    fireEvent(screen.getByTestId('start-run-bar'), 'layout', { nativeEvent: { layout: { height: 130, width: 400, x: 0, y: 0 } } });
+    const pad = (screen.getByTestId('races-scroll').props.contentContainerStyle as { paddingBottom: number }).paddingBottom;
+    expect(pad).toBe(130 + 24); // the button's measured height + a margin
+  });
+
   it('search narrows the list', async () => {
     render(<HomeScreen />);
     await screen.findByText('Savannah 5K');

@@ -77,6 +77,14 @@ test('verified organiser drafts, submits; admin approves; organiser postpones wi
   await expect(o.getByText('Draft: only you and your team can see it.')).toBeVisible();
   await o.getByRole('button', { name: 'Submit for approval' }).click();
   await expect(o.getByText('Submitted.', { exact: false })).toBeVisible();
+  // Owner retest B4: the owner sees the fields to add someone to the team.
+  const eventUrl = o.url();
+  await o.goto(`/organiser/settings/${org.id}`);
+  await expect(o.getByRole('heading', { name: 'Team' })).toBeVisible();
+  await expect(o.getByLabel('Their RunLime account email')).toBeVisible();
+  await expect(o.getByLabel('Role')).toBeVisible();
+  await expect(o.getByTestId('team-owner-only')).toHaveCount(0);
+  await o.goto(eventUrl);
 
   const { ctx: aCtx, page: a } = await signInAdmin(browser);
   await a.goto('/admin/events?status=pending_approval');

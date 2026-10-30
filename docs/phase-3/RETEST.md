@@ -2,6 +2,61 @@
 
 Numbered per slice. Report pass or fail per step, with a screenshot for any failure. An APK link is added after slices 2, 4 and 6; slices 0, 1, 3 and 5 can be checked on the current APK or the website as noted.
 
+## Retest round 3 (2026-10-30): test only these, on the new APK
+**APK:** _added when the build finishes (see docs/reports/LATEST.md)_. Install it over the old app (same signing key). Every step says where to do it: **[App]** = the phone app, **[Website]** = the website (a phone browser is fine).
+
+**Message limit (read first):** race updates from organisers are limited to **3 per race in any 7 days**, or **10 in the 7 days before the race** (the postponed date if postponed). **Admins are not limited.** Automatic postponed / cancelled / back-on notices never count. If a notification test needs more messages, send them as an admin, or use postpone → back on instead of messages.
+
+**R1. A signed-out phone gets nothing (B1, was 6.11 and F1.4)**
+R1.1 [App] Sign in as account A. Say **Going** to a race. Menu → Notification settings shows **Phone notifications: On**.
+R1.2 [App] Menu → **Sign out**. Lock the phone.
+R1.3 [Website] As admin, send **Message people going** on that race. Wait 2 minutes: **no** notification on the phone.
+R1.4 [App] Sign in as account B (a different email, or a different Google account; see R6). Say Going to the same race. [Website] send another message: the phone gets it **once** (for B only).
+R1.5 [App] Sign out of B, sign in as A again. [Website] send a message: the phone gets it for A, and B's phone (if B is also signed in elsewhere) is not affected.
+R1.6 [App] Turn on airplane mode, sign out, turn airplane mode off, open the app (signed out). [Website] send a message: no notification. (The sign-out finishes when the phone is back online; the server also stops sending once the sign-in has ended.)
+R1.7 [App] Optional, with a throwaway account: Settings → **Delete account**. [Website] message a race it was Going to: nothing arrives.
+
+**R2. Keyboard (B2)**
+R2.1 [App] Help & legal → **Report a safety concern** → tap **Tell us what happened** and type 6+ lines. The whole box stays above the keyboard while it grows; past about a third of the screen it scrolls inside.
+R2.2 [App] Same check (the field you type in stays fully visible): Edit profile (Display name, Nickname), Finish setting up (Display name, Nickname), Suggest a race (every box, especially the last), Ask for a new club (About the club, Leader's sign-in email), Emergency contact, Delete account (Type DELETE), Sign in (email, code).
+
+**R3. Finish setting up (B3)**
+R3.1 [App] New account (or a second Google account): on **Finish setting up**, enter a nickname another account already uses (for example your first account's), tap Continue: "That nickname is already taken. Choose another, or leave it empty." (no "Something went wrong").
+R3.2 [App] Clear the nickname, Continue: you reach the app.
+
+**R4. Organiser team (B4)**
+R4.1 [Website] Sign in as an organisation **owner** → Organiser → **Settings** → your organisation → **Team**: fields **Their RunLime account email** and **Role**, and **Add to team**. Add your second account as Manager.
+R4.2 [Website] Sign in as that **manager**: the Team section lists people and says only owners can add people (with the owner's name). (If "Add a team" meant something else, tell me where you clicked.)
+
+**R5. Start run button (B5)**
+R5.1 [App] Home, List view: scroll to the bottom. The last race card scrolls fully above the **Start run** button. At the top, the first card is not covered.
+
+**R6. Google account chooser (B6)**
+R6.1 [App] Sign in with Google: Android's account chooser appears, even if you used Google before.
+R6.2 [App] Sign out, then **Continue with Google** again: the chooser appears again (pick a different Google account to switch).
+R6.3 [App] After deleting a Google-based account, signing in with Google shows the chooser.
+
+**R7. Loud notifications (B8)**
+R7.1 [App] Open the new app once while signed in. Lock the phone. [Website] send a message: the notification makes a **sound**, vibrates and shows a **banner** (heads-up) while the phone is unlocked.
+R7.2 [App] Android Settings → Apps → RunLime → Notifications: one category, **Race alerts**, set to make sound and pop on screen. (Older categories are removed.)
+
+**R8. Organiser message limits (C1)**
+R8.1 [Website] As admin, open a race more than 7 days away → **Message people going**: it says "Admins are not limited … The organiser has 3 of 3 left." Send two messages: the organiser's count doesn't change.
+R8.2 [Website] As the organiser of that race: "3 of 3 left. Up to 3 updates in any 7 days; in the 7 days before the race, up to 10." Send 3; the button is then disabled and a 4th is refused with the race-week explanation.
+R8.3 [Website] For a race within 7 days: the organiser sees "… of 10 left. Race week: up to 10 updates …".
+R8.4 [Website] Postpone and put back on a race: the organiser's count doesn't change.
+R8.5 [Website] Admin → Settings: `messages.per_race_per_week` = **3** and `messages.race_week_limit` = **10**.
+
+**R9. Photos on Private accounts (C2)**
+R9.1 [App] Account A (Private) has a photo. Account B (not following A): search A, open A's profile, any club list and "People you follow who are going": B sees A's **initials**, not the photo.
+R9.2 [App] B asks to follow A. A's Followers → Requests shows B's initials (if B is Private and A doesn't follow B), or B's photo if B is Public.
+R9.3 [App] A approves: B now sees A's photo.
+R9.4 [App] A switches to **Public**: everyone sees the photo. Switch back to Private.
+R9.5 [Website] Admin → Reports: a report on A's photo still shows the photo (for moderation).
+R9.6 [Website] Privacy Policy (/legal/privacy) says photos on Private accounts are shown only to approved followers.
+
+**Still open from earlier:** F2 report box (now R2.1). Everything else from the fix round passed (owner, 2026-10-30).
+
 ## Fix round (2026-10-18) — test only these, on the new APK
 **APK:** https://expo.dev/artifacts/eas/UjmOq-8OOhMBJ65bbJO5LyQ0j5rTd1xQ0O9CMf7ANv8.apk (EAS build a90e523c, commit `11be7a2`, CI #132, Firebase config confirmed) — install over the old app (same signing key). Open it once while signed in: that connects this phone for notifications.
 
@@ -31,7 +86,7 @@ F5.2 Website → Admin → Clubs: the request shows **Proposed leader: <name> (n
 F5.3 The second account gets "You now lead <club>. You'll approve join requests." (bell, and phone if on).
 F5.4 On a third account (or after leaving), open the club: "<leader> approves join requests." shows above **Ask to join**, and after asking: "Your request is waiting for <leader> to approve it."
 
-**Still to confirm from slice 6** — 6.4 (third message blocked, "0 of 2 left"), 6.6 (organiser-updates toggle saves), 6.7 (Mark all as read), 6.11 (after sign-out, no phone notifications for that account on this phone).
+**Still to confirm from slice 6** — 6.4 (message limit; now R8), 6.6 (organiser-updates toggle saves), 6.7 (Mark all as read), 6.11 (after sign-out, no phone notifications for that account on this phone).
 
 
 **Final Phase 3 APK (use this one for every step; push included):** https://expo.dev/artifacts/eas/G_euHwOUZLEUh8J3xPID2DEIkUh139fSVI6l15Qsiwk.apk — EAS build c96497e9, commit `47c7cbd` (CI #125), signing SHA-1 `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25` (same as before, so it installs over the old app), Firebase config: yes (project `runlime-a3849`). The per-slice APK links below are older builds; you don't need them.
@@ -102,7 +157,7 @@ Inbox (works without Firebase):
 6.1 The bell (top right) shows a red number when you have unread notifications. Tap it: **Notifications** lists them, newest first; unread ones have a green dot.
 6.2 Second account: follow your account (Private): your bell shows "<name> asked to follow you". Tap it: Followers → Requests opens. Approve: the second account gets "<you> approved your follow request".
 6.3 Say **Going** to a race. Website: postpone it to a new date with a reason. Phone: pull down on Home; the bell shows 1. The notification reads "<race> is postponed to <day, date, time>" with the reason. Tap it: the race page opens. Put the race back on: "<race> is back on: <date, time>".
-6.4 Website → that race (admin or organiser page) → **Message people going**: type "Re-test: parking opens at 5 am", **Send update**: "Sent to N people." Phone: "<race>: update from the organiser" with your text. A third message in the same 7 days is blocked ("0 of 2 left").
+6.4 Website → that race (admin or organiser page) → **Message people going**: type "Re-test: parking opens at 5 am", **Send update**: "Sent to N people." Phone: "<race>: update from the organiser" with your text. Organisers: a 4th message in the same 7 days is blocked (3 per 7 days; 10 in race week); admins are not limited (see R8).
 6.5 Club join request (slice 4): the leader gets "<name> asked to join <club>"; after approval the member gets "You're now a member of <club>".
 6.6 Profile → **Notification settings**: turn **Updates from race organisers** off, **Save**, send another update (next week, or ask me to lower the limit): you don't get it. Turn it back on.
 6.7 **Mark all as read** clears the dots and the bell number.

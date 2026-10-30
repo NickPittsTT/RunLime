@@ -130,7 +130,10 @@ export default function HomeScreen() {
   ];
 
   const fc = activeFilterCount(filters);
-  const START_RUN_SPACE = 96 + insets.bottom;
+  // The floating Start run button's real height (font size, navigation bar), measured; every card can scroll clear of
+  // it with a margin (owner retest B5: the button covered a race card).
+  const [startRunHeight, setStartRunHeight] = useState(92 + insets.bottom);
+  const START_RUN_SPACE = startRunHeight + spacing.xl;
 
   return (
     <View style={{ flex: 1, backgroundColor: c.background }}>
@@ -199,7 +202,12 @@ export default function HomeScreen() {
         </View>
       </ScrollView>
 
-      <View pointerEvents="box-none" style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: spacing.lg, paddingBottom: spacing.lg + insets.bottom }}>
+      <View
+        testID="start-run-bar"
+        pointerEvents="box-none"
+        onLayout={(e) => setStartRunHeight(e.nativeEvent.layout.height)}
+        style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: spacing.lg, paddingBottom: spacing.lg + insets.bottom }}
+      >
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Start run"

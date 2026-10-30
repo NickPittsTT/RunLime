@@ -23,7 +23,9 @@ async function sendPending(): Promise<{ sent: number; removed: number; errors: R
   const pending = (await (await rest(`notifications?push_sent_at=is.null&created_at=gt.${since}&select=id,user_id,kind,title,body,data&order=created_at&limit=500`)).json()) as PendingNotification[];
   if (!Array.isArray(pending) || pending.length === 0) return { sent: 0, removed: 0, errors: {} };
   const users = [...new Set(pending.map((n) => n.user_id))];
-  const tokens = (await (await rest(`push_tokens?user_id=in.(${users.join(',')})&select=token,user_id`)).json()) as { token: string; user_id: string }[];
+  // Only phones whose sign-in session is still alive (B1: a signed-out phone must not get the account's notifications).
+  const tokens = (await (await rest('rpc/push_targets', { method: 'POST', body: JSON.stringify({ p_users: users }) })).json()) as { token: string; user_id: string }[];
+  if (!Array.isArray(tokens)) throw new Error('push_targets failed');
   const byUser = new Map<string, string[]>();
   for (const t of tokens) byUser.set(t.user_id, [...(byUser.get(t.user_id) ?? []), t.token]);
 

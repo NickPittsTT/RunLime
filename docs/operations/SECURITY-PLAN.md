@@ -72,6 +72,7 @@ Likelihood (L/M/H) · Impact (Low/Med/High/Critical) · **Owner** = who acts · 
 | R16 | Compromised third-party GitHub Action (tags can move) | L–M | High | Pin actions to commit SHAs; Dependabot (actions) keeps them current | Claude | Before launch |
 | R17 | Firebase Android API key in the APK is abused (it is public by design) | L | Low | Restrict the key to package `tt.runlime.app.dev` + signing SHA-1 in Google Cloud (free) | Nicholas | Before pilot |
 | R18 | Edge Function abuse (expensive calls, spam uploads) | L | Med | JWT required except two secret-protected server functions; per-user upload limits (1 MB, size checks) | Claude | Before launch (add per-user rate limit to `profile-photo`) |
+| R19 | A signed-out phone keeps getting an account's notifications (owner retest 6.11, 2026-10-30): the token row outlived a sign-out whose unregister call failed | M (was happening) | High (privacy) | **Fixed:** each token is tied to its sign-in session; the server sends only to tokens whose session is alive (`push_targets`), so ending a sign-in stops pushes even if the phone was offline; sign-out and account deletion delete the token, retried at next start; switching accounts moves the token; hourly purge of orphans. Evidence: pgTAP 025 (14 checks), app tests Push + SignOut | Claude | Done (owner retest R1 pending) |
 
 ## 4. Standards mapping
 ### OWASP MASVS v2 (mobile app)
@@ -116,11 +117,12 @@ Likelihood (L/M/H) · Impact (Low/Med/High/Critical) · **Owner** = who acts · 
 - **Exceptions** only when no fix exists or the code never ships (developer tooling). Each needs a reason, a review date at most 30 days out, and an entry in `package.json` → `pnpm.auditConfig.ignoreGhsas`.
 - A failing audit on an unrelated change is still work now: fix, or record an exception with a reason.
 
-**Current exceptions** (review by **2026-11-23**):
+**Current exceptions** (review dates per row; the first two by **2026-11-23**):
 | Advisory | Package | Why it's accepted for now |
 |---|---|---|
 | GHSA-86w9-cpqp-85rv (high) | node-forge 1.4.0 via `expo` → `@expo/cli` | No patched version exists. Used only by Expo's developer CLI on a developer machine/EAS builder (local HTTPS certs); not in the app or website |
 | GHSA-mrhx-c7xc-m3w5 (high) | zod 3.25.76 via `@expo/cli` | Fix only in zod 4 (breaking for Expo's CLI). Memory exhaustion while the CLI validates its own config; not reachable by users. Our code uses zod 4.6.6 |
+| GHSA-qr28-fpjm-wq7f (high, found by CI 2026-10-30) | decode-uri-component 0.2.2 via `expo-router` → `query-string` 7 | Ships in the app, but **no compatible fix exists for Expo SDK 57**: the only fixed version (0.5.1) is ESM-only, and overriding it made `query-string` crash at runtime (verified: "decodeComponent is not a function"; Jest and the Metro bundle did not catch it). Impact: a crafted RunLime deep link with a huge malformed `%` sequence could make the app slow to respond; no data exposure. Fixed by the Expo SDK 58 upgrade (`expo-router` 58 no longer uses `query-string`). **Review by 2026-11-29**; alternative if the owner prefers: a small vetted CommonJS replacement (shim) now |
 
 ## 6. CI security gates (all free)
 1. gitleaks — whole history (checks job)

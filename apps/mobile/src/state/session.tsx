@@ -1,6 +1,7 @@
 import type { Session } from '@supabase/supabase-js';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { disablePushForThisPhone } from '@/lib/push';
+import { disablePushForThisPhone, retryPendingUnregister } from '@/lib/push';
+import { forgetGoogleAccount } from '@/lib/socialSignIn';
 import { supabase } from '@/lib/supabase';
 
 export interface Profile {
@@ -55,6 +56,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    // A phone removal that failed at the last sign-out is retried at every start.
+    void retryPendingUnregister();
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       void loadProfile(data.session);
@@ -76,8 +79,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       refreshProfile: () => loadProfile(session),
       signOut: async () => {
         setPassedDob(null);
-        // This phone stops getting the account's push notifications.
+        // This phone stops getting the account's push notifications (retried later if offline), and the next
+        // Google sign-in shows the account chooser. Neither may block signing out.
         await disablePushForThisPhone();
+        await forgetGoogleAccount();
         await supabase.auth.signOut();
       },
     }),

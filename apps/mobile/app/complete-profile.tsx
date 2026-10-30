@@ -78,6 +78,7 @@ export default function CompleteProfileScreen() {
 
   async function submit() {
     if (!accepted) return setErrors({ accept: 'Please accept the Terms of Use and Privacy Policy to continue.' });
+    if (!versions) return setFormError('Still loading the Terms of Use and Privacy Policy. Check your connection and try again.');
     const parsed = completeSignupSchema.safeParse({
       dateOfBirth: passedDob,
       displayName,

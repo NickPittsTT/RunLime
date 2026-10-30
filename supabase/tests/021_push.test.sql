@@ -24,7 +24,7 @@ select is((select count(*)::int from public.push_tokens), 0, 'signing out remove
 -- Dispatch: off until configured; configuration only by the service role.
 select throws_ok($$select public.set_push_config('https://example.org/x', repeat('s', 40))$$, '42501', null, 'users cannot configure push');
 select tests.clear_authentication();
-insert into public.push_tokens (token, user_id, platform) values ('ExponentPushToken[ana-phone]', :'ana', 'android');
+insert into public.push_tokens (token, user_id, platform, session_id) values ('ExponentPushToken[ana-phone]', :'ana', 'android', tests.new_session(:'ana'));
 insert into public.notifications (user_id, kind, title) values (:'ana', 'new_follower', 'Test push');
 delete from vault.secrets where name in ('push_dispatch_url', 'push_dispatch_secret');
 select is(public.dispatch_push(), false, 'not configured: nothing is sent (the inbox still works)');

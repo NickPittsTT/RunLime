@@ -1,6 +1,8 @@
-import type { ReactElement, ReactNode, Ref } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, type ReactElement, type ReactNode, type Ref } from 'react';
 import {
   ActivityIndicator,
+  Dimensions,
+  Keyboard,
   KeyboardAvoidingView,
   Pressable,
   ScrollView,
@@ -15,18 +17,72 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/lib/theme';
 
+/**
+ * Where to scroll so a field is fully visible: its whole box (plus a margin) inside the visible part of the scroll
+ * view, preferring to keep its top in view if it is taller than that. Returns null when nothing needs to move.
+ */
+export function revealOffset(field: { y: number; height: number }, view: { offset: number; height: number }, margin = 16): number | null {
+  const top = field.y - margin;
+  const bottom = field.y + field.height + margin;
+  if (field.height + 2 * margin > view.height) return Math.max(0, top);
+  if (bottom > view.offset + view.height) return bottom - view.height;
+  if (top < view.offset) return Math.max(0, top);
+  return null;
+}
+
+type Reveal = (node: View | TextInput | null) => void;
+export const RevealContext = createContext<Reveal | null>(null);
+
 export function Screen({ children, scroll = true, refreshControl, testID }: { children: ReactNode; scroll?: boolean; refreshControl?: ReactElement<RefreshControlProps>; testID?: string }) {
   const { c, spacing } = useTheme();
-  const body = <View style={{ padding: spacing.lg, gap: spacing.lg }}>{children}</View>;
+  const scrollRef = useRef<ScrollView>(null);
+  const contentRef = useRef<View>(null);
+  const view = useRef({ offset: 0, height: 0 });
+  // Keep the focused field fully above the keyboard: on focus, once the keyboard has opened (the view shrinks), and
+  // whenever a multi-line box grows (owner retest B2: the report box's lower lines hid behind the keyboard).
+  const reveal = useCallback<Reveal>((node) => {
+    setTimeout(() => {
+      const content = contentRef.current;
+      if (!node || !content || !scrollRef.current) return;
+      node.measureLayout(
+        content,
+        (_x, y, _w, height) => {
+          const to = revealOffset({ y, height }, view.current);
+          if (to !== null) scrollRef.current?.scrollTo({ y: to, animated: true });
+        },
+        () => undefined,
+      );
+    }, 150);
+  }, []);
+  useEffect(() => {
+    if (!scroll) return;
+    const sub = Keyboard.addListener('keyboardDidShow', () => reveal(TextInput.State.currentlyFocusedInput() as TextInput | null));
+    return () => sub.remove();
+  }, [scroll, reveal]);
+  const body = (
+    <View ref={contentRef} collapsable={false} style={{ padding: spacing.lg, gap: spacing.lg }}>
+      {children}
+    </View>
+  );
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: c.background }} edges={['bottom', 'left', 'right']}>
       {/* Android draws edge-to-edge (required from Android 16), so the window no longer shrinks for the keyboard:
           pad on both platforms so the focused field stays above it (owner retest 2026-10-18, report screen). */}
       <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
         {scroll ? (
-          <ScrollView testID={testID} keyboardShouldPersistTaps="handled" refreshControl={refreshControl}>
-            {body}
-          </ScrollView>
+          <RevealContext.Provider value={reveal}>
+            <ScrollView
+              ref={scrollRef}
+              testID={testID}
+              keyboardShouldPersistTaps="handled"
+              refreshControl={refreshControl}
+              scrollEventThrottle={32}
+              onScroll={(e) => (view.current.offset = e.nativeEvent.contentOffset.y)}
+              onLayout={(e) => (view.current.height = e.nativeEvent.layout.height)}
+            >
+              {body}
+            </ScrollView>
+          </RevealContext.Provider>
         ) : (
           body
         )}
@@ -92,20 +148,47 @@ export function Button({
   );
 }
 
+/** Passes the input to a caller's ref as well as our own (callback or object ref). */
+function assignRef<V>(ref: Ref<V> | undefined, value: V | null) {
+  if (typeof ref === 'function') ref(value);
+  else if (ref && typeof ref === 'object') (ref as { current: V | null }).current = value;
+}
+
+/** Multi-line boxes stop growing at about a third of the screen and scroll inside, so they always fit above the keyboard. */
+const MULTILINE_MAX_HEIGHT = Math.round(Dimensions.get('window').height * 0.32);
+
 export function TextField({ label, hint, error, inputRef, ...props }: TextInputProps & { label: string; hint?: string; error?: string; inputRef?: Ref<TextInput> }) {
   const { c, radius, minTouchTarget, fontSize } = useTheme();
+  const reveal = useContext(RevealContext);
+  const own = useRef<TextInput | null>(null);
+  const setRef = useCallback(
+    (node: TextInput | null) => {
+      own.current = node;
+      assignRef(inputRef, node);
+    },
+    [inputRef],
+  );
   return (
     <View style={{ gap: 6 }}>
       <T style={{ fontWeight: '700' }}>{label}</T>
       {hint ? <T variant="caption">{hint}</T> : null}
       <TextInput
-        ref={inputRef}
+        ref={setRef}
         accessibilityLabel={label}
         accessibilityHint={hint}
         placeholderTextColor={c.inkMuted}
         {...props}
+        onFocus={(e) => {
+          reveal?.(own.current);
+          props.onFocus?.(e);
+        }}
+        onContentSizeChange={(e) => {
+          if (props.multiline) reveal?.(own.current);
+          props.onContentSizeChange?.(e);
+        }}
         style={[
           { minHeight: minTouchTarget, borderWidth: 1, borderColor: error ? c.danger : c.border, borderRadius: radius.md, paddingHorizontal: 12, fontSize: fontSize.body, color: c.ink, backgroundColor: c.background },
+          props.multiline ? { maxHeight: MULTILINE_MAX_HEIGHT } : null,
           props.style,
         ]}
       />

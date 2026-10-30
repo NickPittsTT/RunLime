@@ -1,7 +1,7 @@
 import { devices, expect, test } from '@playwright/test';
 import { admin, signInAdmin, signedInUser } from './helpers';
 
-test('notifications: postponing on the website and an organiser update reach the runner\'s inbox; 2 updates per week', async ({ browser }) => {
+test('notifications: postponing on the website and an organiser update reach the runner\'s inbox; admins are not limited, the organiser allowance shows', async ({ browser }) => {
   const db = admin();
   const { data: area } = await db.from('regions').select('id').eq('kind', 'area').limit(1).single();
   const name = `E2E Notify 5K ${Date.now()}`;
@@ -23,8 +23,12 @@ test('notifications: postponing on the website and an organiser update reach the
   await page.getByRole('button', { name: 'Send update' }).click();
   await expect(page.getByText('Sent to 1 person.')).toBeVisible();
   await page.reload();
-  await expect(page.getByText('0 of 2 left in the last 7 days.')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Send update' })).toBeDisabled();
+  // Admin updates don't use the organiser's allowance (3 per 7 days; 10 in race week; settings).
+  await expect(page.getByTestId('message-allowance')).toHaveText(
+    'Admins are not limited (admin updates are recorded and audit-logged). The organiser has 3 of 3 left. Up to 3 updates in any 7 days; in the 7 days before the race, up to 10.',
+  );
+  await page.getByLabel('Message', { exact: true }).fill('Water stations every 2 km.');
+  await expect(page.getByRole('button', { name: 'Send update' })).toBeEnabled();
 
   // Postpone to a new date on the website.
   const nextYear = new Date().getUTCFullYear() + 1;

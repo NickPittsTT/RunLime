@@ -19,9 +19,17 @@ begin
   return v_id;
 end $$;
 
-create or replace function tests.authenticate_as(p_user uuid, p_aal text default 'aal1') returns void language plpgsql as $$
+drop function if exists tests.authenticate_as(uuid, text);
+
+-- A sign-in session for p_user (auth.sessions), as GoTrue creates on sign-in. Push tokens are tied to it.
+create or replace function tests.new_session(p_user uuid) returns uuid language sql security definer set search_path = '' as $$
+  insert into auth.sessions (id, user_id, created_at, updated_at) values (gen_random_uuid(), p_user, now(), now()) returning id
+$$;
+
+create or replace function tests.authenticate_as(p_user uuid, p_aal text default 'aal1', p_session uuid default null) returns void language plpgsql as $$
 begin
-  perform set_config('request.jwt.claims', json_build_object('sub', p_user, 'role', 'authenticated', 'aal', p_aal)::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', p_user, 'role', 'authenticated', 'aal', p_aal,
+    'session_id', coalesce(p_session, tests.new_session(p_user)))::text, true);
   perform set_config('request.jwt.claim.sub', p_user::text, true);
   perform set_config('role', 'authenticated', true);
 end $$;

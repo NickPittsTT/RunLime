@@ -9,7 +9,7 @@ describe('app builds refuse secret EXPO_PUBLIC_ values (incident review 31 Oct 2
     expect(() => assertPublicEnv({ EXPO_PUBLIC_SUPABASE_ANON_KEY: jwt('anon'), EXPO_PUBLIC_X: 'sb_publishable_abc123def456', EXPO_PUBLIC_SUPABASE_URL: 'https://x.supabase.co' })).not.toThrow();
   });
   it('a secret key fails, naming the variable but never printing the value', () => {
-    const value = ['sb', 'secret', 'Q7xKp2Lm9VtR4wZb8NcYd3Hj6Fg1SaEu'].join('_'); // fake; built at runtime so secret scans don't match it
+    const value = 'sb_' + 'secret_' + 'ab12'.repeat(8); // fake, low-entropy, built at runtime so secret scans ignore it
     expect(() => assertPublicEnv({ EXPO_PUBLIC_SUPABASE_ANON_KEY: value })).toThrow(/EXPO_PUBLIC_SUPABASE_ANON_KEY holds a Supabase secret key/);
     try {
       assertPublicEnv({ EXPO_PUBLIC_SUPABASE_ANON_KEY: value });

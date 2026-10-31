@@ -57,5 +57,5 @@ keywords = ["private key"]
 # The only allowlisted value: a FAKE key used by the build-guard self-test committed on 31 Oct 2026 (commit 3702234).
 # It was never a real key; the test now builds it at runtime. Do not add real values here.
 [allowlist]
-description = "Fake sb_secret_ value from the 31 Oct 2026 build-guard self-test"
-regexes = ['''sb_secret_Q7xKp2Lm9VtR4wZb8NcYd3Hj6Fg1SaEu''']
+description = "Fake value from the 31 Oct 2026 build-guard self-test (commits 3702234, 06c66e1)"
+regexes = ['''Q7xKp2Lm9VtR4wZb8NcYd3Hj6Fg1SaEu''']

@@ -32,12 +32,19 @@ cd - > /dev/null
 node scripts/backup-row-counts.mjs local > /tmp/counts-restored.txt
 tables=$(wc -l < /tmp/counts-live.txt)
 rows=$(awk '{s+=$2} END {print s+0}' /tmp/counts-live.txt)
-if diff -u /tmp/counts-live.txt /tmp/counts-restored.txt > /tmp/counts.diff; then
-  echo "PASS  restored $tables tables, $rows rows; every table's row count matches the live project" | tee /tmp/restore-result.txt
+# Every live table must exist in the copy with the same row count. Tables that exist only in the copy (a newer local
+# Supabase version) are allowed if they are empty.
+awk 'NR==FNR {live[$1]=$2; next} {restored[$1]=$2}
+     END {
+       for (t in live) if (!(t in restored)) print "missing " t " (live " live[t] ")"; else if (restored[t] != live[t]) print "count " t " live " live[t] ", restored " restored[t];
+       for (t in restored) if (!(t in live) && restored[t] != 0) print "extra " t " " restored[t];
+     }' /tmp/counts-live.txt /tmp/counts-restored.txt | sort > /tmp/counts.diff
+if [ ! -s /tmp/counts.diff ]; then
+  echo "PASS  restored $tables tables, $rows rows; every live table's row count matches" | tee /tmp/restore-result.txt
   status=0
 else
-  echo "FAIL  row counts differ (schema.table count; - live, + restored):" | tee /tmp/restore-result.txt
-  grep -E '^[-+][a-z]' /tmp/counts.diff | head -40 | tee -a /tmp/restore-result.txt
+  echo "FAIL  the restored copy differs:" | tee /tmp/restore-result.txt
+  head -40 /tmp/counts.diff | tee -a /tmp/restore-result.txt
   status=1
 fi
 (cd "$work/project" && supabase stop --no-backup > /dev/null) || true

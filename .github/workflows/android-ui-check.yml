@@ -68,6 +68,7 @@ jobs:
       - name: Result
         if: always()
         run: |
+          cat /tmp/ui/result.txt 2>/dev/null || echo "no result (the flow stopped earlier; see the log)"
           { echo '```'; cat /tmp/ui/result.txt 2>/dev/null || echo "no result (the flow stopped earlier; see the log)"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v6
         if: always()

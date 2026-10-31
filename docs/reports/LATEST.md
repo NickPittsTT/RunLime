@@ -7,7 +7,7 @@
 ## 1. Your four decisions
 | # | Decision | What I did | Evidence | Confidence |
 |---|---|---|---|---|
-| 1 | Satellite: option D + an "Open in Google Maps (satellite)" link | Built (details in §2) | Shared unit test of the exact URL; web E2E checks the link's address, new tab and no-referrer on the admin race page (passed locally); CI on `c70b8b6`: see §5 | High (link built); Medium (Google terms, §2) |
+| 1 | Satellite: option D + an "Open in Google Maps (satellite)" link | Built (details in §2) | Shared unit test of the exact URL; web E2E checks the link's address, new tab and no-referrer on the admin race page (passed locally); CI #160 passed | High (link built); Medium (Google terms, §2) |
 | 2 | Deploy: option 1 | **Nothing from Phase 4/5 is on staging.** Rollout order recorded in PROGRESS.md: round-4 APK → your R2 result → deploy Phase 4/5 database + website together → emulator mock-location check → combined APK (max 3 builds) | PROGRESS.md; tonight's scheduled task updated to say "do not deploy Phase 4/5" | High |
 | 3 | Tonight as scheduled; APK link at the top of LATEST.md | The scheduled task (00:45 UTC) now also puts the link at the top of this file, lists the `EXPO_PUBLIC_*` build sync, and merges phase-3 into `phase-4-5` | Scheduled task updated (prompt only; same time) | High |
 | 4 | Swipe-away test clearly marked, with a fallback plan | B5.6 rewritten as a marked step-by-step test with the expected result and three possible outcomes (a/b/c); fallback in §3 | `docs/phase-4-5/TEST-SCRIPT.md` (branch `phase-4-5`) | High |
@@ -61,5 +61,5 @@
   - shared unit tests: **100 pass** (one new test of the link);
   - web typecheck and lint: clean;
   - web E2E, run against a freshly reset local database: `checkins`, `events` and `review-fixes`, **7 of 7 pass**.
-- **CI:** `c70b8b6` was pushed to `phase-4-5`; the result follows in the next report (Phase 4 #158 and Phase 5 #159 passed earlier).
+- **CI:** `c70b8b6` **passed in full** (#160: unit tests, pgTAP, Security Advisor, scans, web E2E). Phase 4 #158 and Phase 5 #159 passed earlier.
 - **Not tested:** whether the link opens the Maps app on your phone (I expect yes). Test-script step P0.2 is where to try it.

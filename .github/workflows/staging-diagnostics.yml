@@ -13,7 +13,7 @@ on:
       check:
         description: What to check
         type: choice
-        options: [api-cache-headers, event-history, push, security-advisor, security-baseline]
+        options: [api-cache-headers, event-history, photos, push, security-advisor, security-baseline]
         default: api-cache-headers
       name:
         description: Event name fragment (event-history only)
@@ -29,13 +29,19 @@ jobs:
     environment: staging
     steps:
       - uses: actions/checkout@v5
-        if: inputs.check == 'event-history' || inputs.check == 'push' || inputs.check == 'security-advisor' || inputs.check == 'security-baseline'
+        if: inputs.check != 'api-cache-headers'
       - name: Security baseline live on staging (read-only)
         if: inputs.check == 'security-baseline'
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
         run: node scripts/staging-security-check.mjs
+      - name: Photo visibility (read-only; accounts as letters)
+        if: inputs.check == 'photos'
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+        run: node scripts/photo-diagnostics.mjs
       - name: Security Advisor (hosted)
         if: inputs.check == 'security-advisor'
         env:

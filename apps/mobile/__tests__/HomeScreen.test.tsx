@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { formatEventDateTime } from '@runlime/shared/events';
-import { Alert, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import HomeScreen from '../app/(app)/index';
 import { CALENDAR_CACHE_KEY } from '../src/lib/calendar';
 import { queryMock, race } from '../test-utils/races';
@@ -93,12 +93,11 @@ describe('home: race calendar', () => {
     expect(screen.getByText('Chaguaramas Fun Run')).toBeTruthy();
   });
 
-  it('Start run says coming soon; the bell opens the inbox', async () => {
-    const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
+  it('Start run opens the run tracker (Phase 5); the bell opens the inbox', async () => {
     render(<HomeScreen />);
     await screen.findByText('Savannah 5K');
     fireEvent.press(screen.getByRole('button', { name: 'Start run' }));
-    expect(alert.mock.calls.map((c) => c[1])).toEqual(['Coming soon.']);
+    expect(mockPush).toHaveBeenCalledWith('/run');
     fireEvent.press(screen.getByRole('button', { name: 'Notifications' }));
     expect(mockPush).toHaveBeenCalledWith('/inbox');
   });
@@ -109,9 +108,10 @@ describe('home: race calendar', () => {
     fireEvent.press(screen.getByRole('button', { name: 'Open menu' }));
     expect(screen.getByText('AL')).toBeTruthy();
     expect(screen.getByText('Speedy')).toBeTruthy();
-    for (const label of ['Leaderboards', 'Run history']) {
-      expect(screen.getByRole('button', { name: `${label}, coming soon` })).toBeTruthy();
-    }
+    expect(screen.getByRole('button', { name: 'Leaderboards, coming soon' })).toBeTruthy();
+    fireEvent.press(screen.getByRole('button', { name: 'Run history' }));
+    expect(mockPush).toHaveBeenCalledWith('/runs');
+    fireEvent.press(screen.getByRole('button', { name: 'Open menu' }));
     fireEvent.press(screen.getByRole('button', { name: 'My races' }));
     expect(mockPush).toHaveBeenCalledWith('/my-races');
     fireEvent.press(screen.getByRole('button', { name: 'Open menu' }));

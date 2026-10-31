@@ -114,11 +114,10 @@ export default function HomeScreen() {
     ]);
   };
 
-  const soon = (what: string) => () => Alert.alert(what, 'Coming soon.');
   const menu: MenuItem[] = [
     { key: 'my-races', label: 'My races', icon: 'flag-outline', onPress: () => router.push('/my-races') },
     { key: 'leaderboards', label: 'Leaderboards', icon: 'trophy-outline' },
-    { key: 'history', label: 'Run history', icon: 'time-outline' },
+    { key: 'history', label: 'Run history', icon: 'time-outline', onPress: () => router.push('/runs') },
     { key: 'followers', label: 'Followers', icon: 'people-outline', onPress: () => router.push('/people') },
     { key: 'clubs', label: 'Clubs', icon: 'shield-outline', onPress: () => router.push('/clubs') },
     { key: 'suggest', label: 'Suggest a race', icon: 'add-circle-outline', onPress: () => router.push('/suggest-race') },
@@ -211,8 +210,8 @@ export default function HomeScreen() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Start run"
-          accessibilityHint="Run tracking is coming soon"
-          onPress={soon('Start run')}
+          accessibilityHint="Opens the run tracker"
+          onPress={() => router.push('/run')}
           style={({ pressed }) => ({
             minHeight: 60,
             borderRadius: radius.pill,

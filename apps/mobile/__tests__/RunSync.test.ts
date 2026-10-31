@@ -1,0 +1,50 @@
+const mockRpc = jest.fn();
+const mockSelect = jest.fn();
+jest.mock('@/lib/supabase', () => ({
+  supabase: { rpc: (...a: unknown[]) => mockRpc(...a), from: () => ({ select: () => ({ order: () => ({ limit: () => mockSelect() }) }) }) },
+}));
+let mockLocal: Record<string, unknown>[] = [];
+const mockMark = jest.fn();
+jest.mock('@/lib/runDb', () => ({
+  unsyncedRuns: () => mockLocal.filter((r) => !r.synced),
+  localRuns: () => mockLocal,
+  markSynced: (id: string) => mockMark(id),
+  deleteLocalRun: jest.fn(),
+}));
+
+// eslint-disable-next-line import/first
+import { loadRuns, syncRuns } from '@/lib/runSync';
+
+const run = (id: string, synced = false) => ({ id, started_at: `2026-10-3${id}T10:00:00Z`, ended_at: `2026-10-3${id}T10:30:00Z`, distance_m: 5000, moving_seconds: 1500, elapsed_seconds: 1600, avg_pace_sec_per_km: 300, splits: [], steps: null, calories_est: 350, calories_basis: 'general', route_polyline: 'abc', point_count: 3, event_id: null, synced });
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
+describe('run upload queue (works offline, uploads later)', () => {
+  it('uploads waiting runs and marks them synced; never sends a weight', async () => {
+    mockLocal = [run('0'), run('1')];
+    mockRpc.mockResolvedValue({ data: 'x', error: null });
+    expect(await syncRuns()).toEqual({ uploaded: 2, waiting: 0 });
+    expect(mockMark.mock.calls.map((c) => c[0])).toEqual(['0', '1']);
+    const sent = mockRpc.mock.calls[0]![1].p_run;
+    expect(sent.id).toBe('0');
+    expect(sent).not.toHaveProperty('weight');
+    expect(sent).not.toHaveProperty('synced');
+  });
+  it('offline: stops at the first failure and keeps the rest for the next try', async () => {
+    mockLocal = [run('0'), run('1')];
+    mockRpc.mockResolvedValue({ data: null, error: { message: 'Network request failed' } });
+    expect(await syncRuns()).toEqual({ uploaded: 0, waiting: 2 });
+    expect(mockMark).not.toHaveBeenCalled();
+  });
+  it('history merges server runs with runs still waiting on this phone (no duplicates); offline shows the phone\'s runs', async () => {
+    mockLocal = [run('1'), run('0', true)];
+    mockSelect.mockResolvedValue({ data: [{ ...run('0', true), events: { name: 'Savannah 5K' } }], error: null });
+    const r = await loadRuns();
+    expect(r.runs.map((x) => x.id)).toEqual(['1', '0']);
+    expect(r.runs[1]!.raceName).toBe('Savannah 5K');
+    mockSelect.mockResolvedValue({ data: null, error: { message: 'offline' } });
+    expect((await loadRuns()).offline).toBe(true);
+  });
+});

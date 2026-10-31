@@ -24,7 +24,7 @@ select throws_ok(format($$select public.review_event(%L, 'published')$$, :'race'
 select throws_ok(format($$select public.review_event(%L, 'published', null, false, true)$$, :'race'), '22023', 'Tick "Pin checked" before publishing', 'and the admin''s "Pin checked"');
 select lives_ok(format($$select public.review_event(%L, 'published', null, true, true)$$, :'race'), 'with both ticks it publishes');
 select isnt((select pin_checked_at from public.events where id = :'race'), null, 'pin checked is recorded');
-select is((select count(*)::int from public.search_venues('Savannah')), 1, 'a checked pin is saved as a reusable venue');
+select is((select count(*)::int from public.search_venues('Savannah') where confirmed_at = now()), 1, 'a checked pin is saved as a reusable venue');
 select tests.clear_authentication();
 update public.events set start_lat = 10.6701 where id = :'race';
 select is((select pin_checked_at from public.events where id = :'race'), null, 'moving the pin clears "Pin checked"');

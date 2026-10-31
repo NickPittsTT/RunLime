@@ -1,6 +1,9 @@
 import type { Session } from '@supabase/supabase-js';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { forgetPhotoUrls } from '@/lib/profilePhoto';
+import { wipeLocalRuns } from '@/lib/runDb';
+import { clearRunPrefs } from '@/lib/runPrefs';
+import { syncRuns } from '@/lib/runSync';
 import { disablePushForThisPhone, retryPendingUnregister } from '@/lib/push';
 import { forgetGoogleAccount } from '@/lib/socialSignIn';
 import { supabase } from '@/lib/supabase';
@@ -85,6 +88,15 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         // This phone stops getting the account's push notifications (retried later if offline), and the next
         // Google sign-in shows the account chooser. Neither may block signing out.
         await disablePushForThisPhone();
+        // Runs on this phone belong to this account: upload any still waiting, then clear them (and the phone-only
+        // weight and tracker settings) so the next account never sees them.
+        await syncRuns().catch(() => undefined);
+        try {
+          wipeLocalRuns();
+        } catch {
+          // no local run store yet
+        }
+        await clearRunPrefs().catch(() => undefined);
         await forgetGoogleAccount();
         await supabase.auth.signOut();
         forgetPhotoUrls();

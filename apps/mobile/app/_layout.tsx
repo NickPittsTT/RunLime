@@ -5,6 +5,8 @@ import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { colors } from '@runlime/ui-tokens';
 import { SessionProvider, useSession } from '@/state/session';
+// Registers the run-tracking background task at start-up (Android may start the app headless to deliver fixes).
+import '@/lib/tracker';
 
 void SplashScreen.preventAutoHideAsync();
 

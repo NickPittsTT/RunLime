@@ -62,15 +62,21 @@ const config: ExpoConfig = {
     [
       'expo-location',
       {
-        locationWhenInUsePermission: 'RunLime uses your location to show races near you. It stays on your phone.',
+        locationWhenInUsePermission:
+          'RunLime uses your location while the app is open: to show races near you, to check you in at a race, and to record a run you start (recording continues with the screen locked until you stop the run).',
         locationAlwaysAndWhenInUsePermission: false,
         locationAlwaysPermission: false,
         motionUsagePermission: false,
-        isIosBackgroundLocationEnabled: false,
+        // iOS keeps a started run recording with the screen locked through the location background mode (When In
+        // Use; Phase 0 design). Android uses a foreground service started from the open app, so "all the time"
+        // location (ACCESS_BACKGROUND_LOCATION) is never requested and stays blocked below.
+        isIosBackgroundLocationEnabled: true,
         isAndroidBackgroundLocationEnabled: false,
-        isAndroidForegroundServiceEnabled: false,
+        isAndroidForegroundServiceEnabled: true,
       },
     ],
+    ['expo-sensors', { motionPermission: 'RunLime counts your steps during a run you start. You can say no; the run still records.' }],
+    'expo-sqlite',
     ['expo-notifications', { color: '#3F7D0F' }],
     ['expo-image-picker', { photosPermission: 'RunLime uses the photo you choose as your profile picture.', cameraPermission: false, microphonePermission: false }],
     '@maplibre/maplibre-react-native',

@@ -51,6 +51,9 @@ export default function AppLayout() {
       <Stack.Screen name="onboarding" options={{ title: 'Welcome' }} />
       <Stack.Screen name="race/[id]" options={{ title: 'Race details' }} />
       <Stack.Screen name="race/map" options={{ title: 'Map' }} />
+      <Stack.Screen name="run" options={{ title: 'Start run' }} />
+      <Stack.Screen name="runs/index" options={{ title: 'My runs' }} />
+      <Stack.Screen name="runs/[id]" options={{ title: 'Run' }} />
       <Stack.Screen name="suggest-race" options={{ title: 'Suggest a race' }} />
       <Stack.Screen name="profile" options={{ title: 'Profile' }} />
       <Stack.Screen name="edit-profile" options={{ title: 'Edit profile' }} />

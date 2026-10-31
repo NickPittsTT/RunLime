@@ -10,8 +10,8 @@
 | 1 | Setup, environments, auth + 18+ age gate, roles, RLS, seed, legal drafts | Approved by owner (2026-10-11) | 100% |
 | 2 | Events: organiser portal, admin approval, onboarding, calendar, event page, public web | **Approved by the owner (17 Oct 2026)** after phone checks C1–C5 | 100% |
 | 3 | RSVP, followers, clubs (leaders, approvals, requests, turnout), runner level, profile photos, notifications/broadcasts, attendance dashboard | **Scope approved by the owner (2026-10-18)**; all 6 slices built, deployed to staging; **waiting for the owner's phone test and approval** | 95% |
-| 4 | GPS check-in | Not started | 0% |
-| 5 | Run tracker, history, totals | Not started | 0% |
+| 4 | GPS check-in | **Started 31 Oct** on branch `phase-4-5` (owner decisions recorded below) | 5% |
+| 5 | Run tracker, history, totals | **Started 31 Oct** on branch `phase-4-5` | 0% |
 | 6 | Community times, activity + club leaderboards, verified runners, sharing, reporting/blocking, finisher card → then the real-race pilot | Not started | 0% |
 | 6b | Race photo sharing (C4, owner 31 Oct 2026): check-in required, consent tick, admin approval before photos appear, privacy-based visibility, "photo of me" hides at once, 12-month retention, Supabase Pro storage at launch. Plan: `docs/plans/C4-RACE-PHOTOS.md` (decided; build after the pilot) | Planned, not started | 0% |
 | 7 | Plans/entitlements, store subscriptions, organiser payments, settings, support inbox, audit UI | Not started | 0% |
@@ -114,7 +114,11 @@ Owner decisions: push = Expo Push + Firebase Cloud Messaging (inbox first, then 
 - [x] Fix-round APK: EAS build a90e523c (commit `11be7a2`, CI #132; deployed web #37, database #62): https://expo.dev/artifacts/eas/UjmOq-8OOhMBJ65bbJO5LyQ0j5rTd1xQ0O9CMf7ANv8.apk
 - [x] Owner retest on a90e523c (2026-10-30): F1.1–F1.3, F1.5, F2 (except the report box), F3.1, F4.1–F4.3, F5.1, 6.4, 6.6, 6.7 passed; failed: F1.4, 6.11 (signed-out phone still notified), report box, "Finish setting up", organiser team, Start run overlap, Google chooser, silent notifications
 - [x] Retest round 3 fixes (2026-10-30): push tokens tied to the sign-in session (server stops sending when a sign-in ends; sign-out/deletion detach, retried offline; pgTAP 025); keyboard keeps growing boxes visible; specific sign-up errors (taken nickname); organiser Team section explains owner-only adding; Start run padding; Google chooser every time; `race-alerts` channel (sound + heads-up); runners pinned to ubuntu-24.04; message limits 3 per 7 days / 10 in race week / admins exempt (C1); Private-account photos hidden from non-followers (C2, Privacy draft5, Moderation draft3); pgTAP 026. Report: `docs/reports/LATEST.md`
-- [ ] **Owner phone test (RETEST.md "Retest round 3") and Phase 3 approval** (only the owner approves)
+- [x] Owner retest round 3 (31 Oct): R1, R3–R8 passed; R2 (keyboard) and R9 (Public photo) failed → fixed (R2: layout bug under the header, verified on an Android emulator; R9: privacy saves at once, profile re-checks, private photo storage)
+- [x] R9 passed on the current staging APK (owner, 31 Oct)
+- [x] Incident 31 Oct closed: scanner false positive, no key exposed (owner verified); guards + credentials rule added
+- [ ] Round 4 APK (from `phase-3` only, after the Expo build allowance resets on 1 Nov): R2 full retest + quick R9 recheck (photo storage ships with it)
+- [ ] **Phase 3 approval** (only the owner approves)
 - [x] Owner decision (2026-10-30): profile photos on Private accounts are **not** visible to non-followers (initials instead); admins see them in Reports
 - Repo stays **public** until the build is done (owner, intentional)
 - Audit entries can now carry a reason (`audit.log.reason`, set by functions through `runlime.audit_reason`). First user: `ops_correct_event_start` (service role only, "Correct event date" workflow), used once for the PSCU date with the owner's permission
@@ -148,8 +152,22 @@ Owner decisions: push = Expo Push + Firebase Cloud Messaging (inbox first, then 
 - "Use my current location" button.
 - Saved venues reuse confirmed pins.
 
-**Settings to decide at Phase 4 start**
-- Check-in radius (300 vs 500 m); check-in time window; the window follows a postponed race's new date; location permission while the app is open only.
+**Settings decided (owner, 31 Oct 2026)**
+- Radius **500 m** (`checkin.radius_m`; admins may override per event).
+- Window **1 hour before to 3 hours after** the start (settings); follows a postponed race's new date.
+- Location permission for check-in: **only while the app is open**.
+- Failed attempts: location rounded to 3 dp, accuracy, time, event; deleted after **30 days** (setting); in the Privacy Policy.
+- Check-ins count toward "races attended" (Phase 6 boards).
+
+## Phase 5 notes (owner decisions, 31 Oct 2026)
+- Routes private by default. If a route is ever shown to others, the first and last **200 m** are hidden (privacy zone, setting).
+- Calories: optional body weight stored **on the phone only** (never sent); without it, a general estimate labelled as such.
+- Steps: phone step counter; permission asked at the **first run start**, not at app start; the run still works if refused.
+- Premium: tracker free for everyone until Phase 7, behind an entitlement check (`feature.tracker`).
+- Auto-pause on by default; the user can turn it off.
+- Run data kept while the account exists; GPX export per run; in export-user-data; deleted with the account.
+- Phase 8: Google Play foreground-service (location) declaration + demo video (STORE-REQUIREMENTS.md).
+- One combined phone-test APK for Phase 4+5; at most 3 Expo builds on Phase 4+5 before asking the owner.
 
 ## Phase 8 notes
 - **Signing:** staging is signed with the public React Native debug keystore. Production needs its own private signing key, a **new Google sign-in Android client** (production package + production / Play App Signing SHA-1) and a production Firebase app + FCM key. Tracked in `docs/legal/STORE-REQUIREMENTS.md` (Google Play #18).

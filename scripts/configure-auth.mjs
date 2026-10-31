@@ -35,6 +35,8 @@ const desired = {
   mfa_totp_verify_enabled: true,
   mfa_phone_enroll_enabled: false,
   mfa_phone_verify_enabled: false,
+  // Owner-approved 31 Oct 2026: the staging website, not localhost (used by any future email link).
+  ...(process.env.SITE_URL ? { site_url: process.env.SITE_URL } : {}),
 };
 
 const show = (k, v) => (SECRETISH.test(k) ? '(hidden)' : typeof v === 'string' && v.length > 60 ? `${v.slice(0, 57)}…` : JSON.stringify(v));
@@ -81,7 +83,7 @@ if (apply) {
   const groups = {
     hooks: /^hook_/,
     mfa: /^mfa_/,
-    'sign-in settings': /^(disable_signup|external_|uri_allow_list|mailer_otp_)/,
+    'sign-in settings': /^(disable_signup|external_|uri_allow_list|mailer_otp_|site_url$)/,
     'email templates': /^mailer_(subjects|templates)_/,
   };
   for (const [name, re] of Object.entries(groups)) {

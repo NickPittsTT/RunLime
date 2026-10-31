@@ -1,7 +1,7 @@
 import { runnerLevelLabel } from '@runlime/shared/community';
 import { formatEventDate, formatEventTime } from '@runlime/shared/events';
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { Alert, View } from 'react-native';
 import { Avatar } from '@/components/Avatar';
 import { ReportButton } from '@/components/ReportButton';
@@ -32,9 +32,17 @@ export default function PersonScreen() {
     setPassport(r.passport);
   }, []);
   const load = useCallback(async () => apply(await fetchPerson(id)), [apply, id]);
-  useEffect(() => {
-    void fetchPerson(id).then(apply);
-  }, [apply, id]);
+  // Re-checked every time the screen is shown (owner retest R9): a privacy change or an approved follow request
+  // shows at once when you come back, without reopening the app.
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      void fetchPerson(id).then((r) => active && apply(r));
+      return () => {
+        active = false;
+      };
+    }, [apply, id]),
+  );
 
   if (card === undefined) {
     return (

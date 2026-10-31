@@ -23,6 +23,28 @@ export default function EditProfileScreen() {
   const [nickname, setNickname] = useState(profile?.nickname ?? '');
   const [areaId, setAreaId] = useState(profile?.home_region_id ?? null);
   const [privacy, setPrivacy] = useState<'private' | 'public'>(profile?.account_privacy ?? 'private');
+  const [privacyMessage, setPrivacyMessage] = useState<{ tone: 'danger' | 'success'; text: string }>();
+  // Privacy saves the moment it's chosen (owner retest R9: a choice left unsaved looked applied). The other fields
+  // still use Save.
+  const choosePrivacy = async (value: 'private' | 'public') => {
+    if (!profile || value === privacy) return;
+    const before = privacy;
+    setPrivacy(value);
+    setPrivacyMessage(undefined);
+    const { error } = await supabase.from('profiles').update({ account_privacy: value }).eq('id', profile.id);
+    if (error) {
+      setPrivacy(before);
+      return setPrivacyMessage({ tone: 'danger', text: friendlyError(error) });
+    }
+    await refreshProfile();
+    setPrivacyMessage({
+      tone: 'success',
+      text:
+        value === 'public'
+          ? 'Saved. Your account is Public: everyone signed in can see your photo, race passport and races you are going to.'
+          : 'Saved. Your account is Private: only approved followers see your photo, race passport and races you are going to.',
+    });
+  };
   const [level, setLevel] = useState<RunnerLevel | null>(profile?.runner_level ?? null);
   const [clubTurnout, setClubTurnout] = useState(profile?.show_attendance_to_clubs ?? false);
   const [photoBusy, setPhotoBusy] = useState(false);
@@ -83,8 +105,8 @@ export default function EditProfileScreen() {
         <T style={{ fontWeight: '700' }}>Account privacy</T>
         {(
           [
-            ['private', 'Private (recommended)', 'People must ask to follow you. Only approved followers see your race passport and the races you are attending.'],
-            ['public', 'Public', 'Anyone can follow you and see your race passport and the races you are attending.'],
+            ['private', 'Private (recommended)', 'People must ask to follow you. Only approved followers see your photo, race passport and the races you are attending.'],
+            ['public', 'Public', 'Anyone can follow you and see your photo, race passport and the races you are attending.'],
           ] as const
         ).map(([value, label, help]) => (
           <Pressable
@@ -92,13 +114,14 @@ export default function EditProfileScreen() {
             accessibilityRole="radio"
             accessibilityState={{ checked: privacy === value }}
             accessibilityHint={help}
-            onPress={() => setPrivacy(value)}
+            onPress={() => void choosePrivacy(value)}
             style={{ minHeight: minTouchTarget, padding: 12, borderRadius: radius.md, borderWidth: privacy === value ? 2 : 1, borderColor: privacy === value ? c.leaf : c.border }}
           >
             <T style={{ fontWeight: '700' }}>{label}</T>
             <T variant="caption">{help}</T>
           </Pressable>
         ))}
+        {privacyMessage ? <Notice tone={privacyMessage.tone}>{privacyMessage.text}</Notice> : <T variant="caption">Saved as soon as you choose.</T>}
         <T variant="caption">Your runs, routes, times and history are always private unless you share a result.</T>
       </View>
       <View accessibilityRole="radiogroup" accessibilityLabel="Runner level (optional)" style={{ gap: 8 }}>
@@ -143,7 +166,7 @@ export default function EditProfileScreen() {
           setBusy(true);
           const { error } = await supabase
             .from('profiles')
-            .update({ display_name: parsed.data.displayName, nickname: parsed.data.nickname, home_region_id: parsed.data.homeRegionId, account_privacy: privacy, runner_level: level, show_attendance_to_clubs: clubTurnout })
+            .update({ display_name: parsed.data.displayName, nickname: parsed.data.nickname, home_region_id: parsed.data.homeRegionId, runner_level: level, show_attendance_to_clubs: clubTurnout })
             .eq('id', profile.id);
           setBusy(false);
           if (error) return setFormError(error.code === '23505' ? 'That nickname is taken. Try another.' : friendlyError(error));

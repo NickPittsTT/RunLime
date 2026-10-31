@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { REPORT_CATEGORIES, RUNNER_LEVELS, avatarUrl, reportSchema, runnerLevelLabel } from '../src/community';
+import { REPORT_CATEGORIES, RUNNER_LEVELS, reportSchema, runnerLevelLabel } from '../src/community';
 
 describe('community rules', () => {
   it('runner levels match the database enum', () => {
@@ -15,10 +15,6 @@ describe('community rules', () => {
     expect(reportSchema.safeParse({ category: 'child_safety', targetKind: 'general', details: 'An adult is asking for photos of children' }).success).toBe(true);
     expect(reportSchema.safeParse({ category: 'sexual_content', targetKind: 'profile_photo', targetUserId: '0b4d3c2a-1111-4222-8333-444455556666' }).success).toBe(true);
     expect(reportSchema.safeParse({ targetKind: 'general', details: 'no category given here' }).success).toBe(false);
-  });
-  it('builds public photo URLs', () => {
-    expect(avatarUrl('https://x.supabase.co', 'u/p.jpg')).toBe('https://x.supabase.co/storage/v1/object/public/avatars/u/p.jpg');
-    expect(avatarUrl('https://x.supabase.co', null)).toBeNull();
   });
 });
 

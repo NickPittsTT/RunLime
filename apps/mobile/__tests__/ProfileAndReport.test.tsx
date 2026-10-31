@@ -33,6 +33,7 @@ jest.mock('@/lib/supabase', () => ({
   supabase: {
     rpc: (...a: unknown[]) => mockRpc(...a),
     from: () => ({ update: (v: unknown) => ({ eq: async () => mockUpdate(v) }) }),
+    storage: { from: () => ({ createSignedUrls: async (paths: string[]) => ({ data: paths.map((path) => ({ path, signedUrl: `https://signed.example/${path}?token=t`, error: null })) }) }) },
   },
 }));
 jest.mock('react-native-safe-area-context', () => {
@@ -63,6 +64,23 @@ describe('runner level', () => {
     fireEvent.press(screen.getByRole('radio', { name: 'Club runner' }));
     fireEvent.press(screen.getByRole('button', { name: 'Save' }));
     await waitFor(() => expect(mockUpdate).toHaveBeenCalledWith(expect.objectContaining({ runner_level: 'club_runner' })));
+  });
+  it('privacy saves as soon as it is chosen and says what changed (owner retest R9)', async () => {
+    render(<EditProfileScreen />);
+    fireEvent.press(screen.getByRole('radio', { name: /^Public/ }));
+    await waitFor(() => expect(mockUpdate).toHaveBeenCalledWith({ account_privacy: 'public' }));
+    expect(await screen.findByText(/Saved\. Your account is Public: everyone signed in can see your photo/)).toBeTruthy();
+    expect(mockRefresh).toHaveBeenCalled();
+    fireEvent.press(screen.getByRole('radio', { name: /^Private/ }));
+    await waitFor(() => expect(mockUpdate).toHaveBeenLastCalledWith({ account_privacy: 'private' }));
+    expect(await screen.findByText(/Saved\. Your account is Private: only approved followers/)).toBeTruthy();
+  });
+  it('a failed privacy save goes back to the previous choice', async () => {
+    mockUpdate.mockReturnValueOnce({ error: { code: '42501', message: 'denied' } });
+    render(<EditProfileScreen />);
+    fireEvent.press(screen.getByRole('radio', { name: /^Public/ }));
+    expect(await screen.findByText("You don't have permission to do that.")).toBeTruthy();
+    expect(screen.getByRole('radio', { name: /^Private/ }).props.accessibilityState).toMatchObject({ checked: true });
   });
   it('club turnout opt-in (off by default) is saved with the profile', async () => {
     render(<EditProfileScreen />);
@@ -111,7 +129,8 @@ describe('profile photo', () => {
     mockProfile = { ...baseProfile, avatar_path: 'u1/0123456789abcdef0123456789abcdef.jpg' };
     mockCall.mockResolvedValue({ ok: true, json: async () => ({ ok: true }) });
     render(<EditProfileScreen />);
-    expect(screen.getByTestId('avatar-photo').props.source.uri).toMatch(/\/storage\/v1\/object\/public\/avatars\/u1\/0123456789abcdef0123456789abcdef\.jpg$/);
+    // Private bucket (owner decision 4): the photo is shown through a signed link, never a public URL.
+    expect((await screen.findByTestId('avatar-photo')).props.source.uri).toBe('https://signed.example/u1/0123456789abcdef0123456789abcdef.jpg?token=t');
     fireEvent.press(screen.getByRole('button', { name: 'Remove photo' }));
     expect(await screen.findByText('Photo removed.')).toBeTruthy();
     expect(mockCall).toHaveBeenCalledWith('profile-photo', { method: 'DELETE' });

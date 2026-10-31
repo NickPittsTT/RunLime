@@ -42,10 +42,6 @@ export const reportSchema = z
   });
 export type ReportInput = z.infer<typeof reportSchema>;
 
-/** Public URL of a profile photo (public "avatars" bucket; random file names). */
-export function avatarUrl(supabaseUrl: string, path: string | null | undefined): string | null {
-  return path ? `${supabaseUrl}/storage/v1/object/public/avatars/${path}` : null;
-}
 
 // ---------------------------------------------------------------------------
 // RSVPs (slice 2). Children are a number only (18+ rule): never names or ages.

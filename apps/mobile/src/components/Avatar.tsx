@@ -1,6 +1,7 @@
 import { colors } from '@runlime/ui-tokens';
 import { Image, View } from 'react-native';
-import { photoUrl } from '@/lib/profilePhoto';
+import { useState } from 'react';
+import { usePhotoUri } from '@/lib/profilePhoto';
 import { T } from './ui';
 
 export function initials(name: string): string {
@@ -10,16 +11,18 @@ export function initials(name: string): string {
   return (first + last).toUpperCase() || '?';
 }
 
-/** Profile photo, or initials in a lime circle when there is none. */
+/** Profile photo (private, through a signed link), or initials in a lime circle when there is none or it isn't allowed. */
 export function Avatar({ name, path, size = 56 }: { name: string; path?: string | null; size?: number }) {
-  const uri = photoUrl(path);
-  if (uri) {
+  const uri = usePhotoUri(path);
+  const [failed, setFailed] = useState<string | null>(null);
+  if (uri && failed !== uri) {
     return (
       <Image
         testID="avatar-photo"
         source={{ uri }}
         accessibilityIgnoresInvertColors
         accessibilityLabel={`Profile photo of ${name}`}
+        onError={() => setFailed(uri)}
         style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: colors.lime }}
       />
     );

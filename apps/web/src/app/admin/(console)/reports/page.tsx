@@ -1,4 +1,4 @@
-import { REPORT_CATEGORIES, avatarUrl } from '@runlime/shared/community';
+import { REPORT_CATEGORIES } from '@runlime/shared/community';
 import Link from 'next/link';
 import { Notice, PageTitle } from '@/components/ui';
 import { requireAdmin } from '@/lib/auth';
@@ -43,6 +43,11 @@ export default async function Reports({ searchParams }: { searchParams: Promise<
   const { supabase } = await requireAdmin('/admin/reports');
   const { data } = await supabase.rpc('admin_reports', { p_status: status });
   const rows = (data ?? []) as ReportRow[];
+  // Photos are private (owner decision 4): show each reported photo through a short-lived signed link. Storage only
+  // signs it because the viewer is an MFA admin (can_view_avatar).
+  const photoPaths = rows.flatMap((r) => (r.target_kind === 'profile_photo' && r.current_avatar_path && r.current_avatar_path === r.target_ref ? [r.current_avatar_path] : []));
+  const { data: signed } = photoPaths.length ? await supabase.storage.from('avatars').createSignedUrls(photoPaths, 600) : { data: [] };
+  const photoUrl = new Map((signed ?? []).flatMap((x) => (x.path && x.signedUrl ? [[x.path, x.signedUrl] as const] : [])));
   const label = (c: string) => REPORT_CATEGORIES.find((x) => x.value === c)?.label ?? c;
   return (
     <>
@@ -79,7 +84,7 @@ export default async function Reports({ searchParams }: { searchParams: Promise<
               {r.target_kind === 'profile_photo' &&
                 (photo ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={avatarUrl(process.env.NEXT_PUBLIC_SUPABASE_URL ?? '', photo)!} alt={`Reported profile photo of ${r.target_name ?? 'a runner'}`} width={160} height={160} className="mt-3 rounded-lg border border-line" />
+                  <img src={photoUrl.get(photo) ?? ''} alt={`Reported profile photo of ${r.target_name ?? 'a runner'}`} width={160} height={160} className="mt-3 rounded-lg border border-line" />
                 ) : (
                   <p className="text-sm text-ink-muted mt-2">The reported photo has since been changed or removed.</p>
                 ))}

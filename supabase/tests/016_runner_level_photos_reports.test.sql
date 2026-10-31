@@ -21,7 +21,7 @@ select is((select count(*)::int from pg_policies where schemaname = 'storage' an
              and (qual ilike '%avatars%' or with_check ilike '%avatars%') and cmd in ('INSERT', 'UPDATE', 'DELETE')), 0,
   'no user write policies on the avatars bucket');
 select tests.clear_authentication();
-select is((select public from storage.buckets where id = 'avatars'), true, 'avatars bucket exists (public read)');
+select is((select public from storage.buckets where id = 'avatars'), false, 'avatars bucket exists (private; reads follow the photo rule, 027)');
 select is((select allowed_mime_types from storage.buckets where id = 'avatars'), array['image/jpeg'], 'JPEG only (metadata stripped on upload)');
 update public.profiles set avatar_path = :'runner' || '/0123456789abcdef0123456789abcdef.jpg', avatar_updated_at = now() where id = :'runner';
 select throws_ok(format($$update public.profiles set avatar_path = 'elsewhere/x.png' where id = %L$$, :'runner'), '23514', null, 'photo path format enforced');

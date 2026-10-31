@@ -12,13 +12,20 @@ test('profile photo: location data is stripped; a reported photo is removed from
   const up = await fn(runner.token, { method: 'POST', body: PHOTO_WITH_GPS, headers: { 'content-type': 'image/jpeg' } });
   expect(up.status).toBe(200);
   const { path } = (await up.json()) as { path: string };
-  const served = Buffer.from(await (await fetch(`${SUPABASE_URL}/storage/v1/object/public/avatars/${path}`)).arrayBuffer());
+  // Photos are private (owner decision 4): no public link; the owner reads it through the photo rule.
+  expect((await fetch(`${SUPABASE_URL}/storage/v1/object/public/avatars/${path}`)).ok).toBe(false);
+  const own = await runner.client.storage.from('avatars').download(path);
+  expect(own.error).toBeNull();
+  const served = Buffer.from(await own.data!.arrayBuffer());
   expect(served.subarray(0, 2).toString('hex')).toBe('ffd8');
   expect(served.includes(Buffer.from('Exif'))).toBe(false);
   expect(served.includes(Buffer.from('home address'))).toBe(false);
 
   // Another runner reports the photo; someone also reports a child-safety concern.
   const reporter = await signedInUser('Careful Reporter');
+  // The reporter doesn't follow this Private account: no file, no signed link.
+  expect((await reporter.client.storage.from('avatars').download(path)).error).not.toBeNull();
+  expect((await reporter.client.storage.from('avatars').createSignedUrl(path, 60)).data?.signedUrl ?? null).toBeNull();
   const photoReport = await reporter.client.rpc('submit_report', { p_category: 'sexual_content', p_target_kind: 'profile_photo', p_target_user: runner.id, p_target_ref: null, p_details: 'Not a running photo' });
   expect(photoReport.error).toBeNull();
   const concernText = `E2E ${Date.now()}: an adult asked for photos of children at a race`;
@@ -41,14 +48,16 @@ test('profile photo: location data is stripped; a reported photo is removed from
   expect(alerts![0]!.title).toBe('Urgent report: a child may be at risk');
   await expect(page.getByTestId('report').first()).toContainText('A child may be at risk');
   const item = page.getByTestId('report').filter({ hasText: name });
-  await expect(item.getByRole('img', { name: `Reported profile photo of ${name}` })).toBeVisible();
+  const img = item.getByRole('img', { name: `Reported profile photo of ${name}` });
+  await expect(img).toBeVisible();
+  await expect.poll(() => img.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth)).toBeGreaterThan(0); // the signed link loads
   const box = await item.getByRole('button', { name: 'Remove photo' }).boundingBox();
   expect(box!.height).toBeGreaterThanOrEqual(44); // touch target
   await item.getByRole('button', { name: 'Remove photo' }).click();
   await expect(page.getByText('Photo removed and the report closed.')).toBeVisible();
   const { data: prof } = await admin().from('profiles').select('avatar_path').eq('id', runner.id).single();
   expect(prof!.avatar_path).toBeNull();
-  expect((await fetch(`${SUPABASE_URL}/storage/v1/object/public/avatars/${path}`)).ok).toBe(false); // the file is gone
+  expect((await runner.client.storage.from('avatars').download(path)).error).not.toBeNull(); // the file is gone
   await page.getByRole('link', { name: 'Handled' }).click();
   await expect(page.getByTestId('report').filter({ hasText: name })).toContainText('Photo removed');
 

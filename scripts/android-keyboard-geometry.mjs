@@ -7,13 +7,29 @@ import { execFileSync } from 'node:child_process';
 const labels = process.argv.slice(2);
 const adb = (...args) => execFileSync('adb', args, { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
 
+// The keyboard's top edge, from whichever form this Android version prints: the ime insets source, or the input
+// method window's touchable region.
+function keyboardTopFrom(text) {
+  const tops = [];
+  for (const line of text.split('\n')) {
+    if (/type=ime\b/.test(line) && /visible=true/.test(line)) {
+      const m = line.match(/frame=\[(\d+),(\d+)\]\[(\d+),(\d+)\]/);
+      if (m && Number(m[2]) > 0) tops.push(Number(m[2]));
+    }
+  }
+  if (tops.length) return Math.min(...tops);
+  const block = text.split(/\n(?=  Window #)/).find((b) => /InputMethod\}/.test(b) && /isVisible=true|mViewVisibility=0x0\b/.test(b));
+  const touch = block?.match(/touchable region=SkRegion\(\((\d+),(\d+),(\d+),(\d+)\)\)/);
+  return touch && Number(touch[2]) > 0 ? Number(touch[2]) : null;
+}
+const shown = /mInputShown=true|mImeWindowVis=[1-9]/.test(adb('shell', 'dumpsys', 'input_method'));
 const windows = adb('shell', 'dumpsys', 'window');
-const ime = [...windows.matchAll(/type=ime frame=\[(\d+),(\d+)\]\[(\d+),(\d+)\] visible=true/g)].map((m) => Number(m[2])).filter((y) => y > 0);
-if (ime.length === 0) {
-  console.log('FAIL  keyboard is not open (no visible ime inset in dumpsys window)');
+const keyboardTop = keyboardTopFrom(windows + '\n' + adb('shell', 'dumpsys', 'window', 'windows'));
+if (!shown || keyboardTop === null) {
+  console.log(`FAIL  keyboard ${shown ? 'is open but its position could not be read' : 'is not open'}`);
+  if (shown) for (const l of windows.split('\n').filter((l) => /ime|InputMethod/i.test(l)).slice(0, 60)) console.log(`  dumpsys: ${l.trim().slice(0, 200)}`);
   process.exit(1);
 }
-const keyboardTop = Math.min(...ime);
 adb('shell', 'uiautomator', 'dump', '/sdcard/ui.xml');
 const xml = adb('shell', 'cat', '/sdcard/ui.xml');
 let failed = 0;

@@ -1,5 +1,6 @@
 import type { Session } from '@supabase/supabase-js';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { forgetPhotoUrls } from '@/lib/profilePhoto';
 import { disablePushForThisPhone, retryPendingUnregister } from '@/lib/push';
 import { forgetGoogleAccount } from '@/lib/socialSignIn';
 import { supabase } from '@/lib/supabase';
@@ -62,7 +63,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       setSession(data.session);
       void loadProfile(data.session);
     });
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
+      // Photo links were signed for the previous account: never reuse them for the next one.
+      if (event === 'SIGNED_OUT' || event === 'SIGNED_IN') forgetPhotoUrls();
       setSession(s);
       void loadProfile(s);
     });
@@ -84,6 +87,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         await disablePushForThisPhone();
         await forgetGoogleAccount();
         await supabase.auth.signOut();
+        forgetPhotoUrls();
       },
     }),
     [status, session, profile, passedDob, loadProfile],

@@ -2,6 +2,7 @@
 import { useActionState, useState, type FormEvent } from 'react';
 import { Button, Field, Input, Notice, Select } from '@/components/ui';
 import { ReasonField, reasonTooShort } from './ReasonField';
+import { SatelliteLink } from './SatelliteLink';
 import { changeStatusAction, duplicateEventAction, reviewEventAction } from '@/lib/events/actions';
 
 /** Postpone / cancel / reinstate a live event (organiser or admin). */
@@ -84,7 +85,7 @@ export function DuplicatePanel({ id, timezone, back }: { id: string; timezone: s
 }
 
 /** Admin: publish / reject / unpublish. */
-export function ReviewPanel({ id, status, pinOnStartLine, pinChecked }: { id: string; status: string; pinOnStartLine: boolean; pinChecked: boolean }) {
+export function ReviewPanel({ id, status, pinOnStartLine, pinChecked, pin }: { id: string; status: string; pinOnStartLine: boolean; pinChecked: boolean; pin?: { lat: number | null; lng: number | null } }) {
   const [state, action, pending] = useActionState(reviewEventAction, {});
   const [reasonError, setReasonError] = useState<string>();
   // Reject and Unpublish need a reason.
@@ -105,6 +106,9 @@ export function ReviewPanel({ id, status, pinOnStartLine, pinChecked }: { id: st
           <input type="hidden" name="id" value={id} />
           <input type="hidden" name="decision" value="published" />
           {/* Phase 4 pin safeguards: GPS check-in uses this pin. */}
+          <div className="mb-3">
+            <SatelliteLink lat={pin?.lat} lng={pin?.lng} />
+          </div>
           {!pinOnStartLine && (
             <label className="flex gap-3 items-start mb-3">
               <input type="checkbox" name="pinOnStartLine" required className="w-5 h-5 mt-1" />

@@ -66,7 +66,7 @@ export default async function AdminEvent({ params, searchParams }: { params: Pro
       <div className="grid lg:grid-cols-[1fr_20rem] gap-8">
         <EventForm initial={toFormValues(e)} areas={areas} back="/admin/events" />
         <aside>
-          <ReviewPanel id={e.id} status={e.status} pinOnStartLine={Boolean(e.pin_start_line_at)} pinChecked={Boolean(e.pin_checked_at)} />
+          <ReviewPanel id={e.id} status={e.status} pinOnStartLine={Boolean(e.pin_start_line_at)} pinChecked={Boolean(e.pin_checked_at)} pin={{ lat: e.start_lat, lng: e.start_lng }} />
           <CheckinPanel event={e} count={(await supabase.rpc('event_checkin_count', { p_event: e.id })).data ?? 0} />
           <StatusChangePanel id={e.id} status={e.status} timezone={e.timezone} back={`/admin/events/${e.id}`} />
           {['published', 'postponed'].includes(e.status) && <MessagePanel eventId={e.id} back={`/admin/events/${e.id}`} {...(await loadMessages(supabase, e.id))} />}

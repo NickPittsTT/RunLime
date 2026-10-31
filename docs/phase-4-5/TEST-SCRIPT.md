@@ -72,7 +72,21 @@ B5.2 [App] Phone settings → RunLime → Physical activity: **Don't allow**. St
 B5.3 [App] Turn **Auto-pause** off before a run. Standing still no longer pauses.
 B5.4 [App] Open a saved run → **Export GPX** → share to Files/Drive. The file opens in another app (e.g. a GPX viewer) and shows the route. The run page says **Only you can see this route.**
 B5.5 [App] **Delete run** → confirm. It disappears from history and from the totals.
-B5.6 [App] Start a run and swipe the app away from recent apps, then reopen it. Record what happens; it is not a fail either way (see the report: "swiped away").
+**B5.6 SWIPE-AWAY TEST (clearly marked: please do this one)**
+1. [App] Start a run (outdoors or walking around indoors is fine). Wait until the distance shows at least 0.05 km.
+2. Open the recent-apps screen and **swipe RunLime away**.
+3. Check the notification shade: **expected:** the notification "RunLime is recording your run" is **still there**.
+4. Walk for 2 minutes. Then tap the notification (or open RunLime and tap **Start run**).
+5. **Expected:** the live run screen opens with the timer still counting and the distance **including the 2 minutes you walked** after swiping. Stop and save as usual.
+
+Report which of these you saw:
+- **(a) Pass:** the notification stayed and the distance includes the walk.
+- **(b) Partial:** the notification disappeared, but on reopening the run is still there. The part after the swipe is missing, or drawn as a straight line. Stop and save works.
+- **(c) Fail:** the run is gone.
+
+Also note your phone make and model and Android version (different makers' battery savers behave differently).
+
+What happens next for each result: see the report's "Swipe-away fallback". In short, (b) gets a gap-as-pause fix plus a battery-settings tip, and (c) is a bug I fix before the next build.
 B5.7 Battery: note the battery % before and after the 10–15 minute run in A5. About 1–2% per 10 minutes is expected on a typical phone.
 
 ## Part C: website only (any day)

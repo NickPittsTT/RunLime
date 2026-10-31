@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { distanceM, nominatimSearchUrl, parseNominatim, pinFarFromAddress, precisionOf } from '../src/location';
+import { distanceM, googleSatelliteUrl, nominatimSearchUrl, parseNominatim, pinFarFromAddress, precisionOf } from '../src/location';
 
 describe('distance (same formula as the database)', () => {
   it('0.002° of latitude ≈ 222 m', () => {
@@ -32,5 +32,14 @@ describe('venue search (Nominatim usage policy)', () => {
   it('warns when the pin is more than 1 km from the address found', () => {
     expect(pinFarFromAddress({ lat: 10.67, lng: -61.51 }, { lat: 10.68, lng: -61.51 })).toBe(true); // 1.1 km
     expect(pinFarFromAddress({ lat: 10.67, lng: -61.51 }, { lat: 10.675, lng: -61.51 })).toBe(false); // 556 m
+  });
+});
+
+describe('Google Maps satellite link (keyless Maps URL)', () => {
+  it('centres on the pin with the satellite basemap and carries nothing else', () => {
+    const u = new URL(googleSatelliteUrl(10.6701234, -61.5100987));
+    expect(u.origin + u.pathname).toBe('https://www.google.com/maps/@');
+    expect(Object.fromEntries(u.searchParams)).toEqual({ api: '1', map_action: 'map', center: '10.670123,-61.510099', zoom: '19', basemap: 'satellite' });
+    expect(u.toString()).not.toMatch(/key=/);
   });
 });

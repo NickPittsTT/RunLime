@@ -1,7 +1,7 @@
 ---
 slug: privacy
 title: Privacy Policy
-version: 2026-10-31-draft6
+version: 2026-10-31-draft7
 ---
 # RunLime Privacy Policy
 
@@ -61,6 +61,7 @@ We use trusted providers that process data on our behalf under contract:
 - Cloudflare (website hosting)
 - Google (Gmail) for sign-in emails (your email address and the one-time code) and for report alerts to our own support inbox (the report category and time only, never the report text or anyone's name)
 - Nominatim (OpenStreetMap Foundation), only for organisers and admins: when they press **Search** to find a race venue, our server sends the search words (for example "Queen's Park Savannah") to Nominatim. It receives no account details and not your device's address; results are cached.
+- Google Maps (link only), only for organisers and admins: the race-editing pages have an "Open in Google Maps (satellite)" link. Nothing is sent to Google unless you tap it. If you do, Google Maps opens in a new tab or app with the race pin's location, and Google receives what any visit to its site sends (such as your IP address) under Google's own privacy policy. Runners' data is never sent.
 - OpenFreeMap (map tiles). Like any website your device loads, it receives your device's IP address and the map area being shown. It receives no account details.
 - Apple and Google (sign-in, app stores, in-app purchases)
 - Expo (app builds and push notification delivery: your phone's push token and the notification text)

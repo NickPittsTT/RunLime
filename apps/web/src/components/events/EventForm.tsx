@@ -6,6 +6,7 @@ import { useActionState, useState } from 'react';
 import { Button, Field, Input, Notice, Select, Textarea } from '@/components/ui';
 import { saveEventAction } from '@/lib/events/actions';
 import type { EventFormValues } from './eventValues';
+import { SatelliteLink } from './SatelliteLink';
 import { VenueSearch, type FoundVenue } from './VenueSearch';
 
 export type { EventFormValues } from './eventValues';
@@ -229,6 +230,9 @@ export function EventForm({ initial, areas, organisations, back, suggestionId }:
         {v.startLat !== null && v.startLng !== null ? `Start pin: ${v.startLat.toFixed(5)}, ${v.startLng.toFixed(5)}` : 'No start pin yet.'}
         {v.route && v.route.length > 1 ? ` · Route: ${v.route.length} points` : ''}
       </p>
+      <div className="mb-3">
+        <SatelliteLink lat={v.startLat} lng={v.startLng} />
+      </div>
       <Field label="Route from a GPX file (optional)" htmlFor="ev-gpx" hint={gpxNote ?? undefined}>
         <input id="ev-gpx" type="file" accept=".gpx,application/gpx+xml" onChange={(e) => void onGpx(e.target.files?.[0])} />
       </Field>

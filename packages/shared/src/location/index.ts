@@ -59,3 +59,15 @@ export const PRECISION_LABEL: Record<GeocodePrecision, string> = {
 export function pinFarFromAddress(pin: { lat: number; lng: number }, found: { lat: number; lng: number }, warnM = 1000): boolean {
   return distanceM(pin.lat, pin.lng, found.lat, found.lng) > warnM;
 }
+
+/**
+ * Keyless Google Maps link (owner decision, 31 Oct 2026: no satellite layer in the pilot; this link instead).
+ * Google "Maps URLs" open Google Maps in a new tab or the Maps app and need no API key or account. The map is
+ * centred on the pin with the satellite basemap. Only the pin's coordinates go to Google, and only when the
+ * organiser or admin taps the link.
+ */
+export function googleSatelliteUrl(lat: number, lng: number, zoom = 19): string {
+  const c = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+  return `https://www.google.com/maps/@?api=1&map_action=map&center=${encodeURIComponent(c)}&zoom=${zoom}&basemap=satellite`;
+}
+export const GOOGLE_SATELLITE_LINK_LABEL = 'Open in Google Maps (satellite)';

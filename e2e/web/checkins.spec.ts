@@ -35,6 +35,11 @@ test('GPS check-in (Phase 4): a runner too far away asks for help; an admin appr
   // Race page: count, then widen the radius → the 800 m attempt is approved after correction.
   await page.goto(`/admin/events/${ev!.id}`);
   await expect(page.getByTestId('checkin-count')).toHaveText('2');
+  // Owner decision (31 Oct): keyless "Open in Google Maps (satellite)" link beside the pin; new tab, no referrer.
+  const sat = page.getByRole('link', { name: 'Open in Google Maps (satellite)' }).first();
+  await expect(sat).toHaveAttribute('href', 'https://www.google.com/maps/@?api=1&map_action=map&center=10.670000%2C-61.510000&zoom=19&basemap=satellite');
+  await expect(sat).toHaveAttribute('target', '_blank');
+  await expect(sat).toHaveAttribute('rel', /noreferrer/);
   await page.getByLabel('Check-in radius in metres (empty = the standard setting)').fill('1000');
   await page.getByRole('button', { name: 'Save check-in area' }).click();
   await expect(page.getByText(/1 earlier failed check-in now passes and was approved after correction/)).toBeVisible();

@@ -11,7 +11,7 @@ insert into public.user_roles values (:'admin', 'platform_admin');
 
 select tests.authenticate_as(:'admin', 'aal2');
 select public.save_event(null, :'ev'::jsonb || jsonb_build_object('listing_source', 'runlime', 'region_id', tests.area_id('Central')), :'dist') as listing \gset
-select public.review_event(:'listing', 'published');
+select public.review_event(:'listing', 'published', null, true, true);
 
 select has_column('public', 'events', 'original_starts_at', 'events keep the original start of a postponed race');
 

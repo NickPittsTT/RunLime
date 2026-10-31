@@ -13,7 +13,7 @@ select email as orgr_email from auth.users where id = :'orgr' \gset
 
 select tests.authenticate_as(:'admin', 'aal2');
 select public.save_event(null, :'ev'::jsonb || jsonb_build_object('listing_source', 'runlime', 'region_id', tests.area_id('Central')), :'dist') as listing \gset
-select public.review_event(:'listing', 'published');
+select public.review_event(:'listing', 'published', null, true, true);
 
 -- ---------- 1. Status changes: Publish can't undo a postponement or cancellation ----------
 select lives_ok(format($$select public.change_event_status(%L, 'postponed', 'Heavy rain expected', null)$$, :'listing'), 'admin postpones');

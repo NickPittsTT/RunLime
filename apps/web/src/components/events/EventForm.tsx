@@ -6,6 +6,7 @@ import { useActionState, useState } from 'react';
 import { Button, Field, Input, Notice, Select, Textarea } from '@/components/ui';
 import { saveEventAction } from '@/lib/events/actions';
 import type { EventFormValues } from './eventValues';
+import { VenueSearch, type FoundVenue } from './VenueSearch';
 
 export type { EventFormValues } from './eventValues';
 
@@ -35,6 +36,7 @@ export function EventForm({ initial, areas, organisations, back, suggestionId }:
   const [v, setV] = useState<EventFormValues>(initial);
   const [mapMode, setMapMode] = useState<'pin' | 'route'>('pin');
   const [gpxNote, setGpxNote] = useState<string | null>(null);
+  const [found, setFound] = useState<FoundVenue | null>(null);
   const isListing = v.listingSource === 'runlime';
   const set = <K extends keyof EventFormValues>(k: K, value: EventFormValues[K]) => setV((s) => ({ ...s, [k]: value }));
 
@@ -45,6 +47,7 @@ export function EventForm({ initial, areas, organisations, back, suggestionId }:
     feeMax: v.feeMax ?? undefined,
     route: v.route && v.route.length > 1 ? v.route : undefined,
     organisationId: isListing ? undefined : v.organisationId,
+    geocode: found ? { precision: found.precision, lat: found.lat, lng: found.lng } : null,
   });
 
   const onMapClick = (lng: number, lat: number) => {
@@ -186,6 +189,12 @@ export function EventForm({ initial, areas, organisations, back, suggestionId }:
       <p className="text-sm text-ink-muted mb-2">
         {mapMode === 'pin' ? 'Tap the map where the race starts. GPS check-in uses this point.' : 'Tap points along the course in order, or upload a GPX file.'}
       </p>
+      <VenueSearch
+        pin={v.startLat !== null && v.startLng !== null ? { lat: v.startLat, lng: v.startLng } : null}
+        found={found}
+        onFound={setFound}
+        onPin={(lat, lng) => setV((s) => ({ ...s, startLat: lat, startLng: lng }))}
+      />
       <MapView
         label="Event location map"
         onMapClick={onMapClick}

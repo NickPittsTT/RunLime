@@ -21,6 +21,11 @@ export async function saveEventAction(_prev: ActionResult, formData: FormData): 
   const supabase = await createClient();
   const { data, error } = await supabase.rpc('save_event', { p_id: id, p_event: event, p_distances: distances });
   if (error) return { error: friendlyError(error) };
+  // Venue search result (Phase 4): kept for the "pin far from the address" warning and the precision label.
+  const geo = (raw as { geocode?: { precision?: string; lat?: number; lng?: number } | null }).geocode;
+  if (geo && ['exact', 'street', 'town'].includes(String(geo.precision)) && Number.isFinite(geo.lat) && Number.isFinite(geo.lng)) {
+    await supabase.rpc('set_event_geocode', { p_event: data as string, p_precision: geo.precision, p_lat: geo.lat, p_lng: geo.lng });
+  }
   const suggestion = formData.get('suggestion');
   if (suggestion && !id) {
     await supabase.rpc('review_race_suggestion', { p_id: String(suggestion), p_status: 'converted', p_event: data });
@@ -32,7 +37,7 @@ export async function saveEventAction(_prev: ActionResult, formData: FormData): 
 export async function submitEventAction(formData: FormData) {
   const supabase = await createClient();
   const id = String(formData.get('id'));
-  const { error } = await supabase.rpc('submit_event', { p_id: id });
+  const { error } = await supabase.rpc('submit_event', { p_id: id, p_pin_on_start_line: formData.get('pinOnStartLine') === 'on' });
   const back = String(formData.get('back'));
   redirect(`${back}/${id}?${error ? `error=${encodeURIComponent(friendlyError(error))}` : 'submitted=1'}`);
 }
@@ -41,7 +46,13 @@ export async function reviewEventAction(_prev: ActionResult, formData: FormData)
   const supabase = await createClient();
   const id = String(formData.get('id'));
   const decision = String(formData.get('decision'));
-  const { error } = await supabase.rpc('review_event', { p_id: id, p_decision: decision, p_reason: (formData.get('reason') as string) || null });
+  const { error } = await supabase.rpc('review_event', {
+    p_id: id,
+    p_decision: decision,
+    p_reason: (formData.get('reason') as string) || null,
+    p_pin_checked: formData.get('pinChecked') === 'on',
+    p_pin_on_start_line: formData.get('pinOnStartLine') === 'on',
+  });
   if (error) return { error: friendlyError(error) };
   revalidatePath('/admin/events');
   revalidatePath(`/admin/events/${id}`);

@@ -69,6 +69,12 @@ export default async function OrganiserEvent({ params, searchParams }: { params:
         <form action={submitEventAction} className="mb-8">
           <input type="hidden" name="id" value={e.id} />
           <input type="hidden" name="back" value="/organiser/events" />
+          {!e.pin_start_line_at && (
+            <label className="flex gap-3 items-start mb-3">
+              <input type="checkbox" name="pinOnStartLine" required className="w-5 h-5 mt-1" />
+              <span>The pin is on the start line (runners check in with GPS near this point)</span>
+            </label>
+          )}
           <Button type="submit">Submit for approval</Button>
         </form>
       )}

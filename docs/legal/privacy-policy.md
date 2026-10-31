@@ -1,11 +1,11 @@
 ---
 slug: privacy
 title: Privacy Policy
-version: 2026-10-30-draft5
+version: 2026-10-31-draft6
 ---
 # RunLime Privacy Policy
 
-**Last updated:** 30 October 2026 (draft)
+**Last updated:** 31 October 2026 (draft)
 
 RunLime is a calendar for 5K and similar road races in Trinidad and Tobago, with tools to RSVP, check in on race day, track your own runs and follow other runners. RunLime is operated by {{operator_name}} ("RunLime", "we", "us"). Contact us at {{support_email}}.
 
@@ -30,8 +30,11 @@ RunLime accounts are only for adults aged **18 and over**. When you first open t
 | Followers, follow requests, blocks | When you use social features | To run followers and safety tools | Needed for those features |
 | Club memberships | When you join a club | To show club activity you opted into | Your choice |
 | RSVPs (status, number of adults and **number** of children in your group) | When you RSVP | Reminders; organisers see totals only | Needed for the feature |
-| Race-day check-ins (time and approximate location, rounded to about 100 m) | When you check in | To confirm you attended | Your choice, with location consent |
-| Runs you record (GPS route, distance, duration, pace, splits, step count, estimated calories) | When you use the run tracker | Your private history and totals | Your choice, with location consent; private by default |
+| Race-day check-ins (time and approximate location, rounded to about 100 m, with your phone's reported accuracy) | When you check in | To confirm you attended; check-ins count as races attended | Your choice, with location consent |
+| Failed check-in attempts (time, race, approximate location rounded to about 100 m, accuracy, result) and "I'm here but can't check in" requests (with any note you add) | When a check-in doesn't succeed, or you ask for help | So an admin can confirm you were there, and so a corrected race pin can approve your check-in later | Legitimate interest (fair check-ins). Attempts are deleted after 30 days |
+| Runs you record (GPS route, distance, duration, pace, splits, step count, estimated calories) | When you use the run tracker | Your private history and totals | Your choice, with location consent; private by default. Routes are never shown to anyone else; if we ever add a way to share one, the first and last 200 m will be hidden |
+| Body weight (optional, for calorie estimates) | Only if you enter it | To estimate calories | **Stays on your phone; never sent to RunLime.** Without it, calories are a general estimate, labelled as such |
+| Steps during a run | Only if you allow "physical activity" | To show steps for that run | Read from your phone's step counter during the run; only the run's total is saved with the run |
 | Community times you choose to share | When you share a result | To show it on that race's community board | Your choice; you can withdraw it at any time |
 | Reports you make and moderation records | When you report something, or something is reported | To keep the community safe. The person you report is never told who reported them | Legitimate interest / legal obligation |
 | In-app notifications, push notification token and notification preferences | When you use RunLime; the token only if you allow notifications | To tell you about follow requests, club approvals, changes to races you're going to (for example a new date), reminders and organiser updates about those races | Your choice; you can turn each type off |
@@ -40,7 +43,7 @@ RunLime accounts are only for adults aged **18 and over**. When you first open t
 | Organiser details (organisation name, contact email and phone, website, description) and payment records for listings | If you apply as an organiser | To verify organisers and invoice listings | Contract / legal obligation (tax records) |
 | Crash reports and privacy-respecting usage analytics (no advertising IDs, no session recordings) | While using the app | To fix bugs and improve RunLime | Legitimate interest; you can opt out in Settings |
 
-**Location.** We ask for location only "while using the app". If you start a run, tracking continues with the screen off and a visible notification (Android) or location indicator (iOS) for as long as the run lasts. We never track you in the background at any other time.
+**Location.** We ask for location only "while using the app". Check-in reads your position once, when you tap **Check in**. If you start a run, tracking continues with the screen off and a visible notification (Android) or location indicator (iOS) for as long as the run lasts. We never track you in the background at any other time.
 
 **What we don't do:** we don't sell your data, we don't show ads, we don't use your data for advertising, and we don't share your precise location with other users.
 
@@ -57,6 +60,7 @@ We use trusted providers that process data on our behalf under contract:
 - Supabase (database, authentication, file storage). **Your data is stored in {{hosting_region}}.**
 - Cloudflare (website hosting)
 - Google (Gmail) for sign-in emails (your email address and the one-time code) and for report alerts to our own support inbox (the report category and time only, never the report text or anyone's name)
+- Nominatim (OpenStreetMap Foundation), only for organisers and admins: when they press **Search** to find a race venue, our server sends the search words (for example "Queen's Park Savannah") to Nominatim. It receives no account details and not your device's address; results are cached.
 - OpenFreeMap (map tiles). Like any website your device loads, it receives your device's IP address and the map area being shown. It receives no account details.
 - Apple and Google (sign-in, app stores, in-app purchases)
 - Expo (app builds and push notification delivery: your phone's push token and the notification text)
@@ -71,7 +75,9 @@ This means your data is transferred to and stored outside Trinidad and Tobago, m
 | Account and profile | Until you delete your account |
 | Profile photo | Until you replace or remove it, delete your account, or we remove it for breaking our rules. The file itself is deleted |
 | Incomplete sign-ups (age gate not finished) | Deleted automatically within about 1 hour |
-| Runs, RSVPs, check-ins, follows | Until you delete them or your account |
+| Runs, RSVPs, check-ins, follows | Until you delete them or your account (you can download any run as a GPX file, and all of it is in "Download my data") |
+| Failed check-in attempts | 30 days |
+| "I'm here but can't check in" requests | Until you delete your account |
 | Shared community times | Until you withdraw them or delete your account |
 | In-app notifications | 90 days |
 | Push delivery records | 90 days |

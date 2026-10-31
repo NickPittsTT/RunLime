@@ -3,6 +3,7 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { Image, Linking, RefreshControl, Share, View } from 'react-native';
 import { RaceMap } from '@/components/RaceMap';
+import { CheckInPanel } from '@/components/CheckInPanel';
 import { RsvpPanel } from '@/components/RsvpPanel';
 import { StatusBanner } from '@/components/StatusBanner';
 import { Button, LinkRow, Notice, Row, Screen, T } from '@/components/ui';
@@ -79,6 +80,7 @@ export default function RaceScreen() {
         />
       ) : null}
       <RsvpPanel eventId={e.id} eventStatus={e.status} startsAt={e.starts_at} />
+      <CheckInPanel eventId={e.id} timezone={e.timezone} />
       <View style={{ flexDirection: 'row', gap: spacing.md }}>
         <View style={{ flex: 1 }}>
           <Button label="Add to calendar" variant="secondary" onPress={() => void Linking.openURL(`${web}/calendar.ics`)} />

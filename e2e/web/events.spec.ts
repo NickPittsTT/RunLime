@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { admin, createUserWithProfile, signInAdmin, signInWithEmail, uniqueEmail } from './helpers';
 
 const nextYear = new Date().getUTCFullYear() + 1;
@@ -22,6 +22,7 @@ test('admin enters a RunLime listing; the public sees facts + the not-affiliated
   await page.getByLabel('Official registration link (required)').fill('https://example.org/savannah-sunrise');
   await page.getByRole('button', { name: 'Save listing' }).click();
   await expect(page.getByText('Saved.')).toBeVisible();
+  await tickPinBoxes(page); // Phase 4 pin safeguards
   await page.getByRole('button', { name: 'Publish' }).click();
   await expect(page.getByText('Published.')).toBeVisible();
 
@@ -75,6 +76,7 @@ test('verified organiser drafts, submits; admin approves; organiser postpones wi
   await o.getByRole('button', { name: 'Save draft' }).click();
   await expect(o.getByText('Saved.')).toBeVisible();
   await expect(o.getByText('Draft: only you and your team can see it.')).toBeVisible();
+  await o.getByLabel('The pin is on the start line (runners check in with GPS near this point)').check();
   await o.getByRole('button', { name: 'Submit for approval' }).click();
   await expect(o.getByText('Submitted.', { exact: false })).toBeVisible();
   // Owner retest B4: the owner sees the fields to add someone to the team.
@@ -91,6 +93,7 @@ test('verified organiser drafts, submits; admin approves; organiser postpones wi
   await a.getByRole('link', { name }).click();
   await a.getByRole('button', { name: 'Reject' }).click();
   await expect(a.getByText('Please give a reason', { exact: false })).toBeVisible();
+  await tickPinBoxes(a); // Phase 4 pin safeguards
   await a.getByRole('button', { name: 'Publish' }).click();
   await expect(a.getByText('Published.')).toBeVisible();
 
@@ -111,3 +114,11 @@ test('verified organiser drafts, submits; admin approves; organiser postpones wi
   await oCtx.close();
   await aCtx.close();
 });
+
+/** Publish needs "on the start line" (if not confirmed yet) and "Pin checked" (Phase 4). */
+async function tickPinBoxes(page: Page) {
+  for (const label of ['The pin is on the start line', 'Pin checked: I compared the pin with the map and the venue (GPS check-in uses it)']) {
+    const box = page.getByLabel(label, { exact: true });
+    if (await box.count()) await box.check();
+  }
+}

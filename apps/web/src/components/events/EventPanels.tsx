@@ -84,7 +84,7 @@ export function DuplicatePanel({ id, timezone, back }: { id: string; timezone: s
 }
 
 /** Admin: publish / reject / unpublish. */
-export function ReviewPanel({ id, status }: { id: string; status: string }) {
+export function ReviewPanel({ id, status, pinOnStartLine, pinChecked }: { id: string; status: string; pinOnStartLine: boolean; pinChecked: boolean }) {
   const [state, action, pending] = useActionState(reviewEventAction, {});
   const [reasonError, setReasonError] = useState<string>();
   // Reject and Unpublish need a reason.
@@ -104,6 +104,19 @@ export function ReviewPanel({ id, status }: { id: string; status: string }) {
         <form action={action} className="mb-4">
           <input type="hidden" name="id" value={id} />
           <input type="hidden" name="decision" value="published" />
+          {/* Phase 4 pin safeguards: GPS check-in uses this pin. */}
+          {!pinOnStartLine && (
+            <label className="flex gap-3 items-start mb-3">
+              <input type="checkbox" name="pinOnStartLine" required className="w-5 h-5 mt-1" />
+              <span>The pin is on the start line</span>
+            </label>
+          )}
+          {!pinChecked && (
+            <label className="flex gap-3 items-start mb-3">
+              <input type="checkbox" name="pinChecked" required className="w-5 h-5 mt-1" />
+              <span>Pin checked: I compared the pin with the map and the venue (GPS check-in uses it)</span>
+            </label>
+          )}
           <Button type="submit" disabled={pending}>
             Publish
           </Button>

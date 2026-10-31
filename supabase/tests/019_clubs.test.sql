@@ -58,7 +58,7 @@ select throws_ok(format($$select public.remove_club_member(%L, %L)$$, :'club', :
 \set ev '{"name":"Turnout 5K","starts_at":"2031-07-01T06:00:00-04:00","venue_name":"Savannah","start_lat":10.67,"start_lng":-61.51,"registration_url":"https://example.org/r"}'
 select tests.authenticate_as(:'admin', 'aal2');
 select public.save_event(null, :'ev'::jsonb || jsonb_build_object('listing_source', 'runlime', 'region_id', tests.area_id('Central')), '[{"km":5,"label":"5K"}]') as race \gset
-select public.review_event(:'race', 'published');
+select public.review_event(:'race', 'published', null, true, true);
 select tests.clear_authentication();
 update public.profiles set show_attendance_to_clubs = true where id in (:'lead', :'ana');
 update public.app_settings set value = '"2"' where key = 'clubs.turnout_min';

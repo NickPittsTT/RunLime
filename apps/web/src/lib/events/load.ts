@@ -4,7 +4,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { EventFormValues } from '@/components/events/eventValues';
 
 export const EVENT_COLUMNS =
-  'id, slug, name, description, starts_at, original_starts_at, timezone, status, status_reason, listing_source, organisation_id, region_id, venue_name, start_lat, start_lng, registration_url, registration_instructions, package_collection, parking, contact_email, contact_phone, cause, charity_name, walk_friendly, fee_min, fee_max, currency, route, published_at, duplicated_from_id, media_permission_at, event_distances(distance_km, label)';
+  'id, slug, name, description, starts_at, original_starts_at, timezone, status, status_reason, listing_source, organisation_id, region_id, venue_name, start_lat, start_lng, registration_url, registration_instructions, package_collection, parking, contact_email, contact_phone, cause, charity_name, walk_friendly, fee_min, fee_max, currency, route, published_at, duplicated_from_id, media_permission_at, finish_lat, finish_lng, checkin_radius_m, pin_start_line_at, pin_checked_at, geocode_precision, geocoded_lat, geocoded_lng, event_distances(distance_km, label)';
 
 export interface EventRow {
   id: string;
@@ -38,6 +38,14 @@ export interface EventRow {
   published_at: string | null;
   duplicated_from_id: string | null;
   media_permission_at: string | null;
+  finish_lat: number | null;
+  finish_lng: number | null;
+  checkin_radius_m: number | null;
+  pin_start_line_at: string | null;
+  pin_checked_at: string | null;
+  geocode_precision: 'exact' | 'street' | 'town' | null;
+  geocoded_lat: number | null;
+  geocoded_lng: number | null;
   event_distances: { distance_km: number; label: string }[];
 }
 

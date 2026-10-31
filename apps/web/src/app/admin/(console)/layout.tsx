@@ -8,6 +8,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   // Open reports waiting for review (Moderation Policy: within 48 hours, child safety first).
   const { count: openReports } = await supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'open');
   const { count: urgent } = await supabase.from('reports').select('id', { count: 'exact', head: true }).eq('status', 'open').eq('category', 'child_safety');
+  const { data: checkinQueue } = await supabase.rpc('admin_checkin_queue', { p_event: null });
+  const checkinHelp = (checkinQueue ?? []).length;
   return (
     <div>
       <nav aria-label="Admin" className="flex flex-wrap gap-x-5 gap-y-2 mb-8 pb-4 border-b border-line">
@@ -24,6 +26,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               {openReports}
             </span>
           ) : null}
+        </Link>
+        <Link href="/admin/checkins" aria-label={checkinHelp ? `Check-ins, ${checkinHelp} waiting` : 'Check-ins'}>
+          Check-ins
+          {checkinHelp ? <span data-testid="checkin-help-count" className="ml-1 rounded-full px-2 text-sm font-bold text-white bg-forest">{checkinHelp}</span> : null}
         </Link>
         <Link href="/admin/settings">Settings</Link>
         <span className="ml-auto text-sm text-ink-muted">{isSuperAdmin ? 'Super admin' : 'Platform admin'} · MFA verified</span>

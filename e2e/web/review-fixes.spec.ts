@@ -32,6 +32,7 @@ async function createPublishedListing(page: Page, name: string) {
   await page.getByLabel('Official registration link (required)').fill('https://example.org/pscu-5k');
   await page.getByRole('button', { name: 'Save listing' }).click();
   await expect(page.getByText('Saved.')).toBeVisible();
+  await tickPinBoxes(page); // Phase 4 pin safeguards
   await page.getByRole('button', { name: 'Publish' }).click();
   await expect(page.getByText('Published.')).toBeVisible();
 }
@@ -185,3 +186,11 @@ test('a RunLime listing shows the organiser flyer only after the permission tick
   await anon.close();
   await ctx.close();
 });
+
+/** Publish needs "on the start line" (if not confirmed yet) and "Pin checked" (Phase 4). */
+async function tickPinBoxes(page: Page) {
+  for (const label of ['The pin is on the start line', 'Pin checked: I compared the pin with the map and the venue (GPS check-in uses it)']) {
+    const box = page.getByLabel(label, { exact: true });
+    if (await box.count()) await box.check();
+  }
+}

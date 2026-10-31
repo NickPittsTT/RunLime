@@ -48,7 +48,7 @@ select throws_ok(format($$update public.events set registration_url = null where
 
 -- Admin publishes the listing; the public sees it, with the unaffiliated notice available as a public setting.
 select tests.authenticate_as(:'admin', 'aal2');
-select lives_ok(format($$select public.review_event(%L, 'published')$$, :'listing'), 'admin publishes the listing');
+select lives_ok(format($$select public.review_event(%L, 'published', null, true, true)$$, :'listing'), 'admin publishes the listing');
 select tests.authenticate_anon();
 select is((select count(*)::int from public.events where id = :'listing'), 1, 'anon can read the published listing');
 select ok((select value #>> '{}' from public.app_settings where key = 'events.unaffiliated_notice') like '%not affiliated%', 'unaffiliated notice is a public setting');
@@ -64,10 +64,10 @@ select is((select status::text from public.events where id = :'e1'), 'draft', 'n
 select tests.authenticate_anon();
 select is((select count(*)::int from public.events where id = :'e1'), 0, 'drafts are not public');
 select tests.authenticate_as(:'owner');
-select is(public.submit_event(:'e1')::text, 'pending_approval', 'submitting waits for admin approval');
+select is(public.submit_event(:'e1', true)::text, 'pending_approval', 'submitting waits for admin approval');
 select tests.authenticate_as(:'admin', 'aal2');
 select throws_ok(format($$select public.review_event(%L, 'rejected', '')$$, :'e1'), '22023', null, 'rejection needs a reason');
-select lives_ok(format($$select public.review_event(%L, 'published')$$, :'e1'), 'admin approves');
+select lives_ok(format($$select public.review_event(%L, 'published', null, true, true)$$, :'e1'), 'admin approves');
 
 -- Postpone / cancel need a reason and are recorded in the change history.
 select tests.authenticate_as(:'owner');
@@ -99,7 +99,7 @@ select tests.authenticate_as(:'runner');
 select ok(public.suggest_race('Mayaro Beach 5K', '2031-05-01', 'Mayaro', 'https://example.org/mayaro', null) is not null, 'participants can suggest a race');
 select tests.authenticate_as(:'owner');
 select public.save_event(null, :'ev'::jsonb || jsonb_build_object('organisation_id', :'org', 'region_id', tests.area_id('Central'), 'name', 'Chaguanas Charity 5K Run', 'starts_at', '2031-03-08T07:00:00-04:00'), :'dist') as e3 \gset
-select public.submit_event(:'e3');
+select public.submit_event(:'e3', true);
 select tests.authenticate_as(:'admin', 'aal2');
 select is((select count(*)::int from public.duplicate_candidates where event_id = :'e3' and other_event_id = :'e1'), 1, 'similar race in the same area within a day is flagged');
 

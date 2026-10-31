@@ -12,7 +12,7 @@ insert into public.user_roles values (:'admin', 'platform_admin');
 select tests.authenticate_as(:'admin', 'aal2');
 select public.save_event(null, :'ev'::jsonb || jsonb_build_object('listing_source', 'runlime', 'region_id', tests.area_id('Central')), :'dist') as race \gset
 select public.save_event(null, :'ev'::jsonb || jsonb_build_object('name', 'Draft Race 5K', 'listing_source', 'runlime', 'region_id', tests.area_id('Central')), :'dist') as draft \gset
-select public.review_event(:'race', 'published');
+select public.review_event(:'race', 'published', null, true, true);
 
 -- ---------- Setting an RSVP ----------
 select tests.authenticate_as(:'ana');

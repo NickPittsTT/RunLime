@@ -12,6 +12,7 @@ const mockReplace = jest.fn();
 const mockBack = jest.fn();
 const mockFrom = jest.fn();
 const mockRpc = jest.fn();
+jest.mock('@/components/CheckInPanel', () => ({ CheckInPanel: () => null })); // covered by CheckIn.test.tsx
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush, replace: mockReplace, back: mockBack }),

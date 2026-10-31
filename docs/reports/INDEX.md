@@ -1,5 +1,6 @@
 # Reports (newest first)
 
+- [2026-10-31-1630 owner decisions applied](2026-10-31-1630-owner-decisions-applied.md): Google Maps (satellite) link instead of a satellite layer; Phase 4/5 not deployed until R2 passes; swipe-away test + fallback; round-4 APK tonight (link goes at the top); no phase approved
 - [2026-10-31-1245 Phase 4 + 5 built](2026-10-31-1245-phase-4-5-built.md): GPS check-in and run tracker built on `phase-4-5` (CI-tested, not deployed, not on a phone); **decision: satellite layer**; **question: when to deploy Phase 4/5 to staging**; Site URL set; no phase approved
 - [2026-10-31-0732 incident correction, credentials audit, prevention](2026-10-31-0732-incident-correction-audit.md): **correction: no key leaked (scanner false positive)**; audit clean; guards + credentials rule; APK after Expo allowance resets; Phase 3 not approved
 - [2026-10-30-2245 update: backup proven against staging](2026-10-30-2245-update-backup-proven.md): same as 22:30 plus the staging restore test (68 tables, all row counts match); **incident: rotate the staging secret key**; no APK yet

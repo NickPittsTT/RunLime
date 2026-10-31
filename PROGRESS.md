@@ -135,7 +135,7 @@ Owner decisions: push = Expo Push + Firebase Cloud Messaging (inbox first, then 
 
 ## Phase 4 notes (owner requirements, 2026-10-18; do NOT build before Phase 4)
 **Pin safeguards**
-- Satellite layer on the create-event map.
+- Satellite layer on the create-event map: **owner decision 31 Oct 2026: option D for the pilot (no layer)**. Instead, an "Open in Google Maps (satellite)" link beside the pin (organiser create/edit + admin review; keyless Maps URL; only the pin's coordinates sent, when tapped; in the register). **Before public launch: revisit option A (Esri World Imagery) or B (Mapbox Satellite) if wrong pins turned up in the pilot.**
 - Warning when the pin is more than 1 km (setting) from the geocoded venue.
 - Admin "Pin checked" tick required before approval.
 - Record failed check-in attempts: location rounded to 3 decimal places, accuracy, time, event; deleted after 30 days (setting); add to the Privacy Policy.
@@ -158,6 +158,9 @@ Owner decisions: push = Expo Push + Firebase Cloud Messaging (inbox first, then 
 - Location permission for check-in: **only while the app is open**.
 - Failed attempts: location rounded to 3 dp, accuracy, time, event; deleted after **30 days** (setting); in the Privacy Policy.
 - Check-ins count toward "races attended" (Phase 6 boards).
+
+## Phase 4/5 rollout order (owner, 31 Oct 2026)
+- Phase 4/5 is **not** on staging. Order: round-4 APK (phase-3 only) → owner's R2 retest → when the owner says R2 passed: deploy Phase 4/5 database + website together → emulator mock-location check → combined Phase 4+5 APK (max 3 Expo builds before asking).
 
 ## Phase 5 notes (owner decisions, 31 Oct 2026)
 - Routes private by default. If a route is ever shown to others, the first and last **200 m** are hidden (privacy zone, setting).

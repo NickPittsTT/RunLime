@@ -6,7 +6,7 @@ Confidence scale: **High** = proven by automated tests or logs I read. **Medium*
 
 ## 1. Summary
 - **Phase 4 (GPS check-in): built.** Commit `bb02767`, **CI passed** (run #158).
-- **Phase 5 (run tracker, history, totals): built.** Commit `d319099`, CI: see §8.
+- **Phase 5 (run tracker, history, totals): built.** Commit `d319099`, **CI passed** (run #159).
 - They are in separate commits, as you asked.
 - **One decision for you (§2): the satellite layer.** OpenFreeMap has no satellite images, so every option means a new third-party service. I have not built it. Everything else carried on.
 - **No other conflicts** with the existing design, Google Play policy or the free tiers (§3).
@@ -146,7 +146,7 @@ The phone test (and the emulator mock-location check below) needs staging to hav
   - app boundary check: pass (80 app files).
 - **CI:**
   - Phase 4 `bb02767`: **passed** (#158; includes web E2E, Security Advisor, gitleaks and audit).
-  - Phase 5 `d319099`: secret scan, audit, lint, typecheck, unit tests, pgTAP (incl. security baseline), Security Advisor, web build + build secret scan: **passed** (#159); web E2E was **still running** when this was written (the next report confirms it).
+  - Phase 5 `d319099`: secret scan, audit, lint, typecheck, unit tests, pgTAP (incl. security baseline), Security Advisor, web build + build secret scan, web E2E: **all passed** (#159).
 - **Not tested yet:** anything on a real phone, live Nominatim from staging, the emulator mock-location run, battery, distance accuracy, the swipe-away case.
 
 Test script: `docs/phase-4-5/TEST-SCRIPT.md` on branch `phase-4-5`. It has one outdoor outing (check in at a test race pinned near you, then a 10–15 minute run) plus indoor checks.

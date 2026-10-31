@@ -34,7 +34,9 @@ adb('shell', 'uiautomator', 'dump', '/sdcard/ui.xml');
 const xml = adb('shell', 'cat', '/sdcard/ui.xml');
 let failed = 0;
 for (const label of labels) {
-  const node = [...xml.matchAll(/<node [^>]*>/g)].map((m) => m[0]).find((n) => n.includes(`content-desc="${label}"`) || n.includes(`text="${label}"`));
+  // A text box carries its label as content-desc and the typed text as text; prefer the box over its label text.
+  const nodes = [...xml.matchAll(/<node [^>]*>/g)].map((m) => m[0]).filter((n) => n.includes(`content-desc="${label}"`) || n.includes(`text="${label}"`));
+  const node = nodes.find((n) => /class="android\.widget\.EditText"/.test(n)) ?? nodes.find((n) => n.includes(`content-desc="${label}"`)) ?? nodes[0];
   const b = node?.match(/bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"/);
   if (!b) {
     console.log(`FAIL  "${label}" not on screen`);

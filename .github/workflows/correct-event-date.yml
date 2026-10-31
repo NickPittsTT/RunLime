@@ -35,7 +35,7 @@ jobs:
         env:
           SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY || vars.SUPABASE_ANON_KEY }}
           WEB_URL: ${{ vars.STAGING_WEB_URL }}
           EVENT_ID: ${{ inputs.event_id }}
           STARTS_AT: ${{ inputs.starts_at }}

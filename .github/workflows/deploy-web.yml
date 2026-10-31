@@ -48,7 +48,7 @@ jobs:
       - name: Check deploy settings (names only, never values)
         id: check
         env:
-          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY || vars.SUPABASE_ANON_KEY }}
         run: |
           missing=()
           [ -n "$CLOUDFLARE_API_TOKEN" ] || missing+=("secret CLOUDFLARE_API_TOKEN")
@@ -66,6 +66,11 @@ jobs:
         uses: actions/checkout@v5
         with:
           ref: ${{ github.sha }}
+      - name: The public key is really public (never a secret key)
+        if: steps.check.outputs.ready == 'true'
+        env:
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY || vars.SUPABASE_ANON_KEY }}
+        run: bash scripts/check-public-key.sh "$SUPABASE_ANON_KEY"
       - if: steps.check.outputs.ready == 'true'
         uses: pnpm/action-setup@v5
       - if: steps.check.outputs.ready == 'true'
@@ -81,7 +86,7 @@ jobs:
         run: pnpm --filter @runlime/web cf:build
         env:
           NEXT_PUBLIC_SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY || vars.SUPABASE_ANON_KEY }}
           NEXT_PUBLIC_SITE_URL: ${{ vars.STAGING_WEB_URL }}
 
       - name: Secret scan of the built site (before deploying; matches staging secrets by value, never prints them)

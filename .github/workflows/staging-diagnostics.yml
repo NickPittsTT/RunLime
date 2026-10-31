@@ -68,7 +68,7 @@ jobs:
         if: inputs.check == 'api-cache-headers'
         env:
           URL: https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co
-          ANON: ${{ vars.SUPABASE_ANON_KEY }}
+          ANON: ${{ secrets.SUPABASE_ANON_KEY || vars.SUPABASE_ANON_KEY }}
         run: |
           for i in 1 2; do
             echo "--- request $i"

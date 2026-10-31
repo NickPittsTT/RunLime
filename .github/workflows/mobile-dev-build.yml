@@ -39,19 +39,20 @@ jobs:
       - name: Check required settings are in place (names only, never values)
         env:
           SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
-          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY || vars.SUPABASE_ANON_KEY }}
         run: |
           missing=()
           [ -n "$EXPO_TOKEN" ] || missing+=("secret EXPO_TOKEN")
           [ -n "$SUPABASE_PROJECT_REF" ] || missing+=("variable SUPABASE_PROJECT_REF (staging environment)")
           [ -n "$SUPABASE_ANON_KEY" ] || missing+=("variable SUPABASE_ANON_KEY")
           if [ ${#missing[@]} -gt 0 ]; then printf '::error::Missing: %s\n' "${missing[@]}"; exit 1; fi
+          bash scripts/check-public-key.sh "$SUPABASE_ANON_KEY"
 
       - name: Sync public build settings to the EAS environment for this profile
         working-directory: apps/mobile
         env:
           SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co
-          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY || vars.SUPABASE_ANON_KEY }}
           GOOGLE_WEB_CLIENT_ID: ${{ vars.GOOGLE_WEB_CLIENT_ID }}
           STAGING_WEB_URL: ${{ vars.STAGING_WEB_URL }}
         run: |

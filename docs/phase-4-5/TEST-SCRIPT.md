@@ -22,7 +22,7 @@ P0.2 Type the venue and tap **Search**:
 - a **Town**-only result asks you to place the pin by hand;
 - the OpenStreetMap credit is shown.
 
-Drag the pin to the exact spot you will stand at. If the pin ends up more than 1 km from the found address, a warning appears.
+Drag the pin to the exact spot you will stand at. Tap **Open in Google Maps (satellite)** beside the pin: Google Maps opens in a new tab or the Maps app, in satellite view, centred on the pin (the centre of the screen is the pin; there's no marker). If the pin ends up more than 1 km from the found address, a warning appears.
 P0.3 Try **Publish** without the ticks: it is refused. Tick **The pin is on the start line** and **Pin checked**, then publish. Now move the pin slightly and save. Both ticks are cleared and must be ticked again before publishing. Put the pin back, tick both and publish.
 P0.4 [App] Open the race. The **Race-day check-in** box says when check-in opens (1 hour before the start) and that it works **within 500 m of the start**.
 P0.5 [App] If the start is more than 1 hour away, tap **Check in**. The app asks for location ("while using the app" only; there is **no** "all the time" option). The result is **Check-in opens at …**.

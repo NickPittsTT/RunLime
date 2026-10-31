@@ -85,16 +85,29 @@ section('8. Expo (EAS): environment variables (names, environments, visibility, 
 const eas = (args) => execFileSync('npx', ['--yes', 'eas-cli@24.12.1', ...args], { cwd: 'apps/mobile', encoding: 'utf8', env: { ...process.env, EXPO_TOKEN: expoToken }, stdio: ['ignore', 'pipe', 'ignore'] });
 if (!expoToken) console.log('  EXPO_TOKEN not available');
 else {
-  for (const env of ['development', 'preview', 'production']) {
-    try {
-      const vars = JSON.parse(eas(['env:list', env, '--format', 'long', '--json', '--non-interactive']));
-      for (const v of vars) {
-        const val = typeof v.value === 'string' ? v.value : '';
-        const looksSecret = /sb_secret_|-----BEGIN|"private_key"/.test(val) || (/^eyJ/.test(val) && /service_role/.test(kind(val)));
-        console.log(`  [${env}] ${String(v.name).padEnd(34)} visibility ${String(v.visibility).padEnd(10)} type ${v.type ?? '-'}  updated ${v.updatedAt ?? '-'}${v.name.startsWith('EXPO_PUBLIC_') ? `  value kind: ${/KEY/.test(v.name) ? kind(val) : 'public setting'}` : ''}${looksSecret ? '  ⚠ LOOKS SECRET' : ''}`);
+  // The CLI prints "Field  value" blocks; only names, visibility, environments and dates are printed here. Each value
+  // is only classified (public setting / kind of key / LOOKS SECRET), never shown.
+  for (const scope of ['project', 'account']) {
+    for (const env of ['development', 'preview', 'production']) {
+      let out;
+      try {
+        out = eas(['env:list', env, '--format', 'long', '--scope', scope]);
+      } catch (e) {
+        console.log(`  [${scope}/${env}] could not list (${String(e.message).split('\n')[0].slice(0, 100)})`);
+        continue;
       }
-    } catch (e) {
-      console.log(`  [${env}] could not list (${String(e.message).split('\n')[0].slice(0, 120)})`);
+      const blocks = out.split(/\n\s*\n|—{3,}|-{5,}/).map((b) => b.trim()).filter((b) => /Variable|Name/i.test(b));
+      if (!blocks.length) console.log(`  [${scope}/${env}] none`);
+      for (const b of blocks) {
+        const field = (re) => b.match(re)?.[1]?.trim() ?? '';
+        const name = field(/(?:Variable name|Name)\s*:?\s+(\S+)/i);
+        const value = field(/Value\s*:?\s+(.+)/i);
+        const visibility = field(/Visibility\s*:?\s+(.+)/i);
+        const updated = field(/Updated at\s*:?\s+(.+)/i);
+        const looksSecret = /sb_secret_|-----BEGIN|"private_key"/.test(value) || /service_role/.test(kind(value));
+        const what = /\*{3,}|sensitive|secret/i.test(value) && !looksSecret ? 'value hidden by Expo' : /KEY/.test(name) ? kind(value) : 'public setting';
+        console.log(`  [${scope}/${env}] ${name.padEnd(34)} visibility ${visibility || '-'}  updated ${updated || '-'}  value: ${what}${looksSecret ? '  ⚠ LOOKS SECRET' : ''}`);
+      }
     }
   }
   section('9. Expo: recent Android builds');
@@ -108,7 +121,7 @@ else {
   try {
     // Structure only: field names and value types, never values.
     const shape = (o, depth = 0) => (depth > 3 || o === null || typeof o !== 'object' ? typeof o : Array.isArray(o) ? `[${o.length} × ${o.length ? JSON.stringify(shape(o[0], depth + 1)) : '-'}]` : Object.fromEntries(Object.keys(o).map((k) => [k, shape(o[k], depth + 1)])));
-    console.log(JSON.stringify(shape(JSON.parse(eas(['credentials:list', '--platform', 'android', '--json', '--non-interactive'])))).slice(0, 1500));
+    console.log(JSON.stringify(shape(JSON.parse(eas(['credentials:list', '--platform', 'android', '--json'])))).slice(0, 1500));
   } catch {
     console.log('  not listable from the CLI without an interactive session; check expo.dev → Credentials (FCM V1 key record, build keystore)');
   }

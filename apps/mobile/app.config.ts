@@ -1,4 +1,9 @@
 import type { ExpoConfig } from 'expo/config';
+// eslint-disable-next-line @typescript-eslint/no-require-imports -- plain JS so it also runs before TypeScript tooling
+const { assertPublicEnv } = require('./build-guards/publicEnv');
+
+// Never compile a secret into the app (incident review 31 Oct 2026).
+assertPublicEnv();
 
 /**
  * Bundle identifiers are DEVELOPMENT values until the owner confirms the RunLime name is available

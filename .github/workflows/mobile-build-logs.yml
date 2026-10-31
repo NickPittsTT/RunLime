@@ -18,6 +18,8 @@ jobs:
       EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v5
@@ -50,7 +52,10 @@ jobs:
             if [ -n "$project" ]; then firebase="yes (project $project)"; else firebase="no (phone notifications off in this build)"; fi
             printf -- '- Firebase config in the APK: %s\n' "$firebase" | tee -a "$GITHUB_STEP_SUMMARY"
             # Secret scan of the APK (service-role JWTs, secret/private keys, staging secrets and EXPO_TOKEN by value).
-            if node ../../scripts/scan-build-secrets.mjs /tmp/app.apk; then scan="none found"; else scan="FOUND (see the log; do not install)"; fi
+            # Exact-value check against the project's real secret keys (masked) plus the pattern checks.
+            node ../../scripts/fetch-secret-values.mjs /tmp/secret-values.txt
+            if SECRET_VALUES_FILE=/tmp/secret-values.txt node ../../scripts/scan-build-secrets.mjs /tmp/app.apk; then scan="none found"; else scan="FOUND (see the log; do not install)"; fi
+            rm -f /tmp/secret-values.txt
             printf -- '- Secrets in the APK: %s\n' "$scan" | tee -a "$GITHUB_STEP_SUMMARY"
             [ "$scan" = "none found" ] || exit 1
           fi

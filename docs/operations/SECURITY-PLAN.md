@@ -105,6 +105,9 @@ Likelihood (L/M/H) · Impact (Low/Med/High/Critical) · **Owner** = who acts · 
 | V13 API | PostgREST RPCs with explicit grants; anon set pinned | Rate limiting at the edge (§7.3) |
 | V14 Configuration | Security headers; secrets out of repo; build scan; advisor | CSP; production separation (§7.4) |
 
+## 4a. Credentials rule (owner, 31 Oct 2026)
+Claude never creates, changes or deletes credentials, keys, tokens or environment variables in GitHub, Supabase, Expo, Firebase, Google Cloud or Cloudflare without asking the owner first. The only exception is the documented build sync of public `EXPO_PUBLIC_*` values. Every change and sync is listed in the report. A scanner hit is a claim to verify (reproduce, check value kinds and dates) before any rotation is advised. Incident: `incidents/2026-10-31-secret-key-in-test-apk.md`.
+
 ## 5. Patch policy
 | Severity (GitHub/npm advisory) | Deadline to fix or mitigate in production | Who |
 |---|---|---|

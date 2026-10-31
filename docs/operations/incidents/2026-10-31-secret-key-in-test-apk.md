@@ -1,35 +1,49 @@
-# Incident 2026-10-31: Supabase secret key built into a test APK (S1, staging)
+# Incident 2026-10-31: false "secret key in APK" alarm, wrong diagnosis, unnecessary key deletion (S3, closed)
 
-**Status:** contained by Claude (logs deleted, guards added). **Waiting on the owner to rotate the key.** No secret values appear in this record.
+**Status:** closed (31 Oct 2026). **No key or secret was ever in an app build, a log or the repository.** The alarm was a false positive in our own build secret scanner. Claude's first diagnosis was wrong, and on that basis the owner deleted Supabase's auto-created secret key "default". That deletion broke nothing. This record replaces the version of 31 Oct 02:19 UTC, which wrongly said the GitHub variable `SUPABASE_ANON_KEY` had been changed.
 
-## What happened
-| Time (UTC, 31 Oct) | Event |
+## Cause (proven)
+- **The scanner was wrong.** supabase-js contains the text `'sb_secret_'`: it checks whether a key is a secret key so it can refuse it in apps. In the compiled app bundle (Hermes), text constants are stored back to back. In build `dc8e29ea` (commit `0f1da7f`, the keyboard fix), the strings after `'sb_secret_'` happened to be library names:
+  - `_disposeResources`
+  - `creenEdgeGesture`
+  - `adUint16LE`
+  - `ExpoFontLoader`
+
+  Together they are 58 characters with upper case, lower case and digits. Our scanner's "looks random" test (one upper, one lower, one digit) called that a key.
+- **Proof:** Claude rebuilt the same commit's Android bundle locally with **no keys at all** in the environment (fake public values only). The scanner reported the identical "sb_secret_ + 58 random-looking characters". Inspecting the bytes shows the library names above. The previous build (`c14d742a`) passed only because its strings were packed in a different order.
+- **The build used only the documented values.** It was started by the "Mobile build (Android)" workflow, which synced `EXPO_PUBLIC_SUPABASE_ANON_KEY` from the variable `SUPABASE_ANON_KEY`. The owner confirmed (31 Oct) that this is the legacy **anon** key, unchanged for 2 weeks, and the Expo value matches it. Nothing came from Claude's session: no local `eas build`, no local `.env`, no Supabase CLI local keys, no `eas env:set` outside the workflow, and no override in the Android UI check (which only installs an already-built APK).
+
+## Timeline (UTC)
+| When | What |
 |---|---|
-| 30 Oct 21:47 | Last clean build (EAS `c14d742a`): APK secret scan "none found" |
-| between 30 Oct 21:47 and 31 Oct 01:43 | The GitHub variable `SUPABASE_ANON_KEY` (staging environment) was changed to a value starting `sb_secret_`, a Supabase **secret** key. Not changed by Claude (no session tool can edit variables) |
-| 01:43 | Claude started a test build ("Mobile build (Android)" run 41156724494) for the emulator keyboard check. The workflow copies that variable into the app (`EXPO_PUBLIC_SUPABASE_ANON_KEY`). GitHub does not mask variables, so **the value was visible in that run's public log** |
-| 02:16 | "Mobile build logs" (run 41159202485) scanned the APK (EAS `dc8e29ea`): **secret found** in `index.android.bundle`, and the run printed the APK's download link |
-| 02:17–02:18 | Claude deleted the logs of both runs. The APK was never given to anyone; it was installed only on throwaway CI emulators |
+| 30 Oct 21:47 | Build `c14d742a` (commit `51d0154`): scanner "none found" |
+| 31 Oct 01:43 | Build `dc8e29ea` (commit `0f1da7f`) started by the Mobile build workflow; the sync step set the four public `EXPO_PUBLIC_` values (anon key, URL, Google web client ID, web URL) |
+| 02:16 | "Mobile build logs" scanned `dc8e29ea`: **false positive** "Supabase secret key (sb_secret_ + 58 random-looking characters)" |
+| 02:17–02:18 | Claude deleted the logs of the build run and the build-logs run (believing a value was exposed). The logs contained no secret; deleting them only lost history |
+| 02:19 | Claude published a **wrong diagnosis**: the variable had been changed to a secret key, and the key should be revoked |
+| 31 Oct (owner) | The owner deleted the Supabase secret key "default" (auto-created by Supabase with the project) and checked GitHub, Supabase and Expo: the variable and Expo values were the anon key, unchanged |
+| 31 Oct ~11:00 | Claude reproduced the false positive locally; the read-only credentials audit confirmed nothing broke |
 
-Exposure: the key was readable in a public Actions log for about 35 minutes, and in an unlisted APK on expo.dev whose link was public for about 2 minutes. **Treat it as compromised:** it bypasses all row security on staging (test data: the owner's and testers' accounts, emails, profiles, RSVPs, follows, reports).
+## Impact
+- **No exposure:** no secret was in any APK, log, commit or the public website.
+- **Deleting the "default" secret key broke nothing** (audit, 31 Oct):
+  - no workflow, Edge Function or app uses the new-style secret keys;
+  - the GitHub secret `SUPABASE_SERVICE_ROLE_KEY` is the legacy service_role JWT and still works (REST and Auth admin reads both HTTP 200);
+  - the Edge Functions read the legacy `SUPABASE_SERVICE_ROLE_KEY`.
+- **Cost:** owner time; two deleted Actions logs; a wrong alarm in the 30 Oct 22:30 and 22:45 reports (both stay as written; this record and LATEST.md correct them).
+- **Testers:** no action needed. Their data was never exposed; a plain-language note is in LATEST.md if the owner wants to send one.
 
-## Contain (owner, now)
-1. **Supabase → staging project → Project settings → API keys → Secret keys:** delete (revoke) the exposed secret key. If anything needs a secret key, create a new one and store it **only as a GitHub secret**, never a variable.
-2. **GitHub → Settings → Environments → staging → Variables → `SUPABASE_ANON_KEY`:** put back the **anon** key (legacy "anon" JWT) or the **publishable** key (`sb_publishable_…`). Better: also add it as a repository **secret** named `SUPABASE_ANON_KEY`; workflows now prefer the secret, which GitHub masks in logs.
-3. **expo.dev → runlime → Builds → `dc8e29ea`:** delete the build if the page offers it (removes the APK download).
-4. If you're unsure whether the leaked key is the one in the `SUPABASE_SERVICE_ROLE_KEY` secret: rotate that too (runbook table), then tell Claude to re-run Configure push / admin alerts.
+## Fixes
+1. **Scanner** (`scripts/scan-build-secrets.mjs`):
+   - It now checks the build against the project's **real** secret keys by exact value. `scripts/fetch-secret-values.mjs` reads them from the Management API, masks them, and reports only the key's name. This is what proves a real key is absent.
+   - The pattern check ignores `sb_secret_` followed by joined words (long lowercase runs).
+   - A self-test with fake values runs in CI (`scripts/scan-build-secrets.test.mjs`), including this exact false positive.
+2. **Build guard** (`apps/mobile/build-guards/publicEnv.js`, called from `app.config.ts`): any build, local or EAS, fails if an `EXPO_PUBLIC_` value is a secret key, a service_role JWT, a private key or a service-account key. It names the variable and never prints the value.
+3. **Boundary check** (`scripts/check-app-boundaries.mjs`, in CI): app code never reads a non-public environment variable, a service key, or anything in `scripts/` or `e2e/`. The app build workflow has no server credentials or test-account tooling. In the Android UI check, the service key is visible only to the two throwaway-account steps.
+4. **Public-key guard** (`scripts/check-public-key.sh`, added 31 Oct): kept. The app build and web deploy refuse a "public" key that isn't an anon JWT or publishable key.
+5. **Process rule** (CLAUDE.md, owner 31 Oct): Claude never creates, changes or deletes credentials, keys or environment variables in GitHub, Supabase, Expo, Firebase, Google Cloud or Cloudflare without asking first, except the documented build sync of public values. Every such change is listed in the report. Before calling something a leak, Claude reproduces it or checks the actual value source, and says how sure it is.
 
-## Assess (Claude, after rotation)
-- Staging diagnostics: look for activity not explained by our own runs between 01:43 and the rotation (auth audit log, new rows by unknown actors, storage changes).
-- Confirm the hosted Security Advisor and the staging security baseline still pass.
-
-## Root cause and fixes (done, commit after this record)
-- **Cause:** a secret value was put in a variable that the builds treat as public, and nothing checked what kind of key it was before building.
-- **Fixes:**
-  - `scripts/check-public-key.sh` refuses to build the app or deploy the website unless the key is a publishable key or an anon JWT (it checks the JWT role), and never prints it;
-  - every workflow reads `secrets.SUPABASE_ANON_KEY` first, so the key can be masked;
-  - the existing APK secret scan caught the leak.
-- **Gap:** the scan only runs when "Mobile build logs" is run. The test build had already been uploaded to EAS by then. The new guard closes this before the build starts.
-
-## Notify
-- Staging only, test accounts of the owner and two testers; no outside users. The owner decides whether testers are told (recommendation: yes, a short note once the key is rotated).
+## Lessons
+- A scanner hit is a claim to verify, not a fact. Reproduce before advising a rotation.
+- "The value must have come from X" needs evidence (last-updated dates, the value's kind); the owner's checks found the truth in minutes.
+- Deleting logs destroys evidence; next time, verify first.

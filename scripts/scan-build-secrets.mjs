@@ -11,6 +11,13 @@ import { join, relative } from 'node:path';
 // Secrets that must never be in anything shipped to users. Only those set in the environment are checked.
 const SECRET_ENV = ['SUPABASE_SERVICE_ROLE_KEY', 'SERVICE_ROLE_KEY', 'SUPABASE_DB_PASSWORD', 'SUPABASE_ACCESS_TOKEN', 'CLOUDFLARE_API_TOKEN', 'EXPO_TOKEN', 'SMTP_PASSWORD', 'PUSH_DISPATCH_SECRET', 'ADMIN_ALERTS_SECRET', 'EMERGENCY_CONTACT_KEY_V1', 'EMERGENCY_CONTACT_KEY_V2', 'FCM_SERVICE_ACCOUNT_JSON'];
 const exact = SECRET_ENV.map((name) => [name, process.env[name]]).filter(([, v]) => typeof v === 'string' && v.length >= 8);
+// The project's real secret keys, fetched by scripts/fetch-secret-values.mjs (masked in logs): "name<TAB>value" lines.
+if (process.env.SECRET_VALUES_FILE) {
+  for (const line of readFileSync(process.env.SECRET_VALUES_FILE, 'utf8').split('\n')) {
+    const [name, value] = line.split('\t');
+    if (name && value && value.length >= 8) exact.push([`Supabase key "${name}"`, value]);
+  }
+}
 
 const PATTERNS = [
   ['private key block', /-----BEGIN (?:RSA |EC |OPENSSH |DSA |ENCRYPTED )?PRIVATE KEY-----/],
@@ -20,10 +27,17 @@ const PATTERNS = [
   ['Stripe live secret', /\bsk_live_[A-Za-z0-9]{20,}\b/],
 ];
 // Supabase secret keys: sb_secret_ + a random tail. In a Hermes bundle string constants are stored back to back, so
-// supabase-js's own `startsWith('sb_secret_')` check is followed directly by the next string; only a tail that looks
-// random (upper + lower case + digit) counts. Hits are described by shape only, never by characters.
+// supabase-js's own `startsWith('sb_secret_')` check is followed directly by the next strings (31 Oct 2026 false
+// positive: "_disposeResources" + "creenEdgeGesture" + "adUint16LE" + "ExpoFontLoader"…). Joined words have long
+// lowercase runs; a random key almost never does. The exact-value check above is what proves a real key is absent.
+// Hits are described by shape only, never by characters.
 const SB_SECRET = /sb_secret_([A-Za-z0-9_-]{20,64})/g;
-const looksRandom = (t) => /[A-Z]/.test(t) && /[a-z]/.test(t) && /[0-9]/.test(t);
+function looksRandom(t) {
+  if (!(/[A-Z]/.test(t) && /[a-z]/.test(t) && /[0-9]/.test(t))) return false;
+  const runs = (t.match(/[a-z]+/g) ?? []).map((r) => r.length);
+  const wordLike = runs.some((n) => n >= 8) || runs.filter((n) => n >= 6).length >= 2;
+  return !wordLike;
+}
 const JWT = /eyJ[A-Za-z0-9_-]{8,}\.(eyJ[A-Za-z0-9_-]{8,})\.[A-Za-z0-9_-]{8,}/g;
 const FORBIDDEN_ROLES = new Set(['service_role', 'supabase_admin', 'postgres']);
 

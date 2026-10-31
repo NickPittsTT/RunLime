@@ -22,7 +22,6 @@ jobs:
     env:
       EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
       SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co
-      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v5
@@ -47,6 +46,9 @@ jobs:
           echo "### Android UI check: EAS build $BUILD_ID" >> "$GITHUB_STEP_SUMMARY"
       - name: Throwaway staging account (one-time code, no email sent)
         run: node scripts/ui-check-account.mjs create
+        env:
+          # Only these two steps see the service key; it never reaches the emulator, the APK or an app build.
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       - name: Install Maestro (pinned)
         run: |
           curl -fsSL "https://get.maestro.mobile.dev" | MAESTRO_VERSION=1.40.0 bash
@@ -79,3 +81,6 @@ jobs:
       - name: Remove the throwaway account
         if: always()
         run: node scripts/ui-check-account.mjs delete
+        env:
+          # Only these two steps see the service key; it never reaches the emulator, the APK or an app build.
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

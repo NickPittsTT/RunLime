@@ -61,6 +61,10 @@ jobs:
       - name: Dependency audit (fails on high/critical; exceptions in package.json pnpm.auditConfig, reasons in SECURITY-PLAN.md)
         run: pnpm audit --audit-level=high
       - run: pnpm turbo run typecheck lint test
+      - name: Build secret scan self-test (fake values) and test tooling stays out of the app
+        run: |
+          node scripts/scan-build-secrets.test.mjs
+          node scripts/check-app-boundaries.mjs
 
   e2e-web:
     name: Database (pgTAP) + web end-to-end (Playwright on Cloudflare runtime)

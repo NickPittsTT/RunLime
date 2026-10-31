@@ -1,6 +1,6 @@
 # C4: Race photo sharing (S3), plan only
 
-Status: **planned, not built** (owner, 31 Oct 2026). Nothing in this document is in the app, and the published legal drafts don't describe it yet (see §8).
+Status: **planned, not built; decisions made** (owner, 31 Oct 2026): Phase 6b, after the pilot. See §9. Nothing in this document is in the app, and the published legal drafts don't describe it yet (see §8).
 
 ## 1. When: recommendation
 **Right after the real-race pilot, as "Phase 6b", before Phase 7.** Not inside Phase 6.
@@ -127,8 +127,9 @@ These are not in `docs/legal/` yet on purpose: those pages are published to the 
 4. Photos where a child appears in the background.
 5. The licence wording.
 
-## 9. Decisions needed before building
-1. Filtering before posting: (a) admin approval first, (b) automated scan (new service), or (c) reports only. Recommendation: (a) at first.
-2. Hide a photo as soon as someone reports "this is a photo of me", until reviewed? Recommendation: yes. The risk is someone hiding others' photos by misuse; repeat misuse is handled like other abuse.
-3. Retention: keep until deleted, or delete after N months (setting)?
-4. At launch: Supabase Pro storage, or Cloudflare R2 for photo files?
+## 9. Decisions (owner, 31 Oct 2026)
+1. **Filtering before posting: admin approval.** A photo is visible only to its uploader until an MFA admin approves it (status `pending_review` → `visible`). The approval queue sits beside Reports. Automated scanning is not used.
+2. **"This is a photo of me": hide immediately** (status `hidden_pending_review`) until an admin reviews it; alerts like child-safety. Repeated misuse is handled as abuse.
+3. **Retention: deleted after 12 months**, as setting `photos.retention_months` = 12, by a daily clean-up job that removes rows and files.
+4. **Storage at launch: Supabase Pro** (cost, about US$25/month; already planned for launch backups). No new storage provider.
+5. **Timing: Phase 6b, right after the pilot.**

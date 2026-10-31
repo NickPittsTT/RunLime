@@ -50,6 +50,8 @@ Living record of conventions and decisions. Update at the end of every phase.
 - Never put model identifiers in commits, PRs or code.
 
 ## Security conventions
+- **Credentials rule (owner, 2026-10-31): Claude never creates, changes or deletes credentials, keys, tokens or environment variables in GitHub, Supabase, Expo, Firebase, Google Cloud or Cloudflare without asking the owner first.** The one exception is the documented build sync of public values (`EXPO_PUBLIC_*` in "Mobile build (Android)"). Every such change, and every sync, is listed in the report. Before calling something a leak or advising a rotation, reproduce it or check the actual value source (names, kinds, last-updated dates), and state the confidence.
+- Builds never contain secrets: `app.config.ts` refuses secret-looking `EXPO_PUBLIC_` values; the APK and web scans match the project's real secret keys by value; `scripts/check-app-boundaries.mjs` keeps server credentials and test-account tooling away from the app.
 - Admin rights require MFA: `is_admin()` checks the role **and** `auth.jwt()->>'aal' = 'aal2'`.
 - `super_admin` is granted only by `scripts/bootstrap-super-admin.ts`.
 - Audit log: actors and person-subjects are stored as aliases (`audit_actor_aliases`, cascade-deleted with the account). Only allowlisted columns go into before/after. No IPs. Append-only.
@@ -96,6 +98,8 @@ Living record of conventions and decisions. Update at the end of every phase.
 | 2026-10-17 | Compliance additions: Refund Policy (listing fees: rejected / organiser cancels / duplicate → bank transfer within a setting; Premium per store rules); Privacy Policy cookies section (essential only, no banner, attorney to confirm); visible map attribution everywhere; third-party services register; Premium cancel as easy as subscribing, no confirm-shaming (Phase 7); unsubscribe link on all marketing email | Owner |
 | 2026-10-17 | Phase 2 review fixes: Publish can't undo postponed/cancelled (root cause of the failed status test); admin Add organisation (verified, audited); listing flyer/logos/sponsors with recorded permission; onboarding preferences saved to the account; Fun walk / under 5K; List/Map switch; refund-after-live share as a setting (`payments.cancel_refund_after_live_percent`, default 100, owner choosing 100 or 50) | Owner |
 | 2026-10-18 | Postponing to a new date keeps the original (`events.original_starts_at`, shown struck through); `starts_at` is the new date; "Back on" restores the original date; a date is accepted only when postponing (owner's final Phase 2 re-test) | Owner |
+| 2026-10-31 | Credentials rule: Claude asks before creating/changing/deleting any credential, key or environment variable (except the documented public build sync); verify before declaring a leak (false-alarm incident 2026-10-31) | Owner |
+| 2026-10-31 | C4 race photos planned for Phase 6b (after the pilot): admin approval before photos appear; "photo of me" hides at once until reviewed; deleted after 12 months (setting); Supabase Pro storage at launch | Owner |
 | 2026-10-11 | Seed prices: Premium US$2.99/mo, US$19.99/yr; Basic TT$100; Featured TT$400; charity free Basic via setting | Owner |
 
 ## Conventions

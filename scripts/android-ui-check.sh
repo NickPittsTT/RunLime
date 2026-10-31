@@ -6,7 +6,13 @@ mkdir -p /tmp/ui && cd /tmp/ui
 adb install -r /tmp/app.apk
 adb shell settings put secure show_ime_with_hard_keyboard 1
 status=0
-maestro test "$GITHUB_WORKSPACE/.maestro/report-keyboard-1-type.yaml" -e UI_EMAIL="$UI_EMAIL" -e UI_OTP="$UI_OTP"
+if ! maestro test "$GITHUB_WORKSPACE/.maestro/report-keyboard-1-type.yaml" -e UI_EMAIL="$UI_EMAIL" -e UI_OTP="$UI_OTP"; then
+  echo "FAIL  the sign-in and typing flow stopped (screenshot and crash log below)" | tee -a result.txt
+  adb exec-out screencap -p > /tmp/ui/00-flow-stopped.png || true
+  echo "--- crash log"; adb logcat -d -b crash | tail -40 || true
+  echo "--- app log"; adb logcat -d | grep -E "ReactNativeJS|AndroidRuntime|FATAL" | tail -40 || true
+  status=1
+fi
 node "$GITHUB_WORKSPACE/scripts/android-keyboard-geometry.mjs" "Tell us what happened" | tee -a result.txt || status=1
 maestro test "$GITHUB_WORKSPACE/.maestro/report-keyboard-2-scroll.yaml" || { echo "FAIL  could not scroll to \"Send report\" with the keyboard open" | tee -a result.txt; status=1; adb exec-out screencap -p > /tmp/ui/02-send-report-not-reachable.png; }
 node "$GITHUB_WORKSPACE/scripts/android-keyboard-geometry.mjs" "Send report" | tee -a result.txt || status=1

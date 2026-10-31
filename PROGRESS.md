@@ -13,6 +13,7 @@
 | 4 | GPS check-in | Not started | 0% |
 | 5 | Run tracker, history, totals | Not started | 0% |
 | 6 | Community times, activity + club leaderboards, verified runners, sharing, reporting/blocking, finisher card → then the real-race pilot | Not started | 0% |
+| 6b | Race photo sharing (C4, owner 31 Oct 2026): check-in required, consent tick, privacy-based visibility, "photo of me" removal reports. Plan: `docs/plans/C4-RACE-PHOTOS.md` (recommended right after the pilot; 4 decisions open) | Planned, not started | 0% |
 | 7 | Plans/entitlements, store subscriptions, organiser payments, settings, support inbox, audit UI | Not started | 0% |
 | 8 | Hardening, store readiness, TestFlight + Play closed test | Not started | 0% |
 

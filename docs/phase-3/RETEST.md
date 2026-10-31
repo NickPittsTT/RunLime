@@ -2,6 +2,22 @@
 
 Numbered per slice. Report pass or fail per step, with a screenshot for any failure. An APK link is added after slices 2, 4 and 6; slices 0, 1, 3 and 5 can be checked on the current APK or the website as noted.
 
+## Retest round 4 (2026-10-31): only these, on the new APK
+**APK:** _link added when the build finishes (see docs/reports/LATEST.md)_. Install it over the old app. **Install it before testing photos:** photos are now private, so the old app shows initials instead of photos once the website and database are updated. [App] = phone app, [Website] = website.
+
+**R2 again: keyboard (cause found: see the report)**
+R2.1 [App] Help & legal → **Report a safety concern** → tap **Tell us what happened** and type 6+ lines. While the keyboard is open, the whole box stays visible as it grows, and you can scroll down to **Send report** without closing the keyboard.
+R2.2 [App] Same check (the box you type in stays fully visible; you can scroll to the button below it with the keyboard open) on: Edit profile (Nickname → scroll to **Save**), Suggest a race (last box → **Send**), Ask for a new club (About the club → **Send**), Delete account (Type DELETE → **Delete my account**), Sign in (email → **Email me a code**).
+
+**R9 again: Private → Public → Private (+ private photo storage)**
+R9.1 [App] Account A has a photo and is Private. Account B (not following A): search A and open A's profile: **initials**.
+R9.2 [App] A: Edit profile → tap **Public**. A green message says "Saved. Your account is Public…" straight away (no Save button needed for privacy).
+R9.3 [App] B: go back to the search list and open A again (or just come back to A's profile): **A's photo shows**. Also in search results after searching again.
+R9.4 [App] A: tap **Private** → "Saved. Your account is Private…". B: back to A's profile: **initials** again.
+R9.5 [App] A approves a follow request from B: B now sees A's photo (Private account).
+R9.6 [App] A sees their own photo on Profile and in the side menu. [Website] Admin → Reports: a report on A's photo shows the photo.
+R9.7 [Website] Optional: copy a photo link from an old screenshot or message; it no longer opens (photos are private; links expire after 10 minutes).
+
 ## Retest round 3 (2026-10-30): test only these, on the new APK
 **APK:** https://expo.dev/artifacts/eas/riM5Nd_cBRJI0XDt5urUP9UAP7ylqfmvHrdKwjoFShA.apk (EAS build c14d742a, commit `51d0154`; same app code as CI #138 on `c9d46e8`; no secrets found). Install it over the old app (same signing key). Every step says where to do it: **[App]** = the phone app, **[Website]** = the website (a phone browser is fine).
 

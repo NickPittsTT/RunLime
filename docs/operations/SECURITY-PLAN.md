@@ -58,7 +58,7 @@ Likelihood (L/M/H) · Impact (Low/Med/High/Critical) · **Owner** = who acts · 
 | R2 | A migration grants more than intended / disables RLS | M | High | pgTAP 024 + splinter in CI; default privileges fail closed | Claude | Done |
 | R3 | Framework/dependency vulnerability (e.g. RCE) | M | Critical | CI audit, Dependabot, patch policy §5; Next.js RCE fixed 2026-10-24 | Claude | Done; ongoing |
 | R4 | Admin account takeover (phishing, stolen phone) | L–M | Critical | TOTP MFA required; admin identities no longer queryable; every admin action audited. Next: passkey/hardware key for the Google account | Nicholas | Before pilot (Google account MFA + recovery codes) |
-| R5 | Data loss with no restorable backup | M | High | §7.1 nightly encrypted export + tested restore | Nicholas decides; Claude builds | Before pilot |
+| R5 | Data loss with no restorable backup | M | High | §7.1 built (31 Oct): nightly encrypted export, monthly restore test with row-count check; real backups start once the owner adds the two keys | Owner (keys); Claude (built) | Before pilot |
 | R6 | Free Supabase project pauses after ~7 days of low activity (outage) | M | Med | Monitor; keep-alive via real use or Pro **(cost)** at launch | Nicholas | Before pilot |
 | R7 | Going private breaks deploys or drops protections (env secrets ignored on Free) | M | Med | §7.2 migration order; gitleaks stays | Nicholas + Claude | Before pilot |
 | R8 | Bot sign-ups / OTP email abuse (Gmail ~500/day cap → nobody can sign in) | M | Med | Supabase Auth email rate limit (30/h, setting); Turnstile §7.3 | Claude | Before launch |
@@ -133,31 +133,64 @@ Likelihood (L/M/H) · Impact (Low/Med/High/Critical) · **Owner** = who acts · 
 6. Hosted Security Advisor after each database deploy (fails the run as an alert)
 
 ## 7. Proposals for later items (owner decisions)
-### 7.1 Backups (before pilot)
-**What Supabase Free gives:** Supabase's docs say it backs up all projects daily (Free included) but list retention and dashboard restore only for paid plans, and tell Free projects to export their own data with `supabase db dump` and keep off-site copies. So treat Free as **no restorable backup**.
-**Free proposal:**
-1. Nightly workflow (03:17 TT): `supabase db dump` (roles, schema, data as three files) for staging/production. Storage objects (profile photos) are listed but not copied (people can re-upload).
-2. Encrypt with **age** to a public key committed in the repo. The **private key stays with Nicholas only** (password manager + one offline copy). GitHub never holds it, so even the public repo's artifacts are unreadable.
-3. Keep as a GitHub Actions artifact for 30 days (free; about 2 min/night ≈ 60 min/month), plus a monthly copy Nicholas downloads to offline storage.
-4. **Monthly restore test** (workflow). Each dump is also encrypted to a second, restore-test key whose private half is a GitHub secret; Nicholas's own key never goes to GitHub.
-   - The workflow restores the latest dump into a fresh local Supabase in CI and runs row counts and pgTAP. The evidence goes in the run summary.
-   - Trade-off: the restore-test key can decrypt dumps, so it's as sensitive as the database password. It gets rotated in the incident runbook.
-**Is Pro the only sane option?** Not for a 10-person pilot: the free export above is enough. **For public launch, Supabase Pro (cost, ≈ US$25/month)** is the sane choice: 7-day daily backups with dashboard restore, no inactivity pausing (R6), more headroom. Point-in-time recovery is an extra paid add-on — not needed at launch.
+### 7.1 Backups (owner decision 1, 31 Oct 2026: free export for the pilot, Supabase Pro at public launch). **Built: "Backup database" workflow.**
+Supabase Free keeps no backup we can restore, so:
+- **Nightly at 03:17 Port of Spain:** dump staging (roles, schema, data) with the Supabase CLI.
+- **Encrypted with age** to two public keys: the owner's (the private key stays only with the owner, never on GitHub) and a restore-test key (its private half is the GitHub secret `BACKUP_RESTORE_KEY`).
+- **Kept 30 days** as an encrypted Actions artifact (about 2 min a night).
+- **On the 1st of each month (or "Run workflow"):** decrypt with the restore-test key, restore into a brand-new local Supabase in Supabase's documented order, and compare every table's row count with the live project (Supabase's own version tables excluded). The result is in the run summary.
+- **Until the keys exist** it runs a self-test with a throwaway key (proves dump → encrypt → restore against staging) and keeps nothing.
+- **Not included:** storage files (profile photos). People can re-upload, and the photo rows are in the dump.
+- **Trade-off:** the restore-test key can decrypt backups, so it is as sensitive as the database password; rotate it in the incident runbook.
+- **Owner key setup (once, ~10 min).** Install age: age-encryption.org, Windows/macOS/Linux builds, free.
+  - **A. Your own key:** run `age-keygen -o runlime-backup-owner.key`. Keep that file in your password manager plus one offline copy, never in GitHub or chat. The command prints a public key (`age1…`).
+  - **B. Restore-test key:** run `age-keygen -o restore-test.key`. Put the whole file content into the repository secret `BACKUP_RESTORE_KEY`, then delete the file.
+  - **C.** Create the repository variable `BACKUP_AGE_RECIPIENTS` = the two public keys separated by a space (your `age1…` from A, then the one `age-keygen -y restore-test.key` prints, run before deleting the file). Public keys are not secret.
+  - **To restore a backup yourself:** download the artifact, run `age -d -i runlime-backup-owner.key -o backup.tar.gz <file>.age`, then follow Supabase's restore guide (roles.sql, schema.sql, then data.sql).
+- **At public launch: Supabase Pro (cost, about US$25/month):** 7 days of daily backups with dashboard restore, and no inactivity pausing (R6). Keep this export too.
 
-### 7.2 Repo going private (before pilot) — do these in order
-On GitHub Free, **environments and environment secrets are ignored in private repos** (they come back if the repo is made public again). Repository-level secrets keep working.
-1. While still public: add **repository** secrets with the same values as the staging environment's secrets and variables:
-   - Secrets: `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `CLOUDFLARE_API_TOKEN`.
-   - Variables: `SUPABASE_PROJECT_REF`, `SUPABASE_ANON_KEY`, `CLOUDFLARE_ACCOUNT_ID`, `STAGING_WEB_URL`, `GOOGLE_WEB_CLIENT_ID`.
+### 7.2 Repo going private (owner decision 2, 31 Oct 2026): do these in order
+On GitHub Free, **environments and environment secrets don't work in private repos**. Repository-level secrets and variables do. So the values move from the "staging" environment to the repository first, while the repo is still public and everything can be checked.
 
-   GitHub never shows secret values, so Nicholas re-copies each value from its source (Supabase dashboard, Cloudflare, Expo). No values in chat.
-2. Claude removes `environment: staging` from the workflows and adds a guard step: "this must be the staging project ref". The secrets then resolve from the repository level. Verify a CI run, a web deploy, a DB deploy and an APK build all go green.
-3. Delete the environment secrets (so there's one source of truth).
-4. Flip the repo to private. Expect:
-   - 2,000 free Actions minutes/month. Usage is about 1,000/month, so watch it.
-   - No GitHub secret scanning or push protection; gitleaks remains the guard.
-   - No environment protection rules; production protection moves to workflow guards (§7.4).
-5. Production secrets later get a `PROD_` prefix and are read only by the production deploy workflows (§7.4).
+**Step 1 (owner, ~15 min), now.** GitHub → RunLime → Settings → Secrets and variables → Actions.
+- On the **Secrets** tab, choose **New repository secret** for each name below. Copy each value from its source (GitHub never shows saved values). No values in chat.
+
+  | Repository secret | Where the value comes from |
+  |---|---|
+  | `SUPABASE_ACCESS_TOKEN` | Supabase → Account → Access tokens (the staging-only token, or a new one) |
+  | `SUPABASE_DB_PASSWORD` | Supabase → staging project → Settings → Database (reset it if unknown, then update both places) |
+  | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → staging project → Settings → API keys (service_role / secret key) |
+  | `CLOUDFLARE_API_TOKEN` | Cloudflare → My Profile → API Tokens (the Workers deploy token, or roll a new one) |
+  | `EXPO_TOKEN` | expo.dev → Account settings → Access tokens (skip if it's already a repository secret) |
+  | `SMTP_PASSWORD` | The Gmail app password used for admin alert emails (skip if you never set it) |
+  | `BACKUP_RESTORE_KEY` | New: the restore-test private key from §7.1 step B (straight to repository level) |
+
+- On the **Variables** tab, choose **New repository variable** for each name below. Copy the values from Settings → Environments → staging; these values are not secret.
+
+  | Repository variable |
+  |---|
+  | `SUPABASE_PROJECT_REF` |
+  | `SUPABASE_ANON_KEY` |
+  | `CLOUDFLARE_ACCOUNT_ID` |
+  | `STAGING_WEB_URL` |
+  | `GOOGLE_WEB_CLIENT_ID` |
+  | `BACKUP_AGE_RECIPIENTS` (new, from §7.1) |
+
+- Then tell Claude "step 1 done". Not needed: `FCM_SERVICE_ACCOUNT_JSON` (it was deleted after the one-time upload).
+
+**Step 2 (Claude, same day).**
+- Remove `environment:` from the 16 workflows.
+- Add a guard step to each: it refuses to run unless `SUPABASE_PROJECT_REF` is the staging project, and refuses `target: production` until production exists (§7.4).
+- Then verify, while the repo is still public: CI, Deploy database, Deploy web, an APK build plus Mobile build logs, Backup database (self-test or real), Android UI check, and Staging diagnostics. All must be green.
+
+**Step 3 (owner, 5 min), after Claude reports step 2 green.** Settings → Environments → staging → delete each secret and variable listed above, so the values exist in one place only.
+
+**Step 4 (owner), straight after step 3.** Settings → General → Danger Zone → **Change repository visibility** → Private. Then Claude re-runs CI and one deploy to confirm. What changes:
+- 2,000 free Actions minutes a month (current use is about 1,000; the nightly backup adds about 60, and the emulator check about 15 per run).
+- No GitHub secret scanning or push protection; gitleaks in CI stays the guard.
+- No environment protection rules; production protection moves to workflow guards (§7.4).
+
+**Step 5 (later, Phase 8).** Production secrets get a `PROD_` prefix and are read only by the production deploy workflows (§7.4).
 
 ### 7.3 Before public launch: abuse and browser hardening (free)
 - **Cloudflare Turnstile** on sign-in/sign-up (web and app via Supabase Auth's built-in CAPTCHA support): free.

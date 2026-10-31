@@ -1,110 +1,103 @@
-# Report: Phase 3 retest round 3 fixes (30 Oct 2026)
+# Report: Retest round 3 follow-up (R2, R9, private photos, backups, private repo, C4) and a security incident (30 Oct 2026, 22:30 Port of Spain)
 
-Phase 3 is **not approved**. Only the owner approves it, after testing.
+Phase 3 is **not approved**. Only the owner approves it.
 
 ## 1. Summary
-- **B1 (privacy, top priority), cause found and fixed.** A phone's notification token outlived a sign-out: the app's "remove my phone" call could fail silently (offline or slow), and nothing on the server tied a token to a sign-in. Staging data showed account A's token row unchanged since 24 Oct, through sign-outs. Now every token is tied to its sign-in session, and the server sends **only** to tokens whose sign-in is still alive. Ending a sign-in therefore stops notifications even if the phone was offline. Sign-out and account deletion delete the token on the server, retried at the next app start if they fail. Signing in moves the token to the new account only.
-- **F1.4** (no notification after switching accounts and back): the staging logs show the 11:46 message *was* delivered to account A's phone. The most likely cause was the silent notification channel (B8), so it arrived without sound or banner. This is not certain; retest R1.5 checks it.
-- **Fixed:** B2–B6 and B8. **Done:** B7 (RETEST updated) and B9 (runners pinned). **Built:** C1 (message limits) and C2 (private photos).
-- **Live on staging:** database deploy #65, web deploy #39, staging security check 12/12, hosted Security Advisor with 0 errors.
-- **New APK:** https://expo.dev/artifacts/eas/riM5Nd_cBRJI0XDt5urUP9UAP7ylqfmvHrdKwjoFShA.apk (EAS build `c14d742a`, secret scan: none found, Firebase config: yes).
+- **Security incident (S1, staging), action needed from you now.**
+  - The GitHub variable `SUPABASE_ANON_KEY` now holds a Supabase **secret** key (`sb_secret_…`), not the public anon key. It changed after yesterday's clean build; I didn't change it, and no session tool can.
+  - A test build I made for the emulator check copied it into the app. The APK secret scan caught it.
+  - The key was visible in one public Actions log for about 35 minutes. I deleted that log and the log with the APK link.
+  - **Please rotate the key (Owner actions 1–3).** Record: `docs/operations/incidents/2026-10-31-secret-key-in-test-apk.md`.
+  - Guards now stop any app build or website deploy that uses a secret key in place of the public key.
+- **R2 keyboard: cause found and fixed, verified on an Android emulator.**
+  - **Cause:** React Native's KeyboardAvoidingView compares the keyboard's top edge (measured from the top of the screen) with its own position measured from the top of its container, which begins below the navigation header. So on Android (edge-to-edge, where the window no longer resizes for the keyboard) it reserved too little space, short by the height of the header. The bottom of the box and "Send report" stayed under the keyboard and couldn't be scrolled to.
+  - **Evidence:**
+    - The old APK on an Android 14 emulator: "Send report" was **233 px under the keyboard** and scrolling to it failed with the keyboard open.
+    - The fixed build: box and button fully above the keyboard (screenshot: `docs/reports/assets/2026-10-31-r2-keyboard-fixed-emulator.png`).
+  - **Fix:** the shared Screen component now measures its own position on the screen and reserves exactly the part the keyboard covers. This applies to every screen with text boxes.
+- **R9 Public photo: server proven correct; the cause on your phone is not proven; three fixes.**
+  - Staging diagnostics: every current viewer/account pair is served correctly. A local test switches Private → Public → Private and the other account gets the photo at once.
+  - Most likely cause (0.5): **the switch wasn't saved.** Privacy was only saved by "Save" at the bottom of Edit profile, and privacy changes aren't recorded, so I can't confirm it.
+  - Fixes:
+    - privacy now saves the moment you tap it, with a clear confirmation;
+    - other people's profiles re-check every time you return to them;
+    - photos load through fresh signed links.
+- **Private photo storage (decision 4): built and tested, not on staging yet.**
+  - The photos bucket is private. Photos are served only through 10-minute signed links that storage signs only for people allowed to see them (the person, approved followers, everyone for a Public account, MFA admins; never a blocked account).
+  - **Held back from staging** until the key is fixed: your current app would show initials instead of photos until the new APK is installed, and the new APK can't be built safely until the variable is corrected.
+- **Backups (decision 1): built.**
+  - The nightly encrypted export and the monthly restore test with row-count checks are in place.
+  - The restore path is proven locally (72 tables, 241 rows, all counts matched).
+  - Real backups start once you add the two keys (Owner action 5).
+- **Private repo (decision 2):** exact steps in `SECURITY-PLAN.md` §7.2; step 1 is yours (Owner action 6).
+- **C4 race photos: planned only, nothing built.** I recommend building it right after the pilot (Phase 6b). Plan: `docs/plans/C4-RACE-PHOTOS.md`.
+- **New APK: not yet.** It's blocked by the incident; I'll build, scan and emulator-check it as soon as the variable holds the public key again.
 
 ## 2. What changed
 Commits on `phase-3`:
-- `c9d46e8` fix: owner retest round 3 (all code changes below). CI #138 passed; `main` was fast-forwarded to it.
-- `51d0154` docs(security): token renewed; Firebase key restriction steps.
-- `029ae86` ci(diagnostics): staging checks for round 3. Its push CI run was cancelled on purpose, to protect the Ubuntu 26.04 test. CI #142 then passed on this commit (on Ubuntu 26.04), and `main` was fast-forwarded to it.
 
-Deploys and runs:
-- Deploy database #65 and Deploy web #39: success.
-- Staging diagnostics #16 (security-baseline): 12/12 PASS.
-- Mobile build: EAS build `c14d742a` (from `51d0154`, same app code as `c9d46e8`). Mobile build logs #16: finished, signing SHA-1 unchanged, Firebase config in the APK, **no secrets found**.
-- CI #142 on **Ubuntu 26.04**: both jobs passed (lint, typecheck, unit tests, secret scan, dependency audit, database tests, Security Advisor, website build and end-to-end tests).
+| Commit | Change | CI |
+|---|---|---|
+| `0f1da7f` | R2 keyboard fix + Android emulator UI check (Maestro; signs in with a throwaway staging account, deleted afterwards) | Passed; `main` fast-forwarded (app-only change, no deploy) |
+| `e8e93e8` | Read-only photo visibility diagnostic | Failed: new `node-forge` advisories (fixed in `e67662f`) |
+| `e67662f` | Private photo storage + signed links, privacy saves at once, profile re-checks; `node-forge` → 1.4.2 (5 new high advisories, Expo CLI only) | Passed |
+| `2da9fc2` | Nightly encrypted backup + restore test | Passed |
+| `369ec28` | Emulator check diagnostics; docs (C4 plan, backup and private-repo steps, retest round 4) | Superseded |
+| `e741f58` | Guard against secret keys in builds; incident record | Running at the time of writing |
 
-Detail:
-- **B1:**
-  - New database migration `20261030000100`: tokens carry the sign-in session id; `push_targets` (server only) returns live-session tokens; hourly clean-up of orphan tokens; the phone can remove its own token while signed out.
-  - App: stores its token, deletes it on sign-out, keeps a "pending removal" if offline and retries at start.
-  - Tests: database file 025 (14 checks: sign-out, switching, deletion, purge); app tests Push (7) and SignOut (3).
-- **B2:** the focused text box scrolls fully into view when it gets focus, when the keyboard opens and while it grows. Multi-line boxes stop at about a third of the screen and scroll inside. App test KeyboardReveal (6). Applies to every screen built with the shared text field.
-- **B3:** the server now rejects a nickname already in use (any case) with "That nickname is already taken. Choose another, or leave it empty." Other errors are specific too: still loading terms, expired sign-in, no permission, or a code number instead of only "Something went wrong". App test Errors (7); database test 026.
-- **B4:** the Team section (Organiser → Settings → organisation) already had the fields, but showed them only to organisation **owners**; managers saw an empty section. Managers now see who the owners are and that only owners add people. Website end-to-end test: the owner sees the fields.
-- **B5:** the Home list now pads for the measured height of the Start run bar. App test HomeScreen.
-- **B6:** the app forgets the Google account on sign-out (with a 3-second limit, never blocking) and before every Google sign-in, so Android's chooser always shows. This also covers account deletion, which signs out. App test SignOut.
-- **B7:** `docs/phase-3/RETEST.md` has a new "Retest round 3" section. Every step is marked [App] or [Website], the message-limit note comes first, and steps R1–R9 cover each fix.
-- **B8:** a new Android channel `race-alerts`: maximum importance (sound, vibration, pop-up banner, lock screen). The old channels are removed.
-- **B9:** all 15 workflows are pinned to `ubuntu-24.04`, so they don't move to Ubuntu 26 automatically. CI can be run on `ubuntu-26.04` from "Run workflow" to test it first.
-- **C1:**
-  - Organisers get 3 updates per race in any 7 days (`messages.per_race_per_week` = 3) and 10 in the 7 days before the race (new `messages.race_week_limit` = 10). The race date used is the postponed date when postponed.
-  - Admins are exempt. Their messages are marked as admin messages, audit-logged, and don't use the organiser's allowance. Automatic postponed/cancelled/back-on notices are never counted.
-  - The website form shows "N of M left" and the race-week explanation.
-  - Both settings were set to the new defaults by the deploy (verified on staging).
-  - Tests: database test 026; website end-to-end test.
-- **C2:**
-  - Photos on Private accounts are shown only to the person, approved followers and admins. Everyone else sees initials: search, profiles, follow requests, who's going, club lists. Public accounts show the photo to everyone signed in. Admins see photos in Reports.
-  - Privacy Policy is now draft 5 and attorney note (1) is marked resolved. Moderation Policy is draft 3 (message limits).
-  - Tests: database test 026; app test AvatarPrivacy.
-- **0a:** the new token works: Deploy database #64 and #65 succeeded, hardening migration `20261024000100` is live, and the hosted advisor ran.
-- **Other changes:**
-  - New audit exception for a high-severity issue in an Expo command-line dependency (`decode-uri-component`, used only by the build tools, not shipped in the app). Forcing a newer version broke the app, so the fix is the Expo SDK 58 upgrade (in the backlog; review by 29 Nov).
-  - Risk register: new risk R19 (B1).
-  - PROGRESS: token renewal reminder.
+Runs:
+- Android UI check:
+  - old APK `c14d742a`: failed as expected (reproduces R2);
+  - fixed build `dc8e29ea`: **passed**. This build contains the leaked key; it was never shared and was installed only on throwaway CI emulators.
+- Staging diagnostics (photos): all pairs OK.
+- Deleted logs: Mobile build run 41156724494 and Mobile build logs run 41159202485 (incident).
 
-## 3. Owner actions
-1. **Install the new APK and run RETEST.md "Retest round 3"** (R1 first: the privacy fix).
-2. **Dependabot (S1):** GitHub → RunLime → Settings → **Advanced Security**. Make sure **Dependency graph**, **Dependabot alerts** and **Dependabot security updates** are all on. Version updates are confirmed on (PR #1 and today's Dependabot run). The other three toggles couldn't be checked from here: GitHub refused those API calls (403), so their state is **unknown**, not "off".
-3. **Firebase key (S2):** follow `docs/operations/SECURITY-PLAN.md` §9 item 3 (Google Cloud → project runlime-a3849 → APIs & Services → Credentials → the Firebase Android key → restrict to package `tt.runlime.app.dev` + the signing SHA-1 → allow only Firebase Installations and FCM Registration APIs). Then send yourself a race update to confirm it still arrives.
-4. **Renew `SUPABASE_ACCESS_TOKEN` by 21 Jan 2027.** It expires about 28 Jan 2027 (assumes it was created on 30 Oct; check the exact date in Supabase → Access tokens).
-5. **Decide backups (S3).** Options:
-   - **Free:** a nightly encrypted export, kept 30 days, with a monthly tested restore. Claude builds it; the private key stays only with you.
-   - **Supabase Pro (cost, about US$25/month):** 7 days of daily backups with one-click restore, and the project never pauses.
-   - Recommended: Free for the pilot, Pro at public launch.
-6. **Decide the private-repo move (S4):** a 5-step order that keeps every workflow working (`SECURITY-PLAN.md` §7.2). Copy the environment secrets to repository secrets while public; Claude switches the workflows and verifies CI, deploys and APK; then the old secrets are deleted and the repo made private. Cost to watch: 2,000 free Actions minutes/month (use is about 1,000).
+## 3. Owner actions (most urgent first)
+1. **Rotate the leaked key:** Supabase → staging project → Project settings → API keys → Secret keys → delete the exposed `sb_secret_…` key. If you need a secret key, make a new one and keep it only in a GitHub **secret**.
+2. **Fix the variable:** GitHub → Settings → Environments → staging → Variables → `SUPABASE_ANON_KEY` = the **anon** key (legacy anon JWT) or the **publishable** key (`sb_publishable_…`). Also add the same value as a repository **secret** named `SUPABASE_ANON_KEY`: workflows prefer it, and GitHub masks secrets in logs.
+3. expo.dev → runlime → Builds → `dc8e29ea` → delete the build if the page allows it. Then tell me "key fixed": I'll deploy the private-photo update, build the APK, scan it and run the emulator check.
+4. Tell me whether you changed `SUPABASE_ANON_KEY` (e.g. while moving to Supabase's new keys). It helps confirm the cause; no values please.
+5. **Backup keys (10 min):** `SECURITY-PLAN.md` §7.1 steps A–C.
+   - Make your own age key and keep it offline.
+   - Make a restore-test key and save it as secret `BACKUP_RESTORE_KEY`.
+   - Save both public keys as variable `BACKUP_AGE_RECIPIENTS`.
+6. **Private repo, step 1:** `SECURITY-PLAN.md` §7.2. Copy the listed secrets and variables to repository level, then say "step 1 done".
+7. C4: answer the 4 decisions in `docs/plans/C4-RACE-PHOTOS.md` §9 when convenient (no rush; nothing is built).
 
 ## 4. What to test
-APK: https://expo.dev/artifacts/eas/riM5Nd_cBRJI0XDt5urUP9UAP7ylqfmvHrdKwjoFShA.apk (EAS build `c14d742a`). It installs over the old app (same signing key). Open it once while signed in.
-1. [App] R1: sign out, then send a message from the website: **no** notification. Switching accounts, an offline sign-out and account deletion are steps R1.4–R1.7.
-2. [App] R2: the report box and every text box stay fully visible as they grow.
-3. [App] R3: a taken nickname on Finish setting up shows the clear message.
-4. [Website] R4: owner sees the Team fields; manager sees who to ask.
-5. [App] R5: the last race card scrolls clear of Start run.
-6. [App] R6: the Google chooser shows every time.
-7. [App] R7: notifications make a sound and show a banner.
-8. [Website] R8: message limits (admin not limited; organiser 3, race week 10).
-9. [App + Website] R9: Private-account photos show initials to non-followers.
-
-Note: the message limit can block notification tests. Send from an admin account (not limited), or use postpone → back on.
+On the **new APK**, once it's built (link will be added here and in `docs/phase-3/RETEST.md`). Only the changed items: `RETEST.md` → "Retest round 4".
+1. [App] R2.1: report box: type 6+ lines; the whole box stays visible and you can scroll to **Send report** with the keyboard open.
+2. [App] R2.2: same on Edit profile, Suggest a race, Ask for a new club, Delete account, Sign in.
+3. [App] R9.1–R9.4: Private → initials for a non-follower; tap **Public** (saves at once, green message); the other account sees the photo on returning to the profile; back to Private → initials.
+4. [App] R9.5: an approved follower sees a Private account's photo.
+5. [App + Website] R9.6: your own photo shows; Admin → Reports shows a reported photo.
+6. [Website] R9.7 (optional): an old photo link no longer opens.
 
 ## 5. Not tested / known issues
-- **Nothing tested on a real phone yet.** Notifications, keyboard behaviour, the Google chooser and sound/banner are covered only by automated tests and code review.
-- **Photo links:** the photos bucket is publicly readable. Paths include a random part, so they can't be guessed, but someone who already saw a photo link can keep opening it until that photo is changed.
-- **B4:** the manager view has no automated test (it needs a second email sign-in in the test). I'm not sure "Add a team" meant this screen; R4.2 asks.
-- **C1:** the organiser's own view of the limit is tested in the database (3, blocked 4th, race week 10), not by a website test signed in as an organiser.
-- **F1.4:** cause not proven (see the summary).
-- **B9:** CI passes on Ubuntu 26.04 (CI #142). Deploy and build workflows were not run on 26.04; they stay pinned to 24.04 until switched on purpose (a one-line change per workflow, later).
-- **Supabase logs:** the auth-log endpoint can't be queried from here, so B1 diagnosis used database rows (sessions, tokens, notifications), not auth logs.
-- **Local end-to-end run:** 4 website tests first failed locally because of leftover test data and stopped local server functions. After fixing that, all passed. CI is the reference.
+- **Nothing tested on your phone yet.**
+  - R2 is verified on an Android 14 emulator (Pixel 6 profile, Gboard), not on your phone's keyboard or Android version.
+  - Only the report screen was checked on the emulator. The other screens use the same component and are covered by unit tests only.
+- **R9 cause not proven** (see the summary). Privacy changes still aren't written to the audit log (profiles aren't audited; adding that would store personal data, so it's not done).
+- **Private photo storage is not deployed to staging** (held for the incident); it passed CI (database tests, website end-to-end tests).
+- **Backups:** the workflow hasn't run against staging yet. It must be on `main` to be started, and `main` will move with this report; I'll run the self-test next. Restore uses the local superuser (a real restore follows Supabase's guide). Storage files are not included.
+- **Emulator check:** two runs failed at app start (date-of-birth screen not shown within 60 s) and a third identical run passed. I can't tell whether the cause was slow emulator start-up or the leaked-key build. Treat the check as useful but occasionally flaky.
+- **Google Play's policy pages are blocked in this cloud session**, so the C4 recheck used the Phase 3 sources plus secondary summaries. Apple 1.2 was read in full today.
+- Photo signed links last 10 minutes and are reused for up to 8 minutes. A photo whose access is removed can stay visible on a phone for up to that long.
 
 ## 6. Confidence per item
 | Item | Confidence | Evidence |
 |---|---|---|
-| B1 server side (no pushes after a sign-in ends) | 0.9 | database test 025; staging check |
-| B1 end to end on a phone | 0.75 | not phone-tested |
-| F1.4 cause (silent channel) | 0.6 | delivery receipt OK on staging |
-| B2 keyboard | 0.7 | unit tests only; phone layout varies |
-| B3 nickname message | 0.85 | database test 026, app test Errors |
-| B4 Team section | 0.7 | owner end-to-end test; unsure it's the right screen |
-| B5 padding | 0.85 | app test |
-| B6 Google chooser | 0.75 | app test; not phone-tested |
-| B7 RETEST | 0.95 | document |
-| B8 sound/banner | 0.8 | channel settings; Android can keep old user choices per channel, hence the new channel id |
-| B9 runners | 0.9 | all workflows pinned to 24.04; CI #142 green on 26.04 |
-| C1 limits | 0.9 | database test 026, website end-to-end test, staging setting check |
-| C2 private photos | 0.85 | database test 026, app test, staging check |
-| 0a token / migration live | 0.95 | deploys #64/#65, staging check 12/12 |
-| Security Advisor | 0.95 | hosted: 80 findings, 0 ERROR |
+| R2 cause | 0.9 | React Native source + emulator: old build 233 px under the keyboard, fixed build clear |
+| R2 fixed on your phone | 0.8 | Emulator + unit tests; phone keyboards differ |
+| R9 fixed (photo shows after switching to Public) | 0.85 | Database test 027 (Private → Public → Private), app tests (instant save, signed links), live staging pairs |
+| R9 root cause | 0.5 | Not provable from staging data |
+| Private photo storage | 0.9 | Database test 027 (23 checks), website end-to-end test (signed link loads; stranger refused; old public link fails) |
+| Backup + restore | 0.8 | Local end-to-end restore passed; first staging run pending |
+| Incident contained | 0.7 | Logs deleted; guards added; **key not rotated yet** |
+| Private-repo steps | 0.85 | Secrets/variables inventoried from all 16 workflows |
+| C4 plan | 0.75 | See the plan's caveats |
 
 ## 7. Decisions needed
-1. Backups: Free nightly export now, Pro (cost) at launch? (S3)
-2. When to make the repo private (S4)?
-3. Was "Add a team" the organisation Team section (B4)?
+1. Rotate the key now (yes, please; see actions 1–3).
+2. C4: when to build (after the pilot, recommended), plus the 4 decisions in the plan's §9.
+3. After the incident: do you want testers told? I recommend a short note once the key is rotated.

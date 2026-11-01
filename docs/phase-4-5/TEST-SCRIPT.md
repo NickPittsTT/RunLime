@@ -1,7 +1,7 @@
 # Phase 4 + 5 phone test script
 
-**Status: draft. The APK is not built yet.** One combined APK covers Phase 4 (GPS check-in) and Phase 5 (run tracker). The link is added here when it is built.
-Phase 4/5 also needs the database and website on staging. **They are not deployed yet.** The owner decides when (see docs/reports/LATEST.md).
+**APK:** _added here once the secret scan and the Android UI check pass (EAS build ee523162, commit `1ff968f`)._ One combined APK covers Phase 4 (GPS check-in) and Phase 5 (run tracker). Install it over the round-4 app.
+Phase 4/5 is **live on staging** (database + website, deployed 1 Nov 2026 after your R2 pass). The emulator already passed check-in near/far and a 1 km route (1000 m saved); this outing tests what an emulator can't: real GPS, the locked screen, the notification, steps, battery and swipe-away.
 
 Report pass or fail for each step. Add a screenshot for any failure.
 - **[App]** = phone app.
@@ -40,7 +40,7 @@ A5.1 [App] Tap **Start run** (home screen). The pre-run screen shows:
 - **Body weight in kg (optional)**, which says it stays on the phone.
 
 Leave the weight empty. Tap **Start**. The app asks for **physical activity** (steps) once. Allow it the first time. (B5.2 checks refusing it.)
-A5.2 [App] A notification "**RunLime is recording your run**" appears and stays while recording. Time, distance and pace update; the map draws your route.
+A5.2 [App] A notification "**RunLime is recording your run**" appears and stays while recording. Time, distance and pace update; the map draws your route. The live distance can trail a few seconds behind you: Android hands GPS points to the app in batches (seen on the emulator). It catches up; the saved total is unaffected.
 A5.3 [App] **Lock the phone** and run/walk for at least 3 minutes, then unlock. The distance and route include the locked part (no straight-line jump across it).
 A5.4 [App] Stand still for 15 seconds → **Auto-paused while you're stopped.** Move on → it resumes by itself. Tap **Pause** → "Paused. Time and distance aren't counting." Walk 50 m, tap **Resume**: those 50 m are not counted.
 A5.5 [App] Turn on **airplane mode** for the last few minutes (the GPS still works). Tap **Stop**. The summary shows:

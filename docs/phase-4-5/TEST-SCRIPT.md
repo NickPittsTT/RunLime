@@ -1,6 +1,6 @@
 # Phase 4 + 5 phone test script
 
-**APK:** _added here once the secret scan and the Android UI check pass (EAS build ee523162, commit `1ff968f`)._ One combined APK covers Phase 4 (GPS check-in) and Phase 5 (run tracker). Install it over the round-4 app.
+**APK: https://expo.dev/artifacts/eas/o2feN0_gAu7V7TR0Ra7UC-aXbPkHKnfH_EJecTYYmMI.apk** (EAS build 4e591520, commit `2cc5590`; no secrets found; emulator checks passed on this exact APK: check-in near/far, 1 km route, save + upload, keyboard). One combined APK covers Phase 4 (GPS check-in) and Phase 5 (run tracker). Install it over the round-4 app.
 Phase 4/5 is **live on staging** (database + website, deployed 1 Nov 2026 after your R2 pass). The emulator already passed check-in near/far and a 1 km route (1000 m saved); this outing tests what an emulator can't: real GPS, the locked screen, the notification, steps, battery and swipe-away.
 
 Report pass or fail for each step. Add a screenshot for any failure.
@@ -49,7 +49,7 @@ A5.5 [App] Turn on **airplane mode** for the last few minutes (the GPS still wor
 - calories labelled as a **general estimate** (because no weight was given).
 
 Tap **Save run**. The notification goes away.
-A5.6 [App] Menu → **Run history**: the run is listed with **Saved on this phone. It uploads when you're online.** Turn airplane mode off and reopen Run history. The run shows **Saved.** (uploaded). The **Races** totals list the test race (the run started during its check-in window, after you checked in).
+A5.6 [App] Menu → **Run history**: the run is listed with **Saved on this phone. It uploads when you're online.** Turn airplane mode off and reopen Run history. The run shows **Saved.** (uploaded). The **Races** totals list the test race (the run started during its check-in window, after you checked in). After **Save run** the app opens the run straight away. It may say "Saved on this phone. It uploads when you're online." for a little while even with signal (on the emulator the upload took 10-40 s on this build); it then says **Saved.** when you reopen the run or Run history. Note how long it took.
 A5.7 Compare the distance with a known route or another app. Within about 5% is a pass; note the numbers either way.
 
 ## Part B: indoor checks (any day)

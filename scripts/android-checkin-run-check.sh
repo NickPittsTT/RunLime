@@ -31,17 +31,22 @@ if [ $status -eq 0 ]; then
   sampler=$!
   if maestro test "$GITHUB_WORKSPACE/.maestro/checkin-run-2.yaml"; then
     run_ok=1
-    # 1 km due north from the start in 250 steps of 4 m, through Maestro's own location provider (adb emu geo fix
-    # did not move the CI emulator, runs 7-8). Each step takes about 0.7-1 s, i.e. 4-6 m/s: runner speed, well under
-    # the app's 12 m/s bad-point limit. (Maestro "travel" moved in 22 m jumps, runs 4-5.)
+    # 1 km due north from the start: 250 fixes, 4 m apart, one per second (4 m/s, a 4:10 /km runner), through
+    # Android's own test location provider. Earlier attempts: Maestro "travel" (22 m jumps, runs 4-5), adb emu geo fix
+    # (did not move the CI emulator, runs 7-8), Maestro setLocation steps (0.18 s apart = 22 m/s, run 9).
+    adb shell appops set com.android.shell android:mock_location allow
+    for p in gps fused; do
+      adb shell cmd location providers add-test-provider "$p" >/dev/null 2>&1 || true
+      adb shell cmd location providers set-test-provider-enabled "$p" true >/dev/null 2>&1 || true
+    done
+    echo "INFO  test provider reply to the first fix: $(adb shell cmd location providers set-test-provider-location gps --location 10.650500,-61.500000 --accuracy 5 2>&1 | tr '\n' ' ')" | tee -a result.txt
     t0=$(date +%s)
-    { echo "appId: tt.runlime.app.dev"; echo "---"
-      for i in $(seq 1 250); do
-        awk -v i="$i" 'BEGIN { printf "- setLocation:\n    latitude: %.6f\n    longitude: -61.5000\n", 10.6505 + i * 4 / 111195 }'
-      done
-    } > /tmp/ui/replay.yaml
-    maestro test /tmp/ui/replay.yaml > /tmp/ui/replay.log 2>&1 || { echo "FAIL  route replay flow stopped"; tail -5 /tmp/ui/replay.log; } | tee -a result.txt
-    echo "INFO  route replay took $(( $(date +%s) - t0 )) s (250 steps of 4 m)" | tee -a result.txt
+    for i in $(seq 1 250); do
+      lat=$(awk -v i="$i" 'BEGIN { printf "%.6f", 10.6505 + i * 4 / 111195 }')
+      for p in gps fused; do adb shell cmd location providers set-test-provider-location "$p" --location "$lat,-61.500000" --accuracy 5 >/dev/null 2>&1 || true; done
+      sleep 0.8
+    done
+    echo "INFO  route replay took $(( $(date +%s) - t0 )) s (250 fixes, 4 m apart, about one per second)" | tee -a result.txt
     shot 21-after-1km
     node "$GITHUB_WORKSPACE/scripts/android-run-distance.mjs" 1.0 0.1 40 | tee -a result.txt || status=1
     shot 24-live-distance

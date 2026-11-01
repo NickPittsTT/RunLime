@@ -25,10 +25,17 @@ if [ $status -eq 0 ]; then
   # problem from an app problem.
   ( while true; do echo "$(date +%s) $(adb shell dumpsys location 2>/dev/null | grep -m1 -oE 'Location\[gps [-0-9.]+,[-0-9.]+' | sed 's/Location\[gps //')"; sleep 1; done ) > /tmp/ui/fixes.txt &
   sampler=$!
-  t0=$(date +%s)
   if maestro test "$GITHUB_WORKSPACE/.maestro/checkin-run-2.yaml"; then
     run_ok=1
-    echo "INFO  route replay took $(( $(date +%s) - t0 )) s (a 1 km route at 4 m/s should take about 250 s)" | tee -a result.txt
+    # 1 km due north from the start at 4 m/s: 250 fixes, one per second (geo fix takes longitude first).
+    t0=$(date +%s)
+    for i in $(seq 1 250); do
+      lat=$(awk -v i="$i" 'BEGIN { printf "%.6f", 10.6505 + i * 4 / 111195 }')
+      adb emu geo fix -61.5000 "$lat" >/dev/null
+      sleep 1
+    done
+    echo "INFO  route replay took $(( $(date +%s) - t0 )) s (250 fixes, 4 m apart, one per second)" | tee -a result.txt
+    shot 21-after-1km
     node "$GITHUB_WORKSPACE/scripts/android-run-distance.mjs" 1.0 0.1 40 | tee -a result.txt || status=1
     shot 24-live-distance
   else

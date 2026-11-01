@@ -100,6 +100,8 @@ Living record of conventions and decisions. Update at the end of every phase.
 | 2026-10-18 | Postponing to a new date keeps the original (`events.original_starts_at`, shown struck through); `starts_at` is the new date; "Back on" restores the original date; a date is accepted only when postponing (owner's final Phase 2 re-test) | Owner |
 | 2026-10-31 | Credentials rule: Claude asks before creating/changing/deleting any credential, key or environment variable (except the documented public build sync); verify before declaring a leak (false-alarm incident 2026-10-31) | Owner |
 | 2026-10-31 | C4 race photos planned for Phase 6b (after the pilot): admin approval before photos appear; "photo of me" hides at once until reviewed; deleted after 12 months (setting); Supabase Pro storage at launch | Owner |
+| 2026-10-31 | **Phase 3 approved** (R2 + R9 passed on round-4 APK 95784967). Phase 4/5 to staging; emulator mock-location check on a GitHub-built APK before any Expo build; iPhone pilot targeted December (plan only; Apple Developer Program needs owner approval); Phase 6 plan with a late-November pilot target | Owner |
+| 2026-10-31 | Satellite layer: none for the pilot; keyless "Open in Google Maps (satellite)" link instead; revisit Esri/Mapbox before launch | Owner |
 | 2026-10-11 | Seed prices: Premium US$2.99/mo, US$19.99/yr; Basic TT$100; Featured TT$400; charity free Basic via setting | Owner |
 
 ## Conventions

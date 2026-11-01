@@ -1,6 +1,6 @@
 # RunLime — Progress
 
-**Last updated:** 2026-10-18 (Phase 2 approved by the owner; Phase 3 built, waiting for the owner's phone test)
+**Last updated:** 2026-10-31 (**Phase 3 approved by owner, 31 Oct 2026**; Phase 4 + 5 built, deploying to staging for the phone test)
 
 ## Phases
 
@@ -118,7 +118,13 @@ Owner decisions: push = Expo Push + Firebase Cloud Messaging (inbox first, then 
 - [x] R9 passed on the current staging APK (owner, 31 Oct)
 - [x] Incident 31 Oct closed: scanner false positive, no key exposed (owner verified); guards + credentials rule added
 - [ ] Round 4 APK (from `phase-3` only, after the Expo build allowance resets on 1 Nov): R2 full retest + quick R9 recheck (photo storage ships with it)
-- [ ] **Phase 3 approval** (only the owner approves)
+- [x] **Phase 3 approved by owner, 31 Oct 2026** (21:35 Port of Spain): R2 passed and R9 passed on the owner's phone with round-4 APK (EAS build 95784967, commit `27e2a0c`).
+- **Owner tasks still open (not blocking the approval):**
+  - [ ] Switch on Dependabot alerts + security updates (Settings → Advanced Security)
+  - [ ] Restrict the Firebase Android API key (Google Cloud console; Android app + SHA-1 restriction)
+  - [ ] Backup keys (SECURITY-PLAN §7.1)
+  - [ ] Make the repo private in the documented order (SECURITY-PLAN §7.2)
+  - [ ] Renew `SUPABASE_ACCESS_TOKEN` by 21 Jan 2027 (see item 8 below)
 - [x] Owner decision (2026-10-30): profile photos on Private accounts are **not** visible to non-followers (initials instead); admins see them in Reports
 - Repo stays **public** until the build is done (owner, intentional)
 - Audit entries can now carry a reason (`audit.log.reason`, set by functions through `runlime.audit_reason`). First user: `ops_correct_event_start` (service role only, "Correct event date" workflow), used once for the PSCU date with the owner's permission

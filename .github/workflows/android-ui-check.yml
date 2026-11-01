@@ -111,7 +111,9 @@ jobs:
           { echo '```'; cat /tmp/ui/result.txt 2>/dev/null || echo "no result (the flow stopped earlier; see the log)"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
       - name: Saved run on staging (numbers only)
         if: always() && inputs.flow == 'checkin-run'
-        run: node scripts/ui-check-account.mjs report | tee -a "$GITHUB_STEP_SUMMARY"
+        run: |
+          set -o pipefail
+          node scripts/ui-check-account.mjs report --expect-m 1000 | tee -a "$GITHUB_STEP_SUMMARY"
         env:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       - uses: actions/upload-artifact@v6

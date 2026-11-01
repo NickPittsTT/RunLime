@@ -29,8 +29,7 @@ if [ $status -eq 0 ]; then
   if maestro test "$GITHUB_WORKSPACE/.maestro/checkin-run-2.yaml"; then
     run_ok=1
     echo "INFO  route replay took $(( $(date +%s) - t0 )) s (a 1 km route at 4 m/s should take about 250 s)" | tee -a result.txt
-    sleep 8
-    node "$GITHUB_WORKSPACE/scripts/android-run-distance.mjs" 1.0 0.1 | tee -a result.txt || status=1
+    node "$GITHUB_WORKSPACE/scripts/android-run-distance.mjs" 1.0 0.1 40 | tee -a result.txt || status=1
     shot 24-live-distance
   else
     echo "FAIL  run start or route replay stopped (see screenshot 00-run-stopped and the log)" | tee -a result.txt

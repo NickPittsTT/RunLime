@@ -74,6 +74,21 @@ async function report() {
   const runs = await call(`/rest/v1/runs?user_id=in.(${ids.join(',')})&select=distance_m,point_count,moving_seconds,elapsed_seconds,event_id`);
   if (!runs.length) console.log('INFO  saved runs on staging: none');
   for (const r of runs) console.log(`INFO  saved run on staging: ${r.distance_m} m, ${r.point_count} kept points, moving ${r.moving_seconds} s, elapsed ${r.elapsed_seconds} s, linked to the test race: ${r.event_id ? 'yes' : 'no'}`);
+  // --expect-m <metres>: the saved run must be within 10% of the replayed route, and the check-ins must be right.
+  const i = process.argv.indexOf('--expect-m');
+  if (i > 0) {
+    const want = Number(process.argv[i + 1]);
+    const problems = [];
+    if (runs.length !== 1) problems.push(`expected 1 saved run, found ${runs.length}`);
+    else if (Math.abs(runs[0].distance_m - want) / want > 0.1) problems.push(`saved run ${runs[0].distance_m} m is more than 10% from ${want} m`);
+    if (!cis.some((c) => c.status === 'gps')) problems.push('no GPS check-in');
+    if (!att.some((a) => a.reason === 'too_far')) problems.push('no "too far" attempt');
+    if (problems.length) {
+      console.log(`FAIL  staging records: ${problems.join('; ')}`);
+      process.exit(1);
+    }
+    console.log(`PASS  staging records: GPS check-in, "too far" attempt, saved run within 10% of ${want} m`);
+  }
 }
 
 const cmd = process.argv[2];

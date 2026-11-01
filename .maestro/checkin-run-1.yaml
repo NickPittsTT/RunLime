@@ -1,0 +1,66 @@
+# Phase 4+5 emulator check (owner, 31 Oct 2026): GPS check-in next to a test race pin and 2 km away, using
+# emulator mock locations. Staging only; throwaway account and test race from scripts/ui-check-account.mjs.
+# Test race pin: 10.6500, -61.5000. 2 km north = 10.6680. ~55 m north = 10.6505.
+appId: tt.runlime.app.dev
+---
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+- extendedWaitUntil:
+    visible:
+      id: dob-day
+    timeout: 60000
+- tapOn:
+    id: dob-day
+- inputText: "15"
+- tapOn:
+    id: dob-month
+- inputText: "06"
+- tapOn:
+    id: dob-year
+- inputText: "1990"
+- hideKeyboard
+- tapOn: Continue
+- extendedWaitUntil:
+    visible: Email me a code
+    timeout: 20000
+- openLink: runlime://code?email=${UI_EMAIL}
+- extendedWaitUntil:
+    visible: 6-digit code
+    timeout: 20000
+- tapOn: 6-digit code
+- inputText: ${UI_OTP}
+- hideKeyboard
+- tapOn: Sign in
+- extendedWaitUntil:
+    visible: Start run
+    timeout: 60000
+# 2 km away: expect "too far".
+- setLocation:
+    latitude: 10.6680
+    longitude: -61.5000
+- openLink: runlime://race/${CHECKIN_EVENT_ID}
+- extendedWaitUntil:
+    visible: Race-day check-in
+    timeout: 30000
+- scrollUntilVisible:
+    element: Check in
+    direction: DOWN
+- waitForAnimationToEnd
+- tapOn: Check in
+- extendedWaitUntil:
+    visible: ".*check-in works within 500 m.*"
+    timeout: 45000
+- takeScreenshot: 10-checkin-too-far
+# Next to the pin: expect "Checked in".
+- setLocation:
+    latitude: 10.6505
+    longitude: -61.5000
+- swipe:
+    direction: UP
+- tapOn: Check in
+- extendedWaitUntil:
+    visible: ".*Checked in at.*by GPS.*"
+    timeout: 45000
+- takeScreenshot: 11-checked-in

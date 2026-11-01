@@ -1,14 +1,26 @@
 # Android UI check on an emulator (owner retest R2, 2026-10-31): installs an EAS APK, signs in with a throwaway
 # staging account, types a long report with the keyboard open and checks that the report box and "Send report"
 # can sit fully above the keyboard. Screenshots are uploaded as an artifact. Staging only; prints no secrets.
+# flow=checkin-run (Phase 4+5, owner 31 Oct 2026): GPS check-in next to / 2 km from a test race pin and a 1 km route
+# replay with emulator mock locations. apk=github-build builds the staging APK here with Gradle (no Expo build used).
 name: Android UI check
 
 on:
   workflow_dispatch:
     inputs:
       build_id:
-        description: EAS build ID; empty = latest Android build
+        description: EAS build ID; empty = latest Android build (apk=eas only)
         required: false
+      apk:
+        description: Where the APK comes from
+        type: choice
+        options: [eas, github-build]
+        default: eas
+      flow:
+        description: Which check to run
+        type: choice
+        options: [report-keyboard, checkin-run]
+        default: report-keyboard
 
 concurrency:
   group: android-ui-check
@@ -18,7 +30,7 @@ jobs:
   emulator:
     runs-on: ubuntu-24.04
     environment: staging
-    timeout-minutes: 45
+    timeout-minutes: 90
     env:
       EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
       SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co
@@ -31,6 +43,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Download the APK
+        if: inputs.apk != 'github-build'
         working-directory: apps/mobile
         env:
           BUILD_ID: ${{ inputs.build_id }}
@@ -44,8 +57,32 @@ jobs:
           [ -n "$url" ] || { echo "build $BUILD_ID has no APK (not finished?)"; exit 1; }
           curl -fsSL "$url" -o /tmp/app.apk
           echo "### Android UI check: EAS build $BUILD_ID" >> "$GITHUB_STEP_SUMMARY"
+      # Staging APK built on this runner (no Expo build used): same app config and public values as the EAS staging
+      # profile, signed with the public React Native debug key, x86_64 only (the emulator). Never distributed.
+      - uses: actions/setup-java@v5
+        if: inputs.apk == 'github-build'
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Build the staging APK with Gradle (public values only)
+        if: inputs.apk == 'github-build'
+        working-directory: apps/mobile
+        env:
+          APP_ENV: staging
+          EXPO_PUBLIC_SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY || vars.SUPABASE_ANON_KEY }}
+          EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID: ${{ vars.GOOGLE_WEB_CLIENT_ID }}
+          EXPO_PUBLIC_WEB_URL: ${{ vars.STAGING_WEB_URL }}
+        run: |
+          set -euo pipefail
+          bash "$GITHUB_WORKSPACE/scripts/check-public-key.sh" "$EXPO_PUBLIC_SUPABASE_ANON_KEY"
+          npx expo prebuild --platform android --no-install --clean
+          cd android
+          ./gradlew assembleRelease -PreactNativeArchitectures=x86_64 --no-daemon -q
+          cp app/build/outputs/apk/release/app-release.apk /tmp/app.apk
+          echo "### Android UI check: staging APK built on GitHub (commit ${GITHUB_SHA::7})" >> "$GITHUB_STEP_SUMMARY"
       - name: Throwaway staging account (one-time code, no email sent)
-        run: node scripts/ui-check-account.mjs create
+        run: node scripts/ui-check-account.mjs create ${{ inputs.flow == 'checkin-run' && '--with-race' || '' }}
         env:
           # Only these two steps see the service key; it never reaches the emulator, the APK or an app build.
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
@@ -58,7 +95,7 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-      - name: Emulator (Android 14, Pixel 6) — type with the keyboard open, check what it covers
+      - name: Emulator (Android 14, Pixel 6) — ${{ inputs.flow }}
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
@@ -66,7 +103,7 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          script: bash scripts/android-ui-check.sh
+          script: bash scripts/${{ inputs.flow == 'checkin-run' && 'android-checkin-run-check.sh' || 'android-ui-check.sh' }}
       - name: Result
         if: always()
         run: |

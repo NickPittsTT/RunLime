@@ -1,0 +1,15 @@
+# Phase 5 emulator check: stop (confirm in the dialog), save, and see the run saved (uploaded to staging).
+appId: tt.runlime.app.dev
+---
+- tapOn: Stop
+- tapOn:
+    id: android:id/button1
+- extendedWaitUntil:
+    visible: Save run
+    timeout: 30000
+- takeScreenshot: 22-summary
+- tapOn: Save run
+- extendedWaitUntil:
+    visible: "Saved\\."
+    timeout: 30000
+- takeScreenshot: 23-saved

@@ -1,7 +1,10 @@
 // Throwaway staging account for the Android UI check (emulator). Never production; prints no secrets.
 //   create: makes an 18+ account with a profile and finished onboarding, writes its id/email/one-time code to
 //           $GITHUB_ENV (the code is masked in logs) so the emulator flow can sign in without sending an email.
-//   delete: removes every account this script created (email prefix), including leftovers from failed runs.
+//   delete: removes every account this script created (email prefix), including leftovers from failed runs, and
+//           every test race it created (slug prefix).
+//   create --with-race: also makes a published test race starting in 20 minutes with its pin at
+//           10.6500, -61.5000 (an open area, staging only) and writes CHECKIN_EVENT_ID to $GITHUB_ENV.
 //   SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… node scripts/ui-check-account.mjs create|delete
 import { appendFileSync } from 'node:fs';
 
@@ -35,6 +38,20 @@ async function create() {
   console.log(`::add-mask::${otp}`);
   if (GITHUB_ENV) appendFileSync(GITHUB_ENV, `UI_EMAIL=${email}\nUI_OTP=${otp}\n`);
   console.log(`created staging UI-check account ${email}`);
+  if (process.argv.includes('--with-race')) {
+    const slug = `${PREFIX}race-${GITHUB_RUN_ID ?? Date.now()}`;
+    const [ev] = await call('/rest/v1/events?select=id', {
+      method: 'POST',
+      headers: { prefer: 'return=representation' },
+      body: JSON.stringify({
+        listing_source: 'runlime', slug, name: 'UI check race (automated test)', starts_at: new Date(Date.now() + 20 * 60_000).toISOString(),
+        region_id: area.id, venue_name: 'UI check venue', start_lat: 10.65, start_lng: -61.5, registration_url: 'https://example.org/ui-check',
+        status: 'published', published_at: new Date().toISOString(),
+      }),
+    });
+    if (GITHUB_ENV) appendFileSync(GITHUB_ENV, `CHECKIN_EVENT_ID=${ev.id}\n`);
+    console.log(`created staging test race ${ev.id}`);
+  }
 }
 
 async function remove() {
@@ -42,6 +59,8 @@ async function remove() {
   const mine = users.filter((u) => u.email?.startsWith(PREFIX) && u.email.endsWith('@example.com'));
   for (const u of mine) await call(`/auth/v1/admin/users/${u.id}`, { method: 'DELETE' });
   console.log(`deleted ${mine.length} UI-check account(s)`);
+  const races = await call(`/rest/v1/events?slug=like.${PREFIX}race-*&select=id`, { method: 'DELETE', headers: { prefer: 'return=representation' } });
+  console.log(`deleted ${races.length} UI-check race(s)`);
 }
 
 const cmd = process.argv[2];

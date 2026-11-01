@@ -33,6 +33,7 @@ if [ $status -eq 0 ]; then
     run_ok=1
     # 1 km due north from the start at 4 m/s: 250 fixes, one per second (geo fix takes longitude first).
     t0=$(date +%s)
+    echo "INFO  emulator console reply to the first fix: $(adb emu geo fix -61.5000 10.6505 2>&1 | tr '\n' ' ')" | tee -a result.txt
     for i in $(seq 1 250); do
       lat=$(awk -v i="$i" 'BEGIN { printf "%.6f", 10.6505 + i * 4 / 111195 }')
       adb emu geo fix -61.5000 "$lat" >/dev/null

@@ -109,10 +109,10 @@ describe('run tracker (Phase 5)', () => {
     expect(mockReplace).toHaveBeenCalledWith({ pathname: '/runs/[id]', params: { id: 'r1', saved: '1' } });
   });
 
-  it('offline when saving: kept on the phone, uploads later', async () => {
+  it('a slow or missing connection never holds the runner on the summary: saved on the phone, straight to the run', async () => {
     mockLive = { distanceM: 10, movingS: 5, elapsedS: 5, avgPaceSPerKm: null, splits: [], route: [], autoPaused: false, paused: false };
     mockStop.mockResolvedValue(finished);
-    mockSync.mockResolvedValue({ uploaded: 0, waiting: 1 });
+    mockSync.mockReturnValue(new Promise(() => undefined)); // the upload never answers
     jest.spyOn(Alert, 'alert').mockImplementation((_t, _m, buttons) => buttons?.find((b) => b.text === 'Stop')?.onPress?.());
     render(<RunScreen />);
     fireEvent.press(screen.getByRole('button', { name: 'Stop' }));
@@ -120,7 +120,8 @@ describe('run tracker (Phase 5)', () => {
       mockLive = null;
     });
     fireEvent.press(await screen.findByRole('button', { name: 'Save run' }));
-    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith({ pathname: '/runs/[id]', params: { id: 'r1', saved: 'offline' } }));
+    expect(mockKeep).toHaveBeenCalledWith(finished);
+    expect(mockReplace).toHaveBeenCalledWith({ pathname: '/runs/[id]', params: { id: 'r1', saved: '1' } });
   });
 
   it('entitlement check (feature.tracker, Phase 7): no tracker if the plan does not include it', () => {

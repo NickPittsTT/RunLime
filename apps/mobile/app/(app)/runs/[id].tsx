@@ -6,18 +6,30 @@ import { useEffect, useState } from 'react';
 import { Alert, View } from 'react-native';
 import { RaceMap } from '@/components/RaceMap';
 import { Button, Notice, Screen, T } from '@/components/ui';
-import { deleteRun, loadRuns, type RunItem } from '@/lib/runSync';
+import { localRuns } from '@/lib/runDb';
+import { deleteRun, loadRuns, syncRuns, type RunItem } from '@/lib/runSync';
 
 /** M24: one run: map, numbers, splits, GPX export, delete. Private to the runner. */
 export default function RunDetail() {
   const { id, saved } = useLocalSearchParams<{ id: string; saved?: string }>();
   const router = useRouter();
-  const [run, setRun] = useState<RunItem | null | undefined>(undefined);
+  // The phone's copy first (instant, also offline); the effect then uploads anything waiting and refreshes.
+  const [run, setRun] = useState<RunItem | null | undefined>(() => {
+    const local = localRuns().find((x) => x.id === id);
+    return local ? { ...local, raceName: null } : undefined;
+  });
   const [message, setMessage] = useState<string>();
 
   useEffect(() => {
     let active = true;
-    void loadRuns().then((r) => active && setRun(r.runs.find((x) => x.id === id) ?? null));
+    const local = localRuns().find((x) => x.id === id);
+    void syncRuns()
+      .then(() => loadRuns())
+      .then((r) => {
+        if (!active) return;
+        const fresh = r.runs.find((x) => x.id === id);
+        setRun(fresh ?? (local ? { ...local, raceName: null } : null));
+      });
     return () => {
       active = false;
     };
@@ -41,7 +53,7 @@ export default function RunDetail() {
   return (
     <Screen>
       <Stack.Screen options={{ title: 'Run' }} />
-      {saved === '1' ? <Notice tone="success">Saved.</Notice> : saved === 'offline' ? <Notice tone="info">Saved on this phone. It uploads when you&apos;re online.</Notice> : null}
+      {saved ? (run.synced ? <Notice tone="success">Saved.</Notice> : <Notice tone="info">Saved on this phone. It uploads when you&apos;re online.</Notice>) : null}
       <T variant="headline">{`${(run.distance_m / 1000).toFixed(2)} km`}</T>
       <T>{`Moving time ${formatDuration(run.moving_seconds)} (total ${formatDuration(run.elapsed_seconds)}) · Pace ${formatPace(run.avg_pace_sec_per_km)} /km`}</T>
       {run.raceName ? <T>{`Race: ${run.raceName}`}</T> : null}

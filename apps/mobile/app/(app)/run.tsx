@@ -96,11 +96,13 @@ export default function RunScreen() {
       },
     ]);
 
-  const onSave = async () => {
+  // Saved on the phone first, then straight to the run; the upload happens in the background (works offline; a slow
+  // race-day connection never leaves the runner waiting on this screen — emulator check on the Expo APK, 1 Nov).
+  const onSave = () => {
     if (!finished) return;
     keepFinishedRun(finished);
-    const s = await syncRuns();
-    router.replace({ pathname: '/runs/[id]', params: { id: finished.id, saved: s.waiting ? 'offline' : '1' } });
+    void syncRuns();
+    router.replace({ pathname: '/runs/[id]', params: { id: finished.id, saved: '1' } });
   };
 
   if (allowed === false) {
@@ -124,7 +126,7 @@ export default function RunScreen() {
         {finished.point_count > 1 ? (
           <RaceMap label="Your route" height={240} route={decodePolyline(finished.route_polyline).map((p) => [p.lng, p.lat] as [number, number])} showLabels={false} />
         ) : null}
-        <Button label="Save run" onPress={() => void onSave()} />
+        <Button label="Save run" onPress={onSave} />
         <Button
           label="Discard"
           variant="danger"

@@ -2,14 +2,45 @@ import { z } from 'zod';
 import { deleteLocalRun, localRuns, markSynced, unsyncedRuns, type LocalRun } from './runDb';
 import { supabase } from './supabase';
 
-/** Uploads finished runs that haven't reached the server yet (the outbox). Safe to call any time; retries later. */
-export async function syncRuns(): Promise<{ uploaded: number; waiting: number }> {
+/** Network calls never wait forever: on a weak race-day signal a lost reply must not freeze the screen or the queue. */
+export const UPLOAD_TIMEOUT_MS = 15_000;
+export const LOAD_TIMEOUT_MS = 10_000;
+function withTimeout<T>(p: PromiseLike<T>, ms: number, fallback: T): Promise<T> {
+  return new Promise<T>((resolve) => {
+    const timer = setTimeout(() => resolve(fallback), ms);
+    Promise.resolve(p).then(
+      (v) => (clearTimeout(timer), resolve(v)),
+      () => (clearTimeout(timer), resolve(fallback)),
+    );
+  });
+}
+
+type SyncResult = { uploaded: number; waiting: number };
+let inflight: Promise<SyncResult> | null = null;
+
+/**
+ * Uploads finished runs that haven't reached the server yet (the outbox). Safe to call any time; retries later.
+ * Calls made while an upload is running share it, so a run is never sent twice at once. Uploads are idempotent
+ * (the phone's run id), so a reply lost after the server saved the run is harmless: the next try updates it.
+ */
+export function syncRuns(): Promise<SyncResult> {
+  inflight ??= uploadPending().finally(() => {
+    inflight = null;
+  });
+  return inflight;
+}
+
+async function uploadPending(): Promise<SyncResult> {
   let uploaded = 0;
   const pending = unsyncedRuns();
   for (const r of pending) {
     const { synced: _s, event_id: _e, ...payload } = r;
-    const { error } = await supabase.rpc('upsert_run', { p_run: { ...payload, device_meta: { app: 'runlime-android' } } });
-    if (error) break; // offline or refused: keep it for the next try
+    const { error } = await withTimeout<{ error: unknown }>(
+      supabase.rpc('upsert_run', { p_run: { ...payload, device_meta: { app: 'runlime-android' } } }),
+      UPLOAD_TIMEOUT_MS,
+      { error: { message: 'timeout' } },
+    );
+    if (error) break; // offline, slow or refused: keep it for the next try
     markSynced(r.id);
     uploaded++;
   }
@@ -38,11 +69,15 @@ export type RunItem = LocalRun & { raceName: string | null };
 /** History: runs on the server plus any on this phone that are still waiting to upload. Newest first. */
 export async function loadRuns(): Promise<{ runs: RunItem[]; offline: boolean }> {
   const local = localRuns();
-  const { data, error } = await supabase
-    .from('runs')
-    .select('id, started_at, ended_at, distance_m, moving_seconds, elapsed_seconds, avg_pace_sec_per_km, splits, steps, calories_est, calories_basis, route_polyline, point_count, event_id, events(name)')
-    .order('started_at', { ascending: false })
-    .limit(500);
+  const { data, error } = await withTimeout<{ data: unknown; error: unknown }>(
+    supabase
+      .from('runs')
+      .select('id, started_at, ended_at, distance_m, moving_seconds, elapsed_seconds, avg_pace_sec_per_km, splits, steps, calories_est, calories_basis, route_polyline, point_count, event_id, events(name)')
+      .order('started_at', { ascending: false })
+      .limit(500),
+    LOAD_TIMEOUT_MS,
+    { data: null, error: { message: 'timeout' } },
+  );
   if (error || !Array.isArray(data)) return { runs: local.map((r) => ({ ...r, raceName: null })), offline: true };
   const server = z.array(serverRun).safeParse(data);
   const fromServer: RunItem[] = (server.success ? server.data : []).map((r) => ({ ...r, route_polyline: r.route_polyline ?? '', synced: true, raceName: r.events?.name ?? null }));

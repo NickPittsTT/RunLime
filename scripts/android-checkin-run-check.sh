@@ -31,15 +31,17 @@ if [ $status -eq 0 ]; then
   sampler=$!
   if maestro test "$GITHUB_WORKSPACE/.maestro/checkin-run-2.yaml"; then
     run_ok=1
-    # 1 km due north from the start at 4 m/s: 250 fixes, one per second (geo fix takes longitude first).
+    # 1 km due north from the start in 250 steps of 4 m, through Maestro's own location provider (adb emu geo fix
+    # did not move the CI emulator, runs 7-8). Each step takes about 0.7-1 s, i.e. 4-6 m/s: runner speed, well under
+    # the app's 12 m/s bad-point limit. (Maestro "travel" moved in 22 m jumps, runs 4-5.)
     t0=$(date +%s)
-    echo "INFO  emulator console reply to the first fix: $(adb emu geo fix -61.5000 10.6505 2>&1 | tr '\n' ' ')" | tee -a result.txt
-    for i in $(seq 1 250); do
-      lat=$(awk -v i="$i" 'BEGIN { printf "%.6f", 10.6505 + i * 4 / 111195 }')
-      adb emu geo fix -61.5000 "$lat" >/dev/null
-      sleep 1
-    done
-    echo "INFO  route replay took $(( $(date +%s) - t0 )) s (250 fixes, 4 m apart, one per second)" | tee -a result.txt
+    { echo "appId: tt.runlime.app.dev"; echo "---"
+      for i in $(seq 1 250); do
+        awk -v i="$i" 'BEGIN { printf "- setLocation:\n    latitude: %.6f\n    longitude: -61.5000\n", 10.6505 + i * 4 / 111195 }'
+      done
+    } > /tmp/ui/replay.yaml
+    maestro test /tmp/ui/replay.yaml > /tmp/ui/replay.log 2>&1 || { echo "FAIL  route replay flow stopped"; tail -5 /tmp/ui/replay.log; } | tee -a result.txt
+    echo "INFO  route replay took $(( $(date +%s) - t0 )) s (250 steps of 4 m)" | tee -a result.txt
     shot 21-after-1km
     node "$GITHUB_WORKSPACE/scripts/android-run-distance.mjs" 1.0 0.1 40 | tee -a result.txt || status=1
     shot 24-live-distance

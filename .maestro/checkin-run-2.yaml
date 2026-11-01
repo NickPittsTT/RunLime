@@ -1,6 +1,6 @@
-# Phase 5 emulator check: start a run. The script then replays a 1 km route itself (one emulator GPS fix per
-# second, 4 m apart: a 4:10 /km runner) and reads the live distance from the screen. Maestro's travel command is
-# not used: it moved in 22 m jumps (about 10-12 m/s), which the app rightly treats as impossible running.
+# Phase 5 emulator check: start a run. The script then replays a 1 km route in 250 steps of 4 m (runner speed)
+# and reads the live distance from the screen. Maestro's travel command is not used: it moved in 22 m jumps
+# (about 10-12 m/s), which the app rightly treats as impossible running.
 appId: tt.runlime.app.dev
 ---
 - setLocation:

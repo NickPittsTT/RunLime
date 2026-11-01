@@ -84,7 +84,7 @@ jobs:
       - name: Throwaway staging account (one-time code, no email sent)
         run: node scripts/ui-check-account.mjs create ${{ inputs.flow == 'checkin-run' && '--with-race' || '' }}
         env:
-          # Only these two steps see the service key; it never reaches the emulator, the APK or an app build.
+          # Only the account steps see the service key; it never reaches the emulator, the APK or an app build.
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       - name: Install Maestro (pinned)
         run: |
@@ -109,6 +109,11 @@ jobs:
         run: |
           cat /tmp/ui/result.txt 2>/dev/null || echo "no result (the flow stopped earlier; see the log)"
           { echo '```'; cat /tmp/ui/result.txt 2>/dev/null || echo "no result (the flow stopped earlier; see the log)"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+      - name: Saved run on staging (numbers only)
+        if: always() && inputs.flow == 'checkin-run'
+        run: node scripts/ui-check-account.mjs report | tee -a "$GITHUB_STEP_SUMMARY"
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       - uses: actions/upload-artifact@v6
         if: always()
         with:
@@ -119,5 +124,5 @@ jobs:
         if: always()
         run: node scripts/ui-check-account.mjs delete
         env:
-          # Only these two steps see the service key; it never reaches the emulator, the APK or an app build.
+          # Only the account steps see the service key; it never reaches the emulator, the APK or an app build.
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

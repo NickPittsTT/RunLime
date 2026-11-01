@@ -63,7 +63,18 @@ async function remove() {
   console.log(`deleted ${races.length} UI-check race(s)`);
 }
 
+// report: the saved runs of UI-check accounts (numbers only, test accounts only), as evidence for the run check.
+async function report() {
+  const { users } = await call('/auth/v1/admin/users?per_page=200');
+  const ids = users.filter((u) => u.email?.startsWith(PREFIX) && u.email.endsWith('@example.com')).map((u) => u.id);
+  if (!ids.length) return console.log('no UI-check accounts');
+  const runs = await call(`/rest/v1/runs?user_id=in.(${ids.join(',')})&select=distance_m,point_count,moving_seconds,elapsed_seconds,event_id`);
+  if (!runs.length) console.log('INFO  saved runs on staging: none');
+  for (const r of runs) console.log(`INFO  saved run on staging: ${r.distance_m} m, ${r.point_count} kept points, moving ${r.moving_seconds} s, elapsed ${r.elapsed_seconds} s, linked to the test race: ${r.event_id ? 'yes' : 'no'}`);
+}
+
 const cmd = process.argv[2];
 if (cmd === 'create') await create();
 else if (cmd === 'delete') await remove();
-else throw new Error('usage: create | delete');
+else if (cmd === 'report') await report();
+else throw new Error('usage: create | delete | report');

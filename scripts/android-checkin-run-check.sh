@@ -6,7 +6,7 @@ set -euo pipefail
 mkdir -p /tmp/ui && cd /tmp/ui
 adb install -r /tmp/app.apk
 status=0
-shot() { adb exec-out screencap -p > "/tmp/ui/$1.png" || true; }
+shot() { adb exec-out screencap -p > "/tmp/ui/$1.png" || true; node "$GITHUB_WORKSPACE/scripts/android-screen-text.mjs" || true; }
 logs() {
   echo "--- crash log"; adb logcat -d -b crash | tail -40 || true
   echo "--- app log"; adb logcat -d | grep -E "ReactNativeJS|AndroidRuntime|FATAL" | tail -60 || true
@@ -48,8 +48,11 @@ if [ $run_ok -eq 1 ]; then
     shot 00-save-stopped; logs; status=1
   fi
 fi
-for f in /tmp/ui/*.png; do
-  [ -f "$f" ] || continue
-  echo "SCREENSHOT $(basename "$f") BEGIN"; base64 -w 120 "$f"; echo "SCREENSHOT $(basename "$f") END"
-done
+# Screenshots are in the run's artifact; base64 copies in the log only on request (they are large).
+if [ "${UI_PRINT_SCREENSHOTS:-0}" = "1" ]; then
+  for f in /tmp/ui/*.png; do
+    [ -f "$f" ] || continue
+    echo "SCREENSHOT $(basename "$f") BEGIN"; base64 -w 120 "$f"; echo "SCREENSHOT $(basename "$f") END"
+  done
+fi
 exit $status

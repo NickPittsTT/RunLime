@@ -50,6 +50,14 @@ appId: tt.runlime.app.dev
 - waitForAnimationToEnd
 - tapOn: Check in
 - extendedWaitUntil:
+    visible: ".*(check-in works within 500 m|could not find your location).*"
+    timeout: 45000
+- runFlow:
+    when:
+      visible: ".*could not find your location.*"
+    commands:
+      - tapOn: Check in
+- extendedWaitUntil:
     visible: ".*check-in works within 500 m.*"
     timeout: 45000
 - takeScreenshot: 10-checkin-too-far
@@ -60,6 +68,14 @@ appId: tt.runlime.app.dev
 - swipe:
     direction: UP
 - tapOn: Check in
+- extendedWaitUntil:
+    visible: ".*(Checked in at.*by GPS|could not find your location).*"
+    timeout: 45000
+- runFlow:
+    when:
+      visible: ".*could not find your location.*"
+    commands:
+      - tapOn: Check in
 - extendedWaitUntil:
     visible: ".*Checked in at.*by GPS.*"
     timeout: 45000

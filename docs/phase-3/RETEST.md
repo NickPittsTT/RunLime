@@ -3,7 +3,7 @@
 Numbered per slice. Report pass or fail per step, with a screenshot for any failure. An APK link is added after slices 2, 4 and 6; slices 0, 1, 3 and 5 can be checked on the current APK or the website as noted.
 
 ## Retest round 4 (2026-10-31): R2 full retest + quick R9 recheck, on the new APK (built from `phase-3` only; no Phase 4/5 code)
-**APK:** _link added when the build finishes (see docs/reports/LATEST.md)_. Install it over the old app. **Install it before testing photos:** photos are now private, so the old app shows initials instead of photos once the website and database are updated. [App] = phone app, [Website] = website.
+**APK:** https://expo.dev/artifacts/eas/0YUIc4AMHOdTMWVQLoVe4GSgBv0MqPzzPyqi0IY6HyI.apk (EAS build 95784967, commit `27e2a0c` on `phase-3`; no secrets found; emulator keyboard check passed; private-photo database update is live on staging). Install it over the old app. **Install it before testing photos:** photos are now private, so the old app shows initials instead of photos once the website and database are updated. [App] = phone app, [Website] = website.
 
 **R2 again: keyboard (cause found: see the report)**
 R2.1 [App] Help & legal → **Report a safety concern** → tap **Tell us what happened** and type 6+ lines. While the keyboard is open, the whole box stays visible as it grows, and you can scroll down to **Send report** without closing the keyboard.

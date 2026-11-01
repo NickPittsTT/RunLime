@@ -71,7 +71,17 @@ async function report() {
   const cis = await call(`/rest/v1/check_ins?user_id=in.(${ids.join(',')})&select=status`);
   const att = await call(`/rest/v1/checkin_attempts?user_id=in.(${ids.join(',')})&select=reason,distance_m`);
   console.log(`INFO  check-ins on staging: ${cis.map((c) => c.status).join(', ') || 'none'}; failed attempts: ${att.map((a) => `${a.reason} (${Math.round(a.distance_m)} m)`).join(', ') || 'none'}`);
-  const runs = await call(`/rest/v1/runs?user_id=in.(${ids.join(',')})&select=distance_m,point_count,moving_seconds,elapsed_seconds,event_id`);
+  // A saved run may still be uploading in the background: wait up to 2 minutes for it.
+  const wantRun = process.argv.includes('--expect-m');
+  let runs = [];
+  for (let waited = 0; ; waited += 10) {
+    runs = await call(`/rest/v1/runs?user_id=in.(${ids.join(',')})&select=distance_m,point_count,moving_seconds,elapsed_seconds,event_id,created_at`);
+    if (runs.length || !wantRun || waited >= 120) {
+      if (wantRun) console.log(`INFO  saved run ${runs.length ? 'found' : 'not found'} after ${waited} s of waiting`);
+      break;
+    }
+    await new Promise((r) => setTimeout(r, 10_000));
+  }
   if (!runs.length) console.log('INFO  saved runs on staging: none');
   for (const r of runs) console.log(`INFO  saved run on staging: ${r.distance_m} m, ${r.point_count} kept points, moving ${r.moving_seconds} s, elapsed ${r.elapsed_seconds} s, linked to the test race: ${r.event_id ? 'yes' : 'no'}`);
   // --expect-m <metres>: the saved run must be within 10% of the replayed route, and the check-ins must be right.

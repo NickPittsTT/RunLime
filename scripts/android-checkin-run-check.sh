@@ -59,9 +59,14 @@ if [ $status -eq 0 ]; then
 fi
 # Save the run even when the distance check failed, so the saved run can be inspected on staging.
 if [ $run_ok -eq 1 ]; then
+  t_save=$(date +%s)
   if maestro test "$GITHUB_WORKSPACE/.maestro/checkin-run-3.yaml"; then
-    echo "PASS  run stopped, saved and uploaded (\"Saved.\")" | tee -a result.txt
+    echo "PASS  run stopped, saved and uploaded (\"Saved.\" within $(( $(date +%s) - t_save )) s of stopping)" | tee -a result.txt
   else
+    # Evidence for a slow or failed upload: the app's own warnings and errors (Expo APK runs 17 and 20).
+    app_pid=$(adb shell pidof -s tt.runlime.app.dev 2>/dev/null | tr -d '\r')
+    echo "--- app warnings/errors (pid ${app_pid:-none})"
+    [ -n "$app_pid" ] && adb logcat -d --pid="$app_pid" '*:W' | grep -vE 'MapLibre|Mbgl|chatty' | tail -80 || true
     echo "FAIL  stop/save flow stopped (see screenshot 00-save-stopped and the log)" | tee -a result.txt
     shot 00-save-stopped; logs; status=1
   fi

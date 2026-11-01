@@ -11,5 +11,5 @@ appId: tt.runlime.app.dev
 - tapOn: Save run
 - extendedWaitUntil:
     visible: "Saved\\."
-    timeout: 30000
+    timeout: 90000
 - takeScreenshot: 23-saved

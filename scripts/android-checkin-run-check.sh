@@ -5,6 +5,10 @@
 set -euo pipefail
 mkdir -p /tmp/ui && cd /tmp/ui
 adb install -r /tmp/app.apk
+# A freshly booted CI emulator sometimes shows "Pixel Launcher isn't responding" over the app (run 6). Let it settle
+# and close system dialogs before the flow; the flow also taps "Wait" if one appears.
+sleep 20
+adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null 2>&1 || true
 status=0
 shot() { adb exec-out screencap -p > "/tmp/ui/$1.png" || true; node "$GITHUB_WORKSPACE/scripts/android-screen-text.mjs" || true; }
 logs() {

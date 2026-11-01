@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-24.04
     environment: staging
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         if: inputs.check != 'api-cache-headers'
       - name: Security baseline live on staging (read-only)
         if: inputs.check == 'security-baseline'
@@ -36,9 +36,9 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
         run: node scripts/staging-security-check.mjs
-      - uses: pnpm/action-setup@v5
+      - uses: pnpm/action-setup@v6
         if: inputs.check == 'credentials-audit'
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v7
         if: inputs.check == 'credentials-audit'
         with:
           node-version-file: .nvmrc

@@ -36,11 +36,11 @@ jobs:
       RESTORE_KEY: ${{ secrets.BACKUP_RESTORE_KEY }}
       RESTORE_TEST: ${{ github.event_name == 'workflow_dispatch' && inputs.restore_test || github.event.schedule == '37 8 1 * *' }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Staging only
         run: |
           [ "$SUPABASE_PROJECT_REF" = "fmnmylqxrmxuzmdcvmhs" ] || { echo "::error::Backups run against staging only until production exists (SECURITY-PLAN §7.4)."; exit 1; }
-      - uses: supabase/setup-cli@v2
+      - uses: supabase/setup-cli@v3
         with:
           version: 2.120.0
       - name: Tools (age)
@@ -87,7 +87,7 @@ jobs:
           ls -l /tmp/*.age | awk '{print $5, $9}'
       - name: Keep 30 days (encrypted)
         if: steps.keys.outputs.mode == 'real'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: runlime-staging-backup-${{ env.STAMP }}
           path: /tmp/runlime-staging-${{ env.STAMP }}.tar.gz.age

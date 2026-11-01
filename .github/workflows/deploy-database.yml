@@ -61,18 +61,18 @@ jobs:
           else
             echo "ready=true" >> "$GITHUB_OUTPUT"
           fi
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         if: steps.check.outputs.ready == 'true'
-      - uses: pnpm/action-setup@v5
+      - uses: pnpm/action-setup@v6
         if: steps.check.outputs.ready == 'true'
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v7
         if: steps.check.outputs.ready == 'true'
         with:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
         if: steps.check.outputs.ready == 'true'
-      - uses: supabase/setup-cli@v2
+      - uses: supabase/setup-cli@v3
         if: steps.check.outputs.ready == 'true'
         with:
           version: 2.120.0

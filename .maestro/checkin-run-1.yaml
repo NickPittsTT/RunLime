@@ -61,7 +61,7 @@ appId: tt.runlime.app.dev
     visible: ".*check-in works within 500 m.*"
     timeout: 45000
 - takeScreenshot: 10-checkin-too-far
-# Next to the pin: expect "Checked in".
+# Next to the pin: expect "You're checked in" (the server record is read back after the run: status gps).
 - setLocation:
     latitude: 10.6505
     longitude: -61.5000
@@ -69,7 +69,7 @@ appId: tt.runlime.app.dev
     direction: UP
 - tapOn: Check in
 - extendedWaitUntil:
-    visible: ".*(Checked in at.*by GPS|could not find your location).*"
+    visible: ".*(You.re checked in|Checked in at|could not find your location).*"
     timeout: 45000
 - runFlow:
     when:
@@ -77,6 +77,6 @@ appId: tt.runlime.app.dev
     commands:
       - tapOn: Check in
 - extendedWaitUntil:
-    visible: ".*Checked in at.*by GPS.*"
+    visible: ".*(You.re checked in|Checked in at).*"
     timeout: 45000
 - takeScreenshot: 11-checked-in

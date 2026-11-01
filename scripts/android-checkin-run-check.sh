@@ -14,7 +14,7 @@ logs() {
 env_args=(-e UI_EMAIL="$UI_EMAIL" -e UI_OTP="$UI_OTP" -e CHECKIN_EVENT_ID="$CHECKIN_EVENT_ID")
 if maestro test "$GITHUB_WORKSPACE/.maestro/checkin-run-1.yaml" "${env_args[@]}"; then
   echo "PASS  check-in 2 km from the pin: \"too far\" (within 500 m needed)" | tee -a result.txt
-  echo "PASS  check-in next to the pin: \"Checked in … by GPS\"" | tee -a result.txt
+  echo "PASS  check-in next to the pin: \"You're checked in\" (server record below)" | tee -a result.txt
 else
   echo "FAIL  check-in flow stopped (see screenshot 00-checkin-stopped and the log)" | tee -a result.txt
   shot 00-checkin-stopped; logs; status=1

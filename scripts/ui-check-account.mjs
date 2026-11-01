@@ -68,6 +68,9 @@ async function report() {
   const { users } = await call('/auth/v1/admin/users?per_page=200');
   const ids = users.filter((u) => u.email?.startsWith(PREFIX) && u.email.endsWith('@example.com')).map((u) => u.id);
   if (!ids.length) return console.log('no UI-check accounts');
+  const cis = await call(`/rest/v1/check_ins?user_id=in.(${ids.join(',')})&select=status`);
+  const att = await call(`/rest/v1/checkin_attempts?user_id=in.(${ids.join(',')})&select=reason,distance_m`);
+  console.log(`INFO  check-ins on staging: ${cis.map((c) => c.status).join(', ') || 'none'}; failed attempts: ${att.map((a) => `${a.reason} (${Math.round(a.distance_m)} m)`).join(', ') || 'none'}`);
   const runs = await call(`/rest/v1/runs?user_id=in.(${ids.join(',')})&select=distance_m,point_count,moving_seconds,elapsed_seconds,event_id`);
   if (!runs.length) console.log('INFO  saved runs on staging: none');
   for (const r of runs) console.log(`INFO  saved run on staging: ${r.distance_m} m, ${r.point_count} kept points, moving ${r.moving_seconds} s, elapsed ${r.elapsed_seconds} s, linked to the test race: ${r.event_id ? 'yes' : 'no'}`);

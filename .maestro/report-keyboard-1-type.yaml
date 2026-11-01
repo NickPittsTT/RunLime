@@ -4,6 +4,11 @@ appId: tt.runlime.app.dev
 ---
 - launchApp:
     clearState: true
+- runFlow:
+    when:
+      visible: ".*isn.t responding.*"
+    commands:
+      - tapOn: Wait
 - extendedWaitUntil:
     visible:
       id: dob-day
